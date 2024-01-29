@@ -1,3 +1,5 @@
+import { TextField } from "@mui/material";
+
 import styles from "./TempInput.module.css";
 
 // TemperatureInput元件用於單個溫度輸入
@@ -15,12 +17,19 @@ export default function TemperatureInput({
   return (
     <fieldset className={styles.fieldset}>
       <legend className={styles.legend}>輸入{scaleNames[scale]}溫度:</legend>
-      <input
+      <TextField
+        type="number"
+        value={temperature}
+        onChange={(e) => onTemperatureChange(e, scale)}
+        id="outlined-basic"
+        variant="outlined"
+      />
+      {/* <input
         className={styles.input}
         type="number"
         value={temperature}
         onChange={(e) => onTemperatureChange(e, scale)}
-      />
+      /> */}
     </fieldset>
   );
 }

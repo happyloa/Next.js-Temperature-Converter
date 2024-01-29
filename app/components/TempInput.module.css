@@ -8,6 +8,8 @@
   font-size: 38px;
 }
 
-.input {
+#outlined-basic {
+  border: 2px solid white;
+  color: white;
   height: 20px;
 }
