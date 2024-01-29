@@ -1,5 +1,3 @@
-import React from "react";
-
 // TemperatureInput元件用於單個溫度輸入
 export default function TemperatureInput({
   scale,
