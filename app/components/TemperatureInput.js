@@ -45,7 +45,10 @@ export default function TemperatureInput({
           variant="filled"
           color="custom"
           sx={{
-            width: 400,
+            width: {
+              md: 300, // theme.breakpoints.up('md')
+              lg: 400, // theme.breakpoints.up('lg')
+            },
           }}
         />
       </fieldset>
