@@ -1,6 +1,17 @@
-import { TextField } from "@mui/material";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 import styles from "./TempInput.module.css";
+
+const theme = createTheme({
+  palette: {
+    custom: {
+      main: "#15486D",
+    },
+  },
+});
 
 // TemperatureInput元件用於單個溫度輸入
 export default function TemperatureInput({
@@ -15,21 +26,29 @@ export default function TemperatureInput({
   };
 
   return (
-    <fieldset className={styles.fieldset}>
-      <legend className={styles.legend}>輸入{scaleNames[scale]}溫度:</legend>
-      <TextField
-        type="number"
-        value={temperature}
-        onChange={(e) => onTemperatureChange(e, scale)}
-        id="outlined-basic"
-        variant="outlined"
-      />
-      {/* <input
-        className={styles.input}
-        type="number"
-        value={temperature}
-        onChange={(e) => onTemperatureChange(e, scale)}
-      /> */}
-    </fieldset>
+    <ThemeProvider theme={theme}>
+      <fieldset className={styles.fieldset}>
+        <legend className={styles.legend}>輸入{scaleNames[scale]}溫度:</legend>
+        <TextField
+          type="number"
+          value={temperature}
+          onChange={(e) => onTemperatureChange(e, scale)}
+          id="filled-basic"
+          label="輸入溫度"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <DeviceThermostatIcon />
+              </InputAdornment>
+            ),
+          }}
+          variant="filled"
+          color="custom"
+          sx={{
+            width: 400,
+          }}
+        />
+      </fieldset>
+    </ThemeProvider>
   );
 }
