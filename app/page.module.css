@@ -1,0 +1,16 @@
+.container {
+  background: radial-gradient(
+    circle at 24.1% 68.8%,
+    rgb(50, 50, 50) 0%,
+    rgb(0, 0, 0) 99.4%
+  );
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 30px;
+  }
+}

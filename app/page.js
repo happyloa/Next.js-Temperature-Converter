@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+
 import TemperatureInput from "./components/TemperatureInput";
 import styles from "./page.module.css";
 
@@ -41,7 +42,7 @@ export default function TemperatureConverter() {
     scale === "c" ? tryConvert(temperature, toFahrenheit) : temperature;
 
   return (
-    <div>
+    <section className={styles.container}>
       <TemperatureInput
         scale="c"
         temperature={celsius}
@@ -53,6 +54,6 @@ export default function TemperatureConverter() {
         onTemperatureChange={handleTemperatureChange}
       />
       {error && <div style={{ color: "red" }}>{error}</div>}
-    </div>
+    </section>
   );
 }
