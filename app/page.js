@@ -1,95 +1,58 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
+import TemperatureInput from "./components/TemperatureInput";
 import styles from "./page.module.css";
 
-export default function Home() {
+// TemperatureConverter 主元件，用於攝氏與華氏溫度轉換
+export default function TemperatureConverter() {
+  const [temperature, setTemperature] = useState("");
+  const [scale, setScale] = useState("c");
+  const [error, setError] = useState("");
+
+  // 處理溫度輸入變更的函數
+  const handleTemperatureChange = (e, scale) => {
+    const value = e.target.value;
+    if (!value || !isNaN(value)) {
+      setTemperature(value);
+      setScale(scale);
+      setError("");
+    } else {
+      setError("請輸入有效的數字");
+    }
+  };
+
+  // 溫度轉換函數：攝氏轉華氏
+  const toFahrenheit = (celsius) => (celsius * 9) / 5 + 32;
+
+  // 溫度轉換函數：華氏轉攝氏
+  const toCelsius = (fahrenheit) => ((fahrenheit - 32) * 5) / 9;
+
+  // 嘗試進行溫度轉換，並返回轉換後的溫度值
+  const tryConvert = (temperature, convert) => {
+    const input = parseFloat(temperature);
+    if (Number.isNaN(input)) return "";
+    return convert(input).toString();
+  };
+
+  const celsius =
+    scale === "f" ? tryConvert(temperature, toCelsius) : temperature;
+  const fahrenheit =
+    scale === "c" ? tryConvert(temperature, toFahrenheit) : temperature;
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    <div>
+      <TemperatureInput
+        scale="c"
+        temperature={celsius}
+        onTemperatureChange={handleTemperatureChange}
+      />
+      <TemperatureInput
+        scale="f"
+        temperature={fahrenheit}
+        onTemperatureChange={handleTemperatureChange}
+      />
+      {error && <div style={{ color: "red" }}>{error}</div>}
+    </div>
   );
 }
