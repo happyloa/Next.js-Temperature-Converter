@@ -1,0 +1,13 @@
+.fieldset {
+  background-color: #00000000;
+  backdrop-filter: blur(10px);
+  padding: 50px;
+}
+
+.legend {
+  font-size: 38px;
+}
+
+.input {
+  height: 20px;
+}
