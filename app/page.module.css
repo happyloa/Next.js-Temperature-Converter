@@ -3,6 +3,8 @@
   min-height: 100vh;
   padding: clamp(3rem, 5vw, 6rem) 0;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
 }
 
 .main::before,
@@ -15,7 +17,8 @@
 }
 
 .main::before {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 15% 20%,
       rgba(56, 189, 248, 0.28) 0%,
       transparent 45%
@@ -29,7 +32,8 @@
 }
 
 .main::after {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 25% 80%,
       rgba(14, 116, 144, 0.25) 0%,
       transparent 45%
@@ -45,22 +49,28 @@
 .content {
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.centeredArea {
+  width: min(100%, 1120px);
+  margin: 0 auto;
 }
 
 .glassCard {
-  background: linear-gradient(
-      150deg,
-      rgba(15, 23, 42, 0.95) 0%,
-      rgba(30, 41, 59, 0.86) 35%,
-      rgba(15, 23, 42, 0.92) 100%
-    )
-    padding-box,
-  linear-gradient(
-      135deg,
-      rgba(56, 189, 248, 0.45),
-      rgba(236, 72, 153, 0.35)
-    )
-    border-box;
+  background:
+    linear-gradient(
+        150deg,
+        rgba(15, 23, 42, 0.95) 0%,
+        rgba(30, 41, 59, 0.86) 35%,
+        rgba(15, 23, 42, 0.92) 100%
+      )
+      padding-box,
+    linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(236, 72, 153, 0.35))
+      border-box;
   border-radius: 24px;
   border: 1px solid transparent;
 }
@@ -75,7 +85,11 @@
   position: absolute;
   inset: 0;
   opacity: 0.9;
-  background: radial-gradient(circle at 30% -10%, rgba(255, 255, 255, 0.18), transparent 55%);
+  background: radial-gradient(
+    circle at 30% -10%,
+    rgba(255, 255, 255, 0.18),
+    transparent 55%
+  );
   mix-blend-mode: screen;
 }
 
@@ -90,6 +104,30 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.cardSection {
+  padding: clamp(1.75rem, 3vw, 3rem) !important;
+}
+
+.cardSection:last-child {
+  padding-bottom: clamp(1.75rem, 3vw, 3rem) !important;
+}
+
+.innerCardSection {
+  padding: clamp(1.25rem, 2.5vw, 2rem) !important;
+}
+
+.innerCardSection:last-child {
+  padding-bottom: clamp(1.25rem, 2.5vw, 2rem) !important;
+}
+
+.compactCardSection {
+  padding: clamp(1rem, 2vw, 1.6rem) !important;
+}
+
+.compactCardSection:last-child {
+  padding-bottom: clamp(1rem, 2vw, 1.6rem) !important;
 }
 
 @media (max-width: 900px) {
