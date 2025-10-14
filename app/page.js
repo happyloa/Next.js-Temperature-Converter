@@ -145,6 +145,25 @@ const toInputString = (value) => {
 
 const formatTemperature = (value) => numberFormatter.format(value);
 
+const getAdaptiveFontSize = (value) => {
+  if (!Number.isFinite(value)) {
+    return { xs: "2.1rem", md: "2.6rem" };
+  }
+
+  const formatted = formatTemperature(Math.abs(value));
+  const digits = formatted.replace(/[^0-9]/g, "").length;
+
+  if (digits >= 9) {
+    return { xs: "1.6rem", md: "2.1rem" };
+  }
+
+  if (digits >= 7) {
+    return { xs: "1.85rem", md: "2.3rem" };
+  }
+
+  return { xs: "2.1rem", md: "2.6rem" };
+};
+
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 const getScale = (code) =>
@@ -410,8 +429,12 @@ export default function TemperatureStudio() {
     <main className={`${styles.main}`}>
       <Container className={styles.content} maxWidth="lg">
         <Box className={styles.centeredArea}>
-          <Stack spacing={6} sx={{ width: "100%" }}>
-            <Stack spacing={2} alignItems="center" textAlign="center">
+          <Stack spacing={{ xs: 5, md: 6.5 }} sx={{ width: "100%" }}>
+            <Stack
+              spacing={{ xs: 2.5, md: 3 }}
+              alignItems="center"
+              textAlign="center"
+            >
               <Chip
                 icon={<BoltIcon />}
                 label="Multi-Scale Temperature Studio"
@@ -435,7 +458,7 @@ export default function TemperatureStudio() {
               </Typography>
               <Stack
                 direction={{ xs: "column", sm: "row" }}
-                spacing={1.5}
+                spacing={2}
                 className={styles.chipRow}
                 justifyContent="center"
               >
@@ -459,19 +482,19 @@ export default function TemperatureStudio() {
               </Stack>
             </Stack>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={{ xs: 3, lg: 4 }}>
               <Grid size={{ xs: 12, lg: 7 }}>
                 <Card className={styles.glassCard}>
                   <CardContent className={styles.cardSection}>
-                    <Stack spacing={4}>
+                    <Stack spacing={{ xs: 3.5, md: 4.5 }}>
                       <Box>
                         <Stack
                           direction="row"
-                          spacing={2}
+                          spacing={{ xs: 2, md: 2.75 }}
                           alignItems="center"
                           justifyContent="space-between"
                           flexWrap="wrap"
-                          rowGap={1.5}
+                          sx={{ rowGap: { xs: 1.5, md: 2 } }}
                         >
                           <Box>
                             <Typography variant="h5" fontWeight={700}>
@@ -481,7 +504,7 @@ export default function TemperatureStudio() {
                               選擇欲輸入的溫標並輸入數值，即可同步取得所有單位結果。
                             </Typography>
                           </Box>
-                          <Stack direction="row" spacing={1}>
+                          <Stack direction="row" spacing={1.5}>
                             <Button
                               startIcon={<RestartAltIcon />}
                               color="secondary"
@@ -530,7 +553,7 @@ export default function TemperatureStudio() {
                         ))}
                       </ToggleButtonGroup>
 
-                      <Stack spacing={2}>
+                      <Stack spacing={{ xs: 2.2, sm: 2.8 }}>
                         <TextField
                           value={rawInput}
                           onChange={handleInputChange}
@@ -578,7 +601,7 @@ export default function TemperatureStudio() {
                         </Typography>
                       </Stack>
 
-                      <Grid container spacing={2}>
+                      <Grid container spacing={{ xs: 2.5, sm: 3 }}>
                         {conversions.map((item) => (
                           <Grid key={item.code} size={{ xs: 12, sm: 6 }}>
                             <Card
@@ -593,7 +616,7 @@ export default function TemperatureStudio() {
                                   direction="row"
                                   justifyContent="space-between"
                                   alignItems="flex-start"
-                                  spacing={1}
+                                  spacing={1.5}
                                 >
                                   <Box>
                                     <Typography
@@ -604,7 +627,13 @@ export default function TemperatureStudio() {
                                     >
                                       {item.label}
                                     </Typography>
-                                    <Typography variant="h4" fontWeight={700}>
+                                    <Typography
+                                      variant="h4"
+                                      fontWeight={700}
+                                      sx={{
+                                        fontSize: getAdaptiveFontSize(item.result),
+                                      }}
+                                    >
                                       {formatTemperature(item.result)}{" "}
                                       {item.symbol}
                                     </Typography>
@@ -653,13 +682,17 @@ export default function TemperatureStudio() {
                       </Grid>
 
                       <Box>
-                        <Stack direction="row" alignItems="center" spacing={2}>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={{ xs: 2.2, md: 2.8 }}
+                        >
                           <InsightsIcon color="secondary" />
                           <Typography variant="subtitle1" fontWeight={700}>
                             相對於太陽表面的能量比例
                           </Typography>
                         </Stack>
-                        <Box mt={2}>
+                        <Box mt={{ xs: 2.2, md: 2.8 }}>
                           <LinearProgress
                             variant="determinate"
                             value={relativeSolarProgress}
@@ -687,18 +720,18 @@ export default function TemperatureStudio() {
               </Grid>
 
               <Grid size={{ xs: 12, lg: 5 }}>
-                <Stack spacing={3}>
+                <Stack spacing={{ xs: 2.8, md: 3.5 }}>
                   <Card className={styles.glassCard}>
                     <CardContent className={styles.cardSection}>
                       <Stack
                         direction="row"
                         justifyContent="space-between"
                         alignItems="center"
-                        spacing={2}
+                        spacing={{ xs: 2, md: 2.6 }}
                       >
                         <Stack
                           direction="row"
-                          spacing={1.5}
+                          spacing={{ xs: 1.8, md: 2.2 }}
                           alignItems="center"
                         >
                           <HistoryIcon color="primary" />
@@ -719,13 +752,13 @@ export default function TemperatureStudio() {
                       </Stack>
 
                       <Divider
-                        sx={{ my: 2, borderColor: "rgba(148, 163, 184, 0.2)" }}
+                        sx={{ my: 2.5, borderColor: "rgba(148, 163, 184, 0.2)" }}
                       />
 
                       {history.length === 0 ? (
                         <Fade in timeout={400}>
                           <Stack
-                            spacing={1.5}
+                            spacing={2}
                             alignItems="center"
                             textAlign="center"
                             py={4}
@@ -756,7 +789,8 @@ export default function TemperatureStudio() {
                                 alignItems="flex-start"
                                 sx={{
                                   borderRadius: 2,
-                                  mb: 1,
+                                  mb: 1.5,
+                                  px: 1.5,
                                   backgroundColor: "rgba(15, 23, 42, 0.6)",
                                 }}
                               >
@@ -774,7 +808,7 @@ export default function TemperatureStudio() {
                                 <ListItemText
                                   primary={`${formatTemperature(item.value)} ${getScale(item.scale)?.symbol ?? ""} → ${displayValue} °C`}
                                   secondary={
-                                    <Stack spacing={0.5} mt={0.5}>
+                                    <Stack spacing={0.75} mt={0.5}>
                                       <Typography
                                         variant="caption"
                                         color="text.secondary"
@@ -785,7 +819,7 @@ export default function TemperatureStudio() {
                                       </Typography>
                                       <Stack
                                         direction="row"
-                                        spacing={1}
+                                        spacing={1.2}
                                         flexWrap="wrap"
                                       >
                                         {item.conversions.map((result) => (
@@ -817,16 +851,16 @@ export default function TemperatureStudio() {
                     <CardContent className={styles.cardSection}>
                       <Stack
                         direction="row"
-                        spacing={1.5}
+                        spacing={{ xs: 1.8, md: 2.2 }}
                         alignItems="center"
-                        mb={2}
+                        mb={{ xs: 2, md: 2.6 }}
                       >
                         <InsightsIcon color="primary" />
                         <Typography variant="h6" fontWeight={700}>
                           溫度洞察
                         </Typography>
                       </Stack>
-                      <Grid container spacing={2}>
+                      <Grid container spacing={{ xs: 2.5, md: 3 }}>
                         {insights.map((insight) => (
                           <Grid key={insight.title} size={12}>
                             <Card
@@ -840,7 +874,7 @@ export default function TemperatureStudio() {
                               >
                                 <Stack
                                   direction="row"
-                                  spacing={2}
+                                  spacing={{ xs: 1.8, md: 2.3 }}
                                   alignItems="center"
                                 >
                                   <Typography fontSize={26}>
@@ -874,13 +908,18 @@ export default function TemperatureStudio() {
 
             <Card className={styles.glassCard}>
               <CardContent className={styles.cardSection}>
-                <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
+                <Stack
+                  direction="row"
+                  spacing={{ xs: 1.8, md: 2.2 }}
+                  alignItems="center"
+                  mb={{ xs: 2.5, md: 3.2 }}
+                >
                   <AutoAwesomeIcon color="secondary" />
                   <Typography variant="h6" fontWeight={700}>
                     作品亮點
                   </Typography>
                 </Stack>
-                <Grid container spacing={3}>
+                <Grid container spacing={{ xs: 2.8, md: 3.5 }}>
                   {FACTS.map((fact) => (
                     <Grid key={fact.title} size={{ xs: 12, md: 4 }}>
                       <Card
@@ -891,7 +930,7 @@ export default function TemperatureStudio() {
                         }}
                       >
                         <CardContent className={styles.innerCardSection}>
-                          <Stack spacing={1.5}>
+                          <Stack spacing={{ xs: 1.8, md: 2.2 }}>
                             <Typography fontSize={32}>{fact.icon}</Typography>
                             <Typography variant="subtitle1" fontWeight={700}>
                               {fact.title}
