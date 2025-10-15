@@ -96,7 +96,9 @@
 .chipRow {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.75rem, 1.5vw, 1.1rem);
+  gap: clamp(0.85rem, 1.8vw, 1.2rem);
+  justify-content: center;
+  padding-block: 0.25rem;
 }
 
 .heroTitle {
@@ -133,5 +135,19 @@
 @media (max-width: 900px) {
   .main {
     padding: 3rem 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 2.5rem 0;
+  }
+
+  .content {
+    padding-inline: clamp(1.25rem, 6vw, 2rem);
+  }
+
+  .centeredArea {
+    width: min(100%, 640px);
   }
 }
