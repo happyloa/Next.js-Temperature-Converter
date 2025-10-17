@@ -1,28 +1,34 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import BoltIcon from "@mui/icons-material/Bolt";
+import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
+import ExploreIcon from "@mui/icons-material/Explore";
 import HistoryIcon from "@mui/icons-material/History";
 import InsightsIcon from "@mui/icons-material/Insights";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import ScienceIcon from "@mui/icons-material/Science";
 import {
+  Alert,
   Avatar,
   Box,
   Button,
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Container,
   Divider,
   Fade,
   Grid,
   IconButton,
+  InputAdornment,
   LinearProgress,
   List,
   ListItem,
@@ -121,6 +127,39 @@ const FACTS = [
   },
 ];
 
+const WEATHER_CODE_MAP = {
+  0: "晴朗無雲",
+  1: "大致晴朗",
+  2: "局部多雲",
+  3: "陰天",
+  45: "有霧",
+  48: "霧凇",
+  51: "毛毛雨",
+  53: "間歇性小雨",
+  55: "毛毛雨偏強",
+  56: "凍毛毛雨",
+  57: "凍毛毛雨偏強",
+  61: "小雨",
+  63: "中雨",
+  65: "大雨",
+  66: "凍雨",
+  67: "凍雨偏強",
+  71: "小雪",
+  73: "中雪",
+  75: "大雪",
+  77: "霰或冰珠",
+  80: "短暫小陣雨",
+  81: "短暫中陣雨",
+  82: "短暫強陣雨",
+  85: "短暫小陣雪",
+  86: "短暫強陣雪",
+  95: "可能打雷",
+  96: "雷陣雨伴隨冰雹",
+  99: "強雷陣雨伴隨冰雹",
+};
+
+const WEATHER_PRESETS = ["台北", "東京", "紐約", "倫敦"];
+
 const numberFormatter = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 2,
   minimumFractionDigits: 0,
@@ -130,6 +169,13 @@ const timeFormatter = new Intl.DateTimeFormat("zh-TW", {
   hour: "2-digit",
   minute: "2-digit",
   second: "2-digit",
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat("zh-TW", {
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
 });
 
 const ABSOLUTE_ZERO_K = 0;
@@ -162,6 +208,25 @@ const getAdaptiveFontSize = (value) => {
   }
 
   return { xs: "2.1rem", md: "2.6rem" };
+};
+
+const getWeatherDescription = (code) =>
+  WEATHER_CODE_MAP[code] ?? "天氣狀況不明，請再試一次。";
+
+const formatOptionalMetric = (value, suffix = "") => {
+  if (!Number.isFinite(value)) {
+    return suffix ? `--${suffix}` : "--";
+  }
+  return `${formatTemperature(value)}${suffix}`;
+};
+
+const formatWeatherTime = (value) => {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return dateTimeFormatter.format(date);
 };
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -239,6 +304,10 @@ export default function TemperatureStudio() {
   const [rawInput, setRawInput] = useState("25");
   const [history, setHistory] = useState([]);
   const [copiedScale, setCopiedScale] = useState(null);
+  const [weatherQuery, setWeatherQuery] = useState("台北");
+  const [weatherData, setWeatherData] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState(null);
 
   const activeScale = useMemo(() => getScale(scale), [scale]);
 
@@ -417,6 +486,88 @@ export default function TemperatureStudio() {
     }
   }, []);
 
+  const fetchWeather = useCallback(async (query) => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setWeatherError("請輸入地點名稱");
+      setWeatherData(null);
+      setWeatherLoading(false);
+      return;
+    }
+
+    setWeatherLoading(true);
+    setWeatherError(null);
+
+    try {
+      const geoResponse = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          trimmed,
+        )}&count=1&language=zh&format=json`,
+      );
+
+      if (!geoResponse.ok) {
+        throw new Error("地理定位服務暫時無法使用");
+      }
+
+      const geoData = await geoResponse.json();
+
+      if (!geoData?.results?.length) {
+        setWeatherData(null);
+        setWeatherError("找不到相符的地點，請再試一次。");
+        return;
+      }
+
+      const location = geoData.results[0];
+
+      const forecastResponse = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code`,
+      );
+
+      if (!forecastResponse.ok) {
+        throw new Error("天氣資料取得失敗");
+      }
+
+      const forecast = await forecastResponse.json();
+
+      if (!forecast?.current) {
+        throw new Error("目前無法取得天氣資訊");
+      }
+
+      setWeatherData({
+        location: `${location.name}${location.country ? ` · ${location.country}` : ""}`,
+        timezone: forecast.timezone_abbreviation,
+        observationTime: forecast.current.time,
+        temperature: forecast.current.temperature_2m,
+        apparentTemperature: forecast.current.apparent_temperature,
+        humidity: forecast.current.relative_humidity_2m,
+        windSpeed: forecast.current.wind_speed_10m,
+        weatherCode: forecast.current.weather_code,
+      });
+    } catch (error) {
+      console.error("fetchWeather", error);
+      setWeatherData(null);
+      setWeatherError(error.message ?? "無法取得天氣資訊，請稍後再試。");
+    } finally {
+      setWeatherLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWeather("台北");
+  }, [fetchWeather]);
+
+  const handleWeatherSubmit = useCallback(() => {
+    fetchWeather(weatherQuery);
+  }, [fetchWeather, weatherQuery]);
+
+  const handleWeatherPreset = useCallback(
+    (preset) => {
+      setWeatherQuery(preset);
+      fetchWeather(preset);
+    },
+    [fetchWeather],
+  );
+
   const sliderValue = Number.isFinite(value)
     ? clamp(value, sliderRange.min, sliderRange.max)
     : clamp(25, sliderRange.min, sliderRange.max);
@@ -429,9 +580,9 @@ export default function TemperatureStudio() {
     <main className={`${styles.main}`}>
       <Container className={styles.content} maxWidth="lg">
         <Box className={styles.centeredArea}>
-          <Stack spacing={{ xs: 5.5, md: 7 }} sx={{ width: "100%" }}>
+          <Stack spacing={{ xs: 6, md: 8 }} sx={{ width: "100%" }}>
             <Stack
-              spacing={{ xs: 3.2, md: 4 }}
+              spacing={{ xs: 3.8, md: 4.8 }}
               alignItems="center"
               textAlign="center"
             >
@@ -487,7 +638,7 @@ export default function TemperatureStudio() {
               </Stack>
             </Stack>
 
-            <Grid container spacing={{ xs: 3, lg: 4 }}>
+            <Grid container spacing={{ xs: 3.5, lg: 4.8 }}>
               <Grid size={{ xs: 12, lg: 7 }}>
                 <Card className={styles.glassCard}>
                   <CardContent className={styles.cardSection}>
@@ -495,11 +646,11 @@ export default function TemperatureStudio() {
                       <Box>
                         <Stack
                           direction="row"
-                          spacing={{ xs: 2, md: 2.75 }}
+                          spacing={{ xs: 2.4, md: 3 }}
                           alignItems="center"
                           justifyContent="space-between"
                           flexWrap="wrap"
-                          sx={{ rowGap: { xs: 1.5, md: 2 } }}
+                          sx={{ rowGap: { xs: 1.6, md: 2.2 } }}
                         >
                           <Box>
                             <Typography variant="h5" fontWeight={700}>
@@ -511,11 +662,11 @@ export default function TemperatureStudio() {
                           </Box>
                           <Stack
                             direction="row"
-                            spacing={{ xs: 1.25, sm: 1.5 }}
+                            spacing={{ xs: 1.5, sm: 1.9 }}
                             sx={{
                               flexWrap: "wrap",
                               justifyContent: { xs: "center", sm: "flex-end" },
-                              rowGap: { xs: 1, md: 0 },
+                              rowGap: { xs: 1.2, md: 0.6 },
                             }}
                           >
                             <Button
@@ -548,7 +699,7 @@ export default function TemperatureStudio() {
                           display: "flex",
                           flexWrap: "wrap",
                           justifyContent: { xs: "center", sm: "flex-start" },
-                          gap: { xs: 1, sm: 1.25 },
+                          gap: { xs: 1.1, sm: 1.4 },
                         }}
                       >
                         {TEMPERATURE_SCALES.map((item) => (
@@ -572,7 +723,7 @@ export default function TemperatureStudio() {
                         ))}
                       </ToggleButtonGroup>
 
-                      <Stack spacing={{ xs: 2.6, sm: 3 }}>
+                      <Stack spacing={{ xs: 3, sm: 3.4 }}>
                         <TextField
                           value={rawInput}
                           onChange={handleInputChange}
@@ -627,7 +778,7 @@ export default function TemperatureStudio() {
                         </Typography>
                       </Stack>
 
-                      <Grid container spacing={{ xs: 2.8, sm: 3.2 }}>
+                      <Grid container spacing={{ xs: 3.2, sm: 3.6 }}>
                         {conversions.map((item) => (
                           <Grid key={item.code} size={{ xs: 12, sm: 6 }}>
                             <Card
@@ -642,7 +793,7 @@ export default function TemperatureStudio() {
                                   direction="row"
                                   justifyContent="space-between"
                                   alignItems="flex-start"
-                                  spacing={{ xs: 1.25, md: 1.6 }}
+                                  spacing={{ xs: 1.4, md: 1.8 }}
                                 >
                                   <Box>
                                     <Typography
@@ -711,8 +862,8 @@ export default function TemperatureStudio() {
                         <Stack
                           direction="row"
                           alignItems="center"
-                          spacing={{ xs: 2.2, md: 2.8 }}
-                          sx={{ flexWrap: "wrap", rowGap: { xs: 1.5, md: 0 } }}
+                          spacing={{ xs: 2.6, md: 3.2 }}
+                          sx={{ flexWrap: "wrap", rowGap: { xs: 1.6, md: 0.4 } }}
                         >
                           <InsightsIcon color="secondary" />
                           <Typography variant="subtitle1" fontWeight={700}>
@@ -747,23 +898,23 @@ export default function TemperatureStudio() {
               </Grid>
 
               <Grid size={{ xs: 12, lg: 5 }}>
-                <Stack spacing={{ xs: 3.2, md: 3.8 }}>
+                <Stack spacing={{ xs: 3.6, md: 4.4 }}>
                   <Card className={styles.glassCard}>
                     <CardContent className={styles.cardSection}>
                       <Stack
                         direction="row"
                         justifyContent="space-between"
                         alignItems="center"
-                        spacing={{ xs: 2, md: 2.6 }}
+                        spacing={{ xs: 2.4, md: 3 }}
                         sx={{
                           flexWrap: "wrap",
-                          rowGap: { xs: 1.25, md: 0 },
-                          columnGap: { xs: 1.5, md: 0 },
+                          rowGap: { xs: 1.4, md: 0 },
+                          columnGap: { xs: 1.6, md: 0 },
                         }}
                       >
                         <Stack
                           direction="row"
-                          spacing={{ xs: 1.8, md: 2.2 }}
+                          spacing={{ xs: 2.1, md: 2.6 }}
                           alignItems="center"
                         >
                           <HistoryIcon color="primary" />
@@ -785,7 +936,7 @@ export default function TemperatureStudio() {
 
                       <Divider
                         sx={{
-                          my: { xs: 2.2, md: 2.8 },
+                          my: { xs: 2.6, md: 3.1 },
                           borderColor: "rgba(148, 163, 184, 0.2)",
                         }}
                       />
@@ -831,8 +982,8 @@ export default function TemperatureStudio() {
                                 alignItems="flex-start"
                                 sx={{
                                   borderRadius: 2,
-                                  mb: { xs: 1.25, md: 1.75 },
-                                  px: 1.5,
+                                  mb: { xs: 1.4, md: 1.9 },
+                                  px: 1.7,
                                   backgroundColor: "rgba(15, 23, 42, 0.6)",
                                 }}
                               >
@@ -861,7 +1012,7 @@ export default function TemperatureStudio() {
                                       </Typography>
                                       <Stack
                                         direction="row"
-                                        spacing={{ xs: 1, md: 1.3 }}
+                                        spacing={{ xs: 1.1, md: 1.5 }}
                                         flexWrap="wrap"
                                         rowGap={0.75}
                                       >
@@ -887,23 +1038,195 @@ export default function TemperatureStudio() {
                           })}
                         </List>
                       )}
-                    </CardContent>
-                  </Card>
+                  </CardContent>
+                </Card>
 
-                  <Card className={styles.glassCard}>
-                    <CardContent className={styles.cardSection}>
+                <Card className={styles.glassCard}>
+                  <CardContent className={styles.cardSection}>
+                    <Stack
+                      direction="row"
+                      spacing={{ xs: 2.1, md: 2.6 }}
+                      alignItems="center"
+                      mb={{ xs: 2.4, md: 3 }}
+                    >
+                      <ExploreIcon color="secondary" />
+                      <Typography variant="h6" fontWeight={700}>
+                        全球氣象快查
+                      </Typography>
+                    </Stack>
+                    <Stack spacing={{ xs: 2, md: 2.4 }}>
+                      <TextField
+                        value={weatherQuery}
+                        onChange={(event) => setWeatherQuery(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            handleWeatherSubmit();
+                          }
+                        }}
+                        placeholder="輸入城市或地區，例如：台北"
+                        autoComplete="off"
+                        fullWidth
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <LocationOnIcon color="primary" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
                       <Stack
                         direction="row"
-                        spacing={{ xs: 1.8, md: 2.2 }}
+                        spacing={{ xs: 1.2, sm: 1.6 }}
+                        sx={{ flexWrap: "wrap", rowGap: { xs: 1, sm: 1.2 } }}
+                      >
+                        {WEATHER_PRESETS.map((preset) => (
+                          <Chip
+                            key={preset}
+                            label={preset}
+                            variant={preset === weatherQuery ? "filled" : "outlined"}
+                            color={preset === weatherQuery ? "primary" : "default"}
+                            onClick={() => handleWeatherPreset(preset)}
+                            sx={{
+                              cursor: "pointer",
+                              borderRadius: 999,
+                              backgroundColor:
+                                preset === weatherQuery
+                                  ? "rgba(56, 189, 248, 0.15)"
+                                  : "rgba(15, 23, 42, 0.65)",
+                              color: preset === weatherQuery ? "#0ea5e9" : "#e2e8f0",
+                            }}
+                          />
+                        ))}
+                      </Stack>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={handleWeatherSubmit}
+                        disabled={weatherLoading}
+                        fullWidth
+                        sx={{ py: { xs: 1.1, md: 1.2 } }}
+                      >
+                        {weatherLoading ? (
+                          <Stack direction="row" spacing={1.2} alignItems="center">
+                            <CircularProgress size={18} color="inherit" />
+                            <span>查詢中</span>
+                          </Stack>
+                        ) : (
+                          "取得即時天氣"
+                        )}
+                      </Button>
+                    </Stack>
+
+                    <Box mt={{ xs: 2.6, md: 3.2 }}>
+                      {weatherError ? (
+                        <Alert severity="warning" variant="outlined">
+                          {weatherError}
+                        </Alert>
+                      ) : weatherData ? (
+                        <Fade in timeout={400}>
+                          <Stack
+                            spacing={{ xs: 2, md: 2.4 }}
+                            sx={{
+                              backgroundColor: "rgba(15, 23, 42, 0.65)",
+                              borderRadius: 3,
+                              border: "1px solid rgba(148, 163, 184, 0.25)",
+                              p: { xs: 2, md: 2.6 },
+                            }}
+                          >
+                            <Stack
+                              direction={{ xs: "column", sm: "row" }}
+                              spacing={{ xs: 1, sm: 1.8 }}
+                              alignItems={{ xs: "flex-start", sm: "center" }}
+                            >
+                              <Stack direction="row" spacing={1.4} alignItems="center">
+                                <CloudOutlinedIcon color="info" />
+                                <Box>
+                                  <Typography variant="subtitle1" fontWeight={700}>
+                                    {weatherData.location}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {getWeatherDescription(weatherData.weatherCode)} · 觀測時間
+                                    {" "}
+                                    {formatWeatherTime(weatherData.observationTime)}
+                                    {weatherData.timezone
+                                      ? `（${weatherData.timezone}）`
+                                      : ""}
+                                  </Typography>
+                                </Box>
+                              </Stack>
+                              <Chip
+                                label={`體感 ${formatOptionalMetric(weatherData.apparentTemperature, "°C")}`}
+                                color="primary"
+                                sx={{
+                                  backgroundColor: "rgba(56, 189, 248, 0.15)",
+                                  color: "#38bdf8",
+                                }}
+                              />
+                            </Stack>
+
+                            <Stack spacing={{ xs: 1.4, md: 1.8 }}>
+                              <Typography variant="h3" fontWeight={700}>
+                                {formatOptionalMetric(weatherData.temperature, "°C")}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                將即時天氣帶入轉換流程，快速比較實驗室設定與當地環境條件。
+                              </Typography>
+                            </Stack>
+
+                            <Grid container spacing={{ xs: 1.8, md: 2.4 }}>
+                              <Grid size={{ xs: 12, sm: 6 }}>
+                                <Stack spacing={0.6}>
+                                  <Typography
+                                    variant="overline"
+                                    sx={{ color: "rgba(226, 232, 240, 0.65)" }}
+                                  >
+                                    相對濕度
+                                  </Typography>
+                                  <Typography variant="h6" fontWeight={600}>
+                                    {formatOptionalMetric(weatherData.humidity, "%")}
+                                  </Typography>
+                                </Stack>
+                              </Grid>
+                              <Grid size={{ xs: 12, sm: 6 }}>
+                                <Stack spacing={0.6}>
+                                  <Typography
+                                    variant="overline"
+                                    sx={{ color: "rgba(226, 232, 240, 0.65)" }}
+                                  >
+                                    風速
+                                  </Typography>
+                                  <Typography variant="h6" fontWeight={600}>
+                                    {formatOptionalMetric(weatherData.windSpeed, " m/s")}
+                                  </Typography>
+                                </Stack>
+                              </Grid>
+                            </Grid>
+                          </Stack>
+                        </Fade>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          查詢任何城市，了解環境背景後再進行溫度轉換與安全判讀。
+                        </Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                <Card className={styles.glassCard}>
+                  <CardContent className={styles.cardSection}>
+                      <Stack
+                        direction="row"
+                        spacing={{ xs: 2.1, md: 2.6 }}
                         alignItems="center"
-                        mb={{ xs: 2.2, md: 2.8 }}
+                        mb={{ xs: 2.6, md: 3.1 }}
                       >
                         <InsightsIcon color="primary" />
                         <Typography variant="h6" fontWeight={700}>
                           溫度洞察
                         </Typography>
                       </Stack>
-                      <Grid container spacing={{ xs: 2.8, md: 3.2 }}>
+                      <Grid container spacing={{ xs: 3.1, md: 3.6 }}>
                         {insights.map((insight) => (
                           <Grid key={insight.title} size={12}>
                             <Card
@@ -917,7 +1240,7 @@ export default function TemperatureStudio() {
                               >
                                 <Stack
                                   direction="row"
-                                  spacing={{ xs: 1.8, md: 2.3 }}
+                                  spacing={{ xs: 2.1, md: 2.6 }}
                                   alignItems="center"
                                 >
                                   <Typography fontSize={26}>
@@ -953,16 +1276,16 @@ export default function TemperatureStudio() {
               <CardContent className={styles.cardSection}>
                 <Stack
                   direction="row"
-                  spacing={{ xs: 1.8, md: 2.2 }}
+                  spacing={{ xs: 2.1, md: 2.6 }}
                   alignItems="center"
-                  mb={{ xs: 2.5, md: 3.2 }}
+                  mb={{ xs: 3, md: 3.5 }}
                 >
                   <AutoAwesomeIcon color="secondary" />
                   <Typography variant="h6" fontWeight={700}>
                     作品亮點
                   </Typography>
                 </Stack>
-                <Grid container spacing={{ xs: 3, md: 3.8 }}>
+                <Grid container spacing={{ xs: 3.4, md: 4.2 }}>
                   {FACTS.map((fact) => (
                     <Grid key={fact.title} size={{ xs: 12, md: 4 }}>
                       <Card
@@ -973,7 +1296,7 @@ export default function TemperatureStudio() {
                         }}
                       >
                         <CardContent className={styles.innerCardSection}>
-                          <Stack spacing={{ xs: 1.8, md: 2.2 }}>
+                          <Stack spacing={{ xs: 2.1, md: 2.6 }}>
                             <Typography fontSize={32}>{fact.icon}</Typography>
                             <Typography variant="subtitle1" fontWeight={700}>
                               {fact.title}

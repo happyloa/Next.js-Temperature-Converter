@@ -1,7 +1,7 @@
 .main {
   position: relative;
   min-height: 100vh;
-  padding: clamp(3rem, 5vw, 6rem) 0;
+  padding: clamp(3.5rem, 6vw, 7.5rem) 0;
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -52,11 +52,11 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 0 clamp(1.5rem, 4vw, 3.5rem);
+  padding: 0 clamp(1.75rem, 5vw, 4.5rem);
 }
 
 .centeredArea {
-  width: min(100%, 1120px);
+  width: min(100%, 1180px);
   margin: 0 auto;
 }
 
@@ -96,9 +96,9 @@
 .chipRow {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.85rem, 1.8vw, 1.2rem);
+  gap: clamp(0.9rem, 2vw, 1.4rem);
   justify-content: center;
-  padding-block: 0.25rem;
+  padding-block: 0.35rem;
 }
 
 .heroTitle {
@@ -109,45 +109,45 @@
 }
 
 .cardSection {
-  padding: clamp(1.75rem, 3vw, 3rem) !important;
+  padding: clamp(2rem, 3.5vw, 3.5rem) !important;
 }
 
 .cardSection:last-child {
-  padding-bottom: clamp(1.75rem, 3vw, 3rem) !important;
+  padding-bottom: clamp(2rem, 3.5vw, 3.5rem) !important;
 }
 
 .innerCardSection {
-  padding: clamp(1.25rem, 2.5vw, 2rem) !important;
+  padding: clamp(1.4rem, 3vw, 2.3rem) !important;
 }
 
 .innerCardSection:last-child {
-  padding-bottom: clamp(1.25rem, 2.5vw, 2rem) !important;
+  padding-bottom: clamp(1.4rem, 3vw, 2.3rem) !important;
 }
 
 .compactCardSection {
-  padding: clamp(1rem, 2vw, 1.6rem) !important;
+  padding: clamp(1.15rem, 2.5vw, 1.9rem) !important;
 }
 
 .compactCardSection:last-child {
-  padding-bottom: clamp(1rem, 2vw, 1.6rem) !important;
+  padding-bottom: clamp(1.15rem, 2.5vw, 1.9rem) !important;
 }
 
 @media (max-width: 900px) {
   .main {
-    padding: 3rem 0;
+    padding: 3.5rem 0;
   }
 }
 
 @media (max-width: 600px) {
   .main {
-    padding: 2.5rem 0;
+    padding: 3rem 0;
   }
 
   .content {
-    padding-inline: clamp(1.25rem, 6vw, 2rem);
+    padding-inline: clamp(1.4rem, 6vw, 2.4rem);
   }
 
   .centeredArea {
-    width: min(100%, 640px);
+    width: min(100%, 660px);
   }
 }
