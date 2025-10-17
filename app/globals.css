@@ -1,29 +1,28 @@
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html {
-  color-scheme: dark;
-  scroll-behavior: smooth;
-}
+@layer base {
+  :root {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
 
-body {
-  min-height: 100vh;
-  max-width: 100vw;
-  overflow-x: hidden;
-  background: radial-gradient(circle at 20% -10%, rgba(59, 130, 246, 0.2), transparent 45%),
-    radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.2), transparent 40%),
-    linear-gradient(160deg, #020617 0%, #0f172a 45%, #111827 100%);
-  color: #e2e8f0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  * {
+    @apply box-border m-0 p-0;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  body {
+    @apply min-h-screen w-full overflow-x-hidden bg-slate-950 text-slate-100 antialiased;
+    background-image:
+      radial-gradient(circle at 20% -10%, rgba(59, 130, 246, 0.25), transparent 45%),
+      radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.22), transparent 40%),
+      linear-gradient(160deg, #020617 0%, #0f172a 45%, #111827 100%);
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
 }
 
 ::-webkit-scrollbar {

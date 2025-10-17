@@ -1,50 +1,20 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import BoltIcon from "@mui/icons-material/Bolt";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
-import HistoryIcon from "@mui/icons-material/History";
-import InsightsIcon from "@mui/icons-material/Insights";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import ScienceIcon from "@mui/icons-material/Science";
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Divider,
-  Fade,
-  Grid,
-  IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Slider,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-
-import styles from "./page.module.css";
+import { FactsSection } from "./components/FactsSection";
+import { HeroSection } from "./components/HeroSection";
+import { HistorySection } from "./components/HistorySection";
+import { InsightsSection } from "./components/InsightsSection";
+import { TemperatureInputCard } from "./components/TemperatureInputCard";
+import { WeatherSection } from "./components/WeatherSection";
 
 const TEMPERATURE_SCALES = [
   {
     code: "celsius",
     label: "攝氏 (°C)",
     symbol: "°C",
-    accent: "#38bdf8",
+    accent: "from-sky-400/30 via-sky-400/15 to-sky-400/5",
     toKelvin: (value) => value + 273.15,
     fromKelvin: (value) => value - 273.15,
   },
@@ -52,7 +22,7 @@ const TEMPERATURE_SCALES = [
     code: "fahrenheit",
     label: "華氏 (°F)",
     symbol: "°F",
-    accent: "#f97316",
+    accent: "from-orange-400/30 via-orange-400/15 to-orange-400/5",
     toKelvin: (value) => ((value + 459.67) * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5 - 459.67,
   },
@@ -60,7 +30,7 @@ const TEMPERATURE_SCALES = [
     code: "kelvin",
     label: "絕對溫標 (K)",
     symbol: "K",
-    accent: "#22d3ee",
+    accent: "from-cyan-400/30 via-cyan-400/15 to-cyan-400/5",
     toKelvin: (value) => value,
     fromKelvin: (value) => value,
   },
@@ -68,7 +38,7 @@ const TEMPERATURE_SCALES = [
     code: "rankine",
     label: "蘭氏 (°R)",
     symbol: "°R",
-    accent: "#a855f7",
+    accent: "from-violet-400/30 via-violet-400/15 to-violet-400/5",
     toKelvin: (value) => (value * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5,
   },
@@ -76,7 +46,7 @@ const TEMPERATURE_SCALES = [
     code: "reaumur",
     label: "列氏 (°Ré)",
     symbol: "°Ré",
-    accent: "#34d399",
+    accent: "from-emerald-400/30 via-emerald-400/15 to-emerald-400/5",
     toKelvin: (value) => value * 1.25 + 273.15,
     fromKelvin: (value) => (value - 273.15) * 0.8,
   },
@@ -84,7 +54,7 @@ const TEMPERATURE_SCALES = [
     code: "newton",
     label: "牛頓氏 (°N)",
     symbol: "°N",
-    accent: "#fb7185",
+    accent: "from-rose-400/30 via-rose-400/15 to-rose-400/5",
     toKelvin: (value) => value * (100 / 33) + 273.15,
     fromKelvin: (value) => (value - 273.15) * (33 / 100),
   },
@@ -121,6 +91,39 @@ const FACTS = [
   },
 ];
 
+const WEATHER_CODE_MAP = {
+  0: "晴朗無雲",
+  1: "大致晴朗",
+  2: "局部多雲",
+  3: "陰天",
+  45: "有霧",
+  48: "霧凇",
+  51: "毛毛雨",
+  53: "間歇性小雨",
+  55: "毛毛雨偏強",
+  56: "凍毛毛雨",
+  57: "凍毛毛雨偏強",
+  61: "小雨",
+  63: "中雨",
+  65: "大雨",
+  66: "凍雨",
+  67: "凍雨偏強",
+  71: "小雪",
+  73: "中雪",
+  75: "大雪",
+  77: "霰或冰珠",
+  80: "短暫小陣雨",
+  81: "短暫中陣雨",
+  82: "短暫強陣雨",
+  85: "短暫小陣雪",
+  86: "短暫強陣雪",
+  95: "可能打雷",
+  96: "雷陣雨伴隨冰雹",
+  99: "強雷陣雨伴隨冰雹",
+};
+
+const WEATHER_PRESETS = ["高雄", "東京", "紐約", "倫敦"];
+
 const numberFormatter = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 2,
   minimumFractionDigits: 0,
@@ -132,10 +135,19 @@ const timeFormatter = new Intl.DateTimeFormat("zh-TW", {
   second: "2-digit",
 });
 
+const dateTimeFormatter = new Intl.DateTimeFormat("zh-TW", {
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 const ABSOLUTE_ZERO_K = 0;
 const SOLAR_SURFACE_K = 5778;
 
 const decimalPattern = /^-?\d*(\.\d*)?$/;
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 const toInputString = (value) => {
   if (!Number.isFinite(value)) return "";
@@ -145,26 +157,24 @@ const toInputString = (value) => {
 
 const formatTemperature = (value) => numberFormatter.format(value);
 
-const getAdaptiveFontSize = (value) => {
+const getWeatherDescription = (code) =>
+  WEATHER_CODE_MAP[code] ?? "天氣狀況不明，請再試一次。";
+
+const formatOptionalMetric = (value, suffix = "") => {
   if (!Number.isFinite(value)) {
-    return { xs: "2.1rem", md: "2.6rem" };
+    return suffix ? `--${suffix}` : "--";
   }
-
-  const formatted = formatTemperature(Math.abs(value));
-  const digits = formatted.replace(/[^0-9]/g, "").length;
-
-  if (digits >= 9) {
-    return { xs: "1.6rem", md: "2.1rem" };
-  }
-
-  if (digits >= 7) {
-    return { xs: "1.85rem", md: "2.3rem" };
-  }
-
-  return { xs: "2.1rem", md: "2.6rem" };
+  return `${formatTemperature(value)}${suffix}`;
 };
 
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+const formatWeatherTime = (value) => {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return dateTimeFormatter.format(date);
+};
 
 const getScale = (code) =>
   TEMPERATURE_SCALES.find((item) => item.code === code);
@@ -239,6 +249,10 @@ export default function TemperatureStudio() {
   const [rawInput, setRawInput] = useState("25");
   const [history, setHistory] = useState([]);
   const [copiedScale, setCopiedScale] = useState(null);
+  const [weatherQuery, setWeatherQuery] = useState("高雄");
+  const [weatherData, setWeatherData] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState(null);
 
   const activeScale = useMemo(() => getScale(scale), [scale]);
 
@@ -314,7 +328,7 @@ export default function TemperatureStudio() {
     ];
   }, [celsiusValue]);
 
-  const handleScaleChange = (_event, nextScale) => {
+  const handleScaleChange = (nextScale) => {
     if (!nextScale || nextScale === scale) return;
     const nextScaleConfig = getScale(nextScale);
     if (!nextScaleConfig || !activeScale) {
@@ -362,8 +376,9 @@ export default function TemperatureStudio() {
     setValue(clamped);
   };
 
-  const handleSliderChange = (_event, sliderValue) => {
-    const numeric = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
+  const handleSliderChange = (event) => {
+    const numeric = Number(event.target.value);
+    if (!Number.isFinite(numeric)) return;
     setValue(numeric);
     setRawInput(toInputString(numeric));
   };
@@ -381,11 +396,7 @@ export default function TemperatureStudio() {
   };
 
   const handleAddHistory = () => {
-    if (
-      !Number.isFinite(value) ||
-      !Number.isFinite(celsiusValue) ||
-      conversions.length === 0
-    ) {
+    if (!Number.isFinite(value) || !Number.isFinite(celsiusValue) || conversions.length === 0) {
       return;
     }
 
@@ -393,6 +404,8 @@ export default function TemperatureStudio() {
       id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
       scale,
+      scaleLabel: activeScale?.label ?? "",
+      scaleSymbol: activeScale?.symbol ?? "",
       value,
       conversions: conversions.map((item) => ({
         code: item.code,
@@ -417,581 +430,164 @@ export default function TemperatureStudio() {
     }
   }, []);
 
+  const fetchWeather = useCallback(async (query) => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setWeatherError("請輸入地點名稱");
+      setWeatherData(null);
+      setWeatherLoading(false);
+      return;
+    }
+
+    setWeatherLoading(true);
+    setWeatherError(null);
+
+    try {
+      const geoResponse = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          trimmed,
+        )}&count=1&language=zh&format=json`,
+      );
+
+      if (!geoResponse.ok) {
+        throw new Error("地理定位服務暫時無法使用");
+      }
+
+      const geoData = await geoResponse.json();
+
+      if (!geoData?.results?.length) {
+        setWeatherData(null);
+        setWeatherError("找不到相符的地點，請再試一次。");
+        return;
+      }
+
+      const location = geoData.results[0];
+
+      const forecastResponse = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code`,
+      );
+
+      if (!forecastResponse.ok) {
+        throw new Error("天氣資料取得失敗");
+      }
+
+      const forecast = await forecastResponse.json();
+
+      if (!forecast?.current) {
+        throw new Error("目前無法取得天氣資訊");
+      }
+
+      setWeatherData({
+        location: `${location.name}${location.country ? ` · ${location.country}` : ""}`,
+        timezone: forecast.timezone_abbreviation,
+        observationTime: forecast.current.time,
+        temperature: forecast.current.temperature_2m,
+        apparentTemperature: forecast.current.apparent_temperature,
+        humidity: forecast.current.relative_humidity_2m,
+        windSpeed: forecast.current.wind_speed_10m,
+        weatherCode: forecast.current.weather_code,
+      });
+    } catch (error) {
+      console.error("fetchWeather", error);
+      setWeatherData(null);
+      setWeatherError(error.message ?? "無法取得天氣資訊，請稍後再試。");
+    } finally {
+      setWeatherLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWeather("高雄");
+  }, [fetchWeather]);
+
+  const handleWeatherSubmit = useCallback(
+    (event) => {
+      event?.preventDefault();
+      fetchWeather(weatherQuery);
+    },
+    [fetchWeather, weatherQuery],
+  );
+
+  const handleWeatherPreset = useCallback(
+    (preset) => {
+      setWeatherQuery(preset);
+      fetchWeather(preset);
+    },
+    [fetchWeather],
+  );
+
   const sliderValue = Number.isFinite(value)
     ? clamp(value, sliderRange.min, sliderRange.max)
     : clamp(25, sliderRange.min, sliderRange.max);
 
-  const relativeSolarProgress = Number.isFinite(kelvinValue)
+  const sliderStep = (sliderRange.max - sliderRange.min) / 400 || 1;
+
+  const hasKelvinValue = Number.isFinite(kelvinValue);
+
+  const relativeSolarProgress = hasKelvinValue
     ? clamp((kelvinValue / SOLAR_SURFACE_K) * 100, 0, 130)
     : 0;
 
+  const mood = Number.isFinite(celsiusValue) ? getThermalMood(celsiusValue) : null;
+
+  const canAddHistory =
+    Number.isFinite(value) && Number.isFinite(celsiusValue) && conversions.length > 0;
+
   return (
-    <main className={`${styles.main}`}>
-      <Container className={styles.content} maxWidth="lg">
-        <Box className={styles.centeredArea}>
-          <Stack spacing={{ xs: 5.5, md: 7 }} sx={{ width: "100%" }}>
-            <Stack
-              spacing={{ xs: 3.2, md: 4 }}
-              alignItems="center"
-              textAlign="center"
-            >
-              <Chip
-                icon={<BoltIcon />}
-                label="Multi-Scale Temperature Studio"
-                variant="outlined"
-                sx={{
-                  borderColor: "rgba(148, 163, 184, 0.4)",
-                  color: "#bae6fd",
-                  backgroundColor: "rgba(30, 64, 175, 0.25)",
-                }}
-              />
-              <Typography
-                variant="h2"
-                className={styles.heroTitle}
-                fontSize={{ xs: 36, md: 48 }}
-              >
-                溫度實驗室 · 智慧轉換平台
-              </Typography>
-              <Typography
-                variant="body1"
-                maxWidth={640}
-                color="text.secondary"
-                sx={{ lineHeight: 1.7 }}
-              >
-                即時轉換六種常見與歷史溫標、加入情境分析與轉換紀錄。無論是烹飪、科研、工業或創作，
-                這裡都能給你漂亮又專業的一站式體驗。
-              </Typography>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                className={styles.chipRow}
-                justifyContent="center"
-                sx={{ width: "100%" }}
-              >
-                {PRESETS.map((preset) => (
-                  <Chip
-                    key={preset.label}
-                    label={`${preset.emoji} ${preset.label}`}
-                    onClick={() => handlePresetSelect(preset)}
-                    variant="outlined"
-                    sx={{
-                      cursor: "pointer",
-                      borderColor: "rgba(148, 163, 184, 0.35)",
-                      color: "#f8fafc",
-                      backgroundColor: "rgba(15, 23, 42, 0.65)",
-                      "&:hover": {
-                        backgroundColor: "rgba(56, 189, 248, 0.15)",
-                      },
-                    }}
-                  />
-                ))}
-              </Stack>
-            </Stack>
+    <main className="py-12 pb-24">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
+        <HeroSection presets={PRESETS} onPresetSelect={handlePresetSelect} />
 
-            <Grid container spacing={{ xs: 3, lg: 4 }}>
-              <Grid size={{ xs: 12, lg: 7 }}>
-                <Card className={styles.glassCard}>
-                  <CardContent className={styles.cardSection}>
-                    <Stack spacing={{ xs: 3.5, md: 4.5 }}>
-                      <Box>
-                        <Stack
-                          direction="row"
-                          spacing={{ xs: 2, md: 2.75 }}
-                          alignItems="center"
-                          justifyContent="space-between"
-                          flexWrap="wrap"
-                          sx={{ rowGap: { xs: 1.5, md: 2 } }}
-                        >
-                          <Box>
-                            <Typography variant="h5" fontWeight={700}>
-                              輸入溫度
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              選擇欲輸入的溫標並輸入數值，即可同步取得所有單位結果。
-                            </Typography>
-                          </Box>
-                          <Stack
-                            direction="row"
-                            spacing={{ xs: 1.25, sm: 1.5 }}
-                            sx={{
-                              flexWrap: "wrap",
-                              justifyContent: { xs: "center", sm: "flex-end" },
-                              rowGap: { xs: 1, md: 0 },
-                            }}
-                          >
-                            <Button
-                              startIcon={<RestartAltIcon />}
-                              color="secondary"
-                              variant="outlined"
-                              onClick={handleReset}
-                            >
-                              重設
-                            </Button>
-                            <Button
-                              startIcon={<HistoryIcon />}
-                              variant="contained"
-                              color="primary"
-                              onClick={handleAddHistory}
-                              disabled={conversions.length === 0}
-                            >
-                              加入紀錄
-                            </Button>
-                          </Stack>
-                        </Stack>
-                      </Box>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
+          <TemperatureInputCard
+            scale={scale}
+            scales={TEMPERATURE_SCALES}
+            onScaleChange={handleScaleChange}
+            rawInput={rawInput}
+            onInputChange={handleInputChange}
+            activeSymbol={activeScale?.symbol}
+            onReset={handleReset}
+            onAddHistory={handleAddHistory}
+            canAddHistory={canAddHistory}
+            sliderRange={sliderRange}
+            sliderValue={sliderValue}
+            sliderStep={sliderStep}
+            onSliderChange={handleSliderChange}
+            conversions={conversions}
+            copiedScale={copiedScale}
+            onCopy={handleCopy}
+            mood={mood}
+            relativeSolarProgress={relativeSolarProgress}
+            showSolarProgress={hasKelvinValue}
+            formatTemperature={formatTemperature}
+          />
 
-                      <ToggleButtonGroup
-                        color="primary"
-                        exclusive
-                        value={scale}
-                        onChange={handleScaleChange}
-                        sx={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          justifyContent: { xs: "center", sm: "flex-start" },
-                          gap: { xs: 1, sm: 1.25 },
-                        }}
-                      >
-                        {TEMPERATURE_SCALES.map((item) => (
-                          <ToggleButton
-                            key={item.code}
-                            value={item.code}
-                            sx={{
-                              borderRadius: 2,
-                              borderColor:
-                                "rgba(148, 163, 184, 0.35) !important",
-                              color:
-                                item.code === scale ? item.accent : "inherit",
-                              fontWeight: 600,
-                              flexGrow: 1,
-                              minWidth: { xs: "calc(50% - 0.75rem)", sm: 140 },
-                              flexBasis: { xs: "calc(50% - 0.75rem)", sm: "auto" },
-                            }}
-                          >
-                            {item.label}
-                          </ToggleButton>
-                        ))}
-                      </ToggleButtonGroup>
+          <div className="space-y-8">
+            <HistorySection
+              history={history}
+              onClearHistory={handleClearHistory}
+              formatTemperature={formatTemperature}
+              formatTime={(date) => timeFormatter.format(date)}
+            />
+            <WeatherSection
+              query={weatherQuery}
+              onQueryChange={setWeatherQuery}
+              onSubmit={handleWeatherSubmit}
+              presets={WEATHER_PRESETS}
+              onPresetSelect={handleWeatherPreset}
+              loading={weatherLoading}
+              error={weatherError}
+              data={weatherData}
+              formatOptionalMetric={formatOptionalMetric}
+              formatWeatherTime={formatWeatherTime}
+              getWeatherDescription={getWeatherDescription}
+            />
+            <InsightsSection insights={insights} />
+          </div>
+        </div>
 
-                      <Stack spacing={{ xs: 2.6, sm: 3 }}>
-                        <TextField
-                          value={rawInput}
-                          onChange={handleInputChange}
-                          placeholder="輸入溫度值"
-                          fullWidth
-                          InputProps={{
-                            startAdornment: (
-                              <DeviceThermostatIcon
-                                color="primary"
-                                sx={{ mr: 1 }}
-                              />
-                            ),
-                            endAdornment: (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight={600}
-                              >
-                                {activeScale?.symbol ?? ""}
-                              </Typography>
-                            ),
-                          }}
-                          sx={{
-                            "& .MuiInputBase-root": {
-                              fontSize: "1.25rem",
-                              paddingY: { xs: 1.1, md: 1.3 },
-                              paddingX: { xs: 1.25, md: 1.5 },
-                            },
-                          }}
-                        />
-                        <Slider
-                          value={sliderValue}
-                          min={sliderRange.min}
-                          max={sliderRange.max}
-                          step={(sliderRange.max - sliderRange.min) / 400}
-                          onChange={handleSliderChange}
-                          valueLabelDisplay="auto"
-                          sx={{
-                            color: activeScale?.accent ?? "#38bdf8",
-                            "& .MuiSlider-rail": { opacity: 0.28 },
-                            mt: { xs: 0.5, md: 0.75 },
-                          }}
-                        />
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ mt: { xs: 0.5, md: 0.75 } }}
-                        >
-                          範圍：{formatTemperature(sliderRange.min)}{" "}
-                          {activeScale?.symbol} ~{" "}
-                          {formatTemperature(sliderRange.max)}{" "}
-                          {activeScale?.symbol}
-                        </Typography>
-                      </Stack>
-
-                      <Grid container spacing={{ xs: 2.8, sm: 3.2 }}>
-                        {conversions.map((item) => (
-                          <Grid key={item.code} size={{ xs: 12, sm: 6 }}>
-                            <Card
-                              className={styles.resultCard}
-                              sx={{
-                                background: `linear-gradient(135deg, ${item.accent}33, rgba(15,23,42,0.92))`,
-                                border: `1px solid ${item.accent}44`,
-                              }}
-                            >
-                              <CardContent className={styles.innerCardSection}>
-                                <Stack
-                                  direction="row"
-                                  justifyContent="space-between"
-                                  alignItems="flex-start"
-                                  spacing={{ xs: 1.25, md: 1.6 }}
-                                >
-                                  <Box>
-                                    <Typography
-                                      variant="overline"
-                                      sx={{
-                                        color: "rgba(226, 232, 240, 0.75)",
-                                      }}
-                                    >
-                                      {item.label}
-                                    </Typography>
-                                    <Typography
-                                      variant="h4"
-                                      fontWeight={700}
-                                      sx={{
-                                        fontSize: getAdaptiveFontSize(item.result),
-                                      }}
-                                    >
-                                      {formatTemperature(item.result)}{" "}
-                                      {item.symbol}
-                                    </Typography>
-                                  </Box>
-                                  <Tooltip
-                                    title={
-                                      copiedScale === item.code
-                                        ? "已複製"
-                                        : "複製結果"
-                                    }
-                                    placement="left"
-                                    arrow
-                                  >
-                                    <span>
-                                      <IconButton
-                                        onClick={() =>
-                                          handleCopy(
-                                            `${formatTemperature(item.result)}`,
-                                            item.code,
-                                          )
-                                        }
-                                        color={
-                                          copiedScale === item.code
-                                            ? "secondary"
-                                            : "default"
-                                        }
-                                      >
-                                        <ContentCopyIcon fontSize="small" />
-                                      </IconButton>
-                                    </span>
-                                  </Tooltip>
-                                </Stack>
-                                {item.code === "celsius" && (
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    mt={{ xs: 1.1, md: 1.4 }}
-                                  >
-                                    {getThermalMood(item.result).title}
-                                  </Typography>
-                                )}
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        ))}
-                      </Grid>
-
-                      <Box>
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          spacing={{ xs: 2.2, md: 2.8 }}
-                          sx={{ flexWrap: "wrap", rowGap: { xs: 1.5, md: 0 } }}
-                        >
-                          <InsightsIcon color="secondary" />
-                          <Typography variant="subtitle1" fontWeight={700}>
-                            相對於太陽表面的能量比例
-                          </Typography>
-                        </Stack>
-                        <Box mt={{ xs: 2.5, md: 3 }}>
-                          <LinearProgress
-                            variant="determinate"
-                            value={relativeSolarProgress}
-                            sx={{
-                              height: 10,
-                              borderRadius: 999,
-                              backgroundColor: "rgba(148, 163, 184, 0.25)",
-                              "& .MuiLinearProgress-bar": {
-                                borderRadius: 999,
-                                background:
-                                  "linear-gradient(90deg, #38bdf8, #f472b6)",
-                              },
-                            }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {Number.isFinite(kelvinValue)
-                              ? `目前為太陽表面溫度的 ${formatTemperature(relativeSolarProgress)}%`
-                              : "輸入溫度以分析熱能比例"}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, lg: 5 }}>
-                <Stack spacing={{ xs: 3.2, md: 3.8 }}>
-                  <Card className={styles.glassCard}>
-                    <CardContent className={styles.cardSection}>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        spacing={{ xs: 2, md: 2.6 }}
-                        sx={{
-                          flexWrap: "wrap",
-                          rowGap: { xs: 1.25, md: 0 },
-                          columnGap: { xs: 1.5, md: 0 },
-                        }}
-                      >
-                        <Stack
-                          direction="row"
-                          spacing={{ xs: 1.8, md: 2.2 }}
-                          alignItems="center"
-                        >
-                          <HistoryIcon color="primary" />
-                          <Typography variant="h6" fontWeight={700}>
-                            轉換紀錄
-                          </Typography>
-                        </Stack>
-                        <Tooltip title="清除全部紀錄" arrow>
-                          <span>
-                            <IconButton
-                              onClick={handleClearHistory}
-                              disabled={history.length === 0}
-                            >
-                              <DeleteSweepIcon />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      </Stack>
-
-                      <Divider
-                        sx={{
-                          my: { xs: 2.2, md: 2.8 },
-                          borderColor: "rgba(148, 163, 184, 0.2)",
-                        }}
-                      />
-
-                      {history.length === 0 ? (
-                        <Fade in timeout={400}>
-                          <Stack
-                            spacing={2}
-                            alignItems="center"
-                            textAlign="center"
-                            py={{ xs: 3.5, md: 4 }}
-                            color="text.secondary"
-                          >
-                            <AutoAwesomeIcon
-                              fontSize="large"
-                              color="secondary"
-                            />
-                            <Typography variant="body1">還沒有紀錄</Typography>
-                            <Typography variant="body2">
-                              轉換完畢後按下「加入紀錄」，即可累積屬於你的溫度資料庫。
-                            </Typography>
-                          </Stack>
-                        </Fade>
-                      ) : (
-                        <List
-                          dense
-                          sx={{
-                            maxHeight: 360,
-                            overflowY: "auto",
-                            pr: 1,
-                          }}
-                        >
-                          {history.map((item) => {
-                            const summary = item.conversions.find(
-                              (scaleItem) => scaleItem.code === "celsius",
-                            );
-                            const displayValue = summary
-                              ? formatTemperature(summary.result)
-                              : formatTemperature(item.value);
-                            return (
-                              <ListItem
-                                key={item.id}
-                                alignItems="flex-start"
-                                sx={{
-                                  borderRadius: 2,
-                                  mb: { xs: 1.25, md: 1.75 },
-                                  px: 1.5,
-                                  backgroundColor: "rgba(15, 23, 42, 0.6)",
-                                }}
-                              >
-                                <ListItemAvatar>
-                                  <Avatar
-                                    sx={{
-                                      backgroundColor:
-                                        "rgba(56, 189, 248, 0.2)",
-                                      color: "#38bdf8",
-                                    }}
-                                  >
-                                    <ScienceIcon fontSize="small" />
-                                  </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={`${formatTemperature(item.value)} ${getScale(item.scale)?.symbol ?? ""} → ${displayValue} °C`}
-                                  secondary={
-                                    <Stack spacing={0.75} mt={0.5}>
-                                      <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                      >
-                                        {timeFormatter.format(
-                                          new Date(item.timestamp),
-                                        )}
-                                      </Typography>
-                                      <Stack
-                                        direction="row"
-                                        spacing={{ xs: 1, md: 1.3 }}
-                                        flexWrap="wrap"
-                                        rowGap={0.75}
-                                      >
-                                        {item.conversions.map((result) => (
-                                          <Chip
-                                            key={result.code}
-                                            size="small"
-                                            label={`${formatTemperature(result.result)} ${result.symbol}`}
-                                            sx={{
-                                              backgroundColor:
-                                                "rgba(30, 41, 59, 0.8)",
-                                              borderRadius: 999,
-                                              color: "#e2e8f0",
-                                            }}
-                                          />
-                                        ))}
-                                      </Stack>
-                                    </Stack>
-                                  }
-                                />
-                              </ListItem>
-                            );
-                          })}
-                        </List>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <Card className={styles.glassCard}>
-                    <CardContent className={styles.cardSection}>
-                      <Stack
-                        direction="row"
-                        spacing={{ xs: 1.8, md: 2.2 }}
-                        alignItems="center"
-                        mb={{ xs: 2.2, md: 2.8 }}
-                      >
-                        <InsightsIcon color="primary" />
-                        <Typography variant="h6" fontWeight={700}>
-                          溫度洞察
-                        </Typography>
-                      </Stack>
-                      <Grid container spacing={{ xs: 2.8, md: 3.2 }}>
-                        {insights.map((insight) => (
-                          <Grid key={insight.title} size={12}>
-                            <Card
-                              sx={{
-                                backgroundColor: "rgba(30, 41, 59, 0.7)",
-                                borderRadius: 3,
-                              }}
-                            >
-                              <CardContent
-                                className={styles.compactCardSection}
-                              >
-                                <Stack
-                                  direction="row"
-                                  spacing={{ xs: 1.8, md: 2.3 }}
-                                  alignItems="center"
-                                >
-                                  <Typography fontSize={26}>
-                                    {insight.icon}
-                                  </Typography>
-                                  <Box>
-                                    <Typography
-                                      variant="subtitle1"
-                                      fontWeight={700}
-                                    >
-                                      {insight.title}
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      color="text.secondary"
-                                    >
-                                      {insight.description}
-                                    </Typography>
-                                  </Box>
-                                </Stack>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </Stack>
-              </Grid>
-            </Grid>
-
-            <Card className={styles.glassCard}>
-              <CardContent className={styles.cardSection}>
-                <Stack
-                  direction="row"
-                  spacing={{ xs: 1.8, md: 2.2 }}
-                  alignItems="center"
-                  mb={{ xs: 2.5, md: 3.2 }}
-                >
-                  <AutoAwesomeIcon color="secondary" />
-                  <Typography variant="h6" fontWeight={700}>
-                    作品亮點
-                  </Typography>
-                </Stack>
-                <Grid container spacing={{ xs: 3, md: 3.8 }}>
-                  {FACTS.map((fact) => (
-                    <Grid key={fact.title} size={{ xs: 12, md: 4 }}>
-                      <Card
-                        sx={{
-                          height: "100%",
-                          background: "rgba(15, 23, 42, 0.78)",
-                          border: "1px solid rgba(148, 163, 184, 0.2)",
-                        }}
-                      >
-                        <CardContent className={styles.innerCardSection}>
-                          <Stack spacing={{ xs: 1.8, md: 2.2 }}>
-                            <Typography fontSize={32}>{fact.icon}</Typography>
-                            <Typography variant="subtitle1" fontWeight={700}>
-                              {fact.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {fact.description}
-                            </Typography>
-                          </Stack>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          </Stack>
-        </Box>
-      </Container>
+        <FactsSection facts={FACTS} />
+      </div>
     </main>
   );
 }
