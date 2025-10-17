@@ -1,8 +1,6 @@
 import { Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
 
-import ThemeRegistry from "./components/ThemeRegistry";
-
 const chinese = Noto_Sans_TC({
   subsets: ["latin"],
   display: "swap",
@@ -17,9 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="zh-TW">
-      <body className={chinese.className}>
-        <ThemeRegistry>{children}</ThemeRegistry>
-      </body>
+      <body className={chinese.className}>{children}</body>
     </html>
   );
 }

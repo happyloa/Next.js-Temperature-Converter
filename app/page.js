@@ -2,55 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import BoltIcon from "@mui/icons-material/Bolt";
-import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
-import ExploreIcon from "@mui/icons-material/Explore";
-import HistoryIcon from "@mui/icons-material/History";
-import InsightsIcon from "@mui/icons-material/Insights";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import ScienceIcon from "@mui/icons-material/Science";
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Divider,
-  Fade,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Slider,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-
-import styles from "./page.module.css";
-
 const TEMPERATURE_SCALES = [
   {
     code: "celsius",
     label: "攝氏 (°C)",
     symbol: "°C",
-    accent: "#38bdf8",
+    accent: "from-sky-400/30 via-sky-400/15 to-sky-400/5",
     toKelvin: (value) => value + 273.15,
     fromKelvin: (value) => value - 273.15,
   },
@@ -58,7 +15,7 @@ const TEMPERATURE_SCALES = [
     code: "fahrenheit",
     label: "華氏 (°F)",
     symbol: "°F",
-    accent: "#f97316",
+    accent: "from-orange-400/30 via-orange-400/15 to-orange-400/5",
     toKelvin: (value) => ((value + 459.67) * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5 - 459.67,
   },
@@ -66,7 +23,7 @@ const TEMPERATURE_SCALES = [
     code: "kelvin",
     label: "絕對溫標 (K)",
     symbol: "K",
-    accent: "#22d3ee",
+    accent: "from-cyan-400/30 via-cyan-400/15 to-cyan-400/5",
     toKelvin: (value) => value,
     fromKelvin: (value) => value,
   },
@@ -74,7 +31,7 @@ const TEMPERATURE_SCALES = [
     code: "rankine",
     label: "蘭氏 (°R)",
     symbol: "°R",
-    accent: "#a855f7",
+    accent: "from-violet-400/30 via-violet-400/15 to-violet-400/5",
     toKelvin: (value) => (value * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5,
   },
@@ -82,7 +39,7 @@ const TEMPERATURE_SCALES = [
     code: "reaumur",
     label: "列氏 (°Ré)",
     symbol: "°Ré",
-    accent: "#34d399",
+    accent: "from-emerald-400/30 via-emerald-400/15 to-emerald-400/5",
     toKelvin: (value) => value * 1.25 + 273.15,
     fromKelvin: (value) => (value - 273.15) * 0.8,
   },
@@ -90,7 +47,7 @@ const TEMPERATURE_SCALES = [
     code: "newton",
     label: "牛頓氏 (°N)",
     symbol: "°N",
-    accent: "#fb7185",
+    accent: "from-rose-400/30 via-rose-400/15 to-rose-400/5",
     toKelvin: (value) => value * (100 / 33) + 273.15,
     fromKelvin: (value) => (value - 273.15) * (33 / 100),
   },
@@ -183,6 +140,8 @@ const SOLAR_SURFACE_K = 5778;
 
 const decimalPattern = /^-?\d*(\.\d*)?$/;
 
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
 const toInputString = (value) => {
   if (!Number.isFinite(value)) return "";
   const trimmed = Number(value.toFixed(4));
@@ -190,25 +149,6 @@ const toInputString = (value) => {
 };
 
 const formatTemperature = (value) => numberFormatter.format(value);
-
-const getAdaptiveFontSize = (value) => {
-  if (!Number.isFinite(value)) {
-    return { xs: "2.1rem", md: "2.6rem" };
-  }
-
-  const formatted = formatTemperature(Math.abs(value));
-  const digits = formatted.replace(/[^0-9]/g, "").length;
-
-  if (digits >= 9) {
-    return { xs: "1.6rem", md: "2.1rem" };
-  }
-
-  if (digits >= 7) {
-    return { xs: "1.85rem", md: "2.3rem" };
-  }
-
-  return { xs: "2.1rem", md: "2.6rem" };
-};
 
 const getWeatherDescription = (code) =>
   WEATHER_CODE_MAP[code] ?? "天氣狀況不明，請再試一次。";
@@ -228,8 +168,6 @@ const formatWeatherTime = (value) => {
   }
   return dateTimeFormatter.format(date);
 };
-
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 const getScale = (code) =>
   TEMPERATURE_SCALES.find((item) => item.code === code);
@@ -297,6 +235,8 @@ const getThermalMood = (celsiusValue) => {
     emoji: "🌋",
   };
 };
+
+const classNames = (...values) => values.filter(Boolean).join(" ");
 
 export default function TemperatureStudio() {
   const [scale, setScale] = useState("celsius");
@@ -383,7 +323,7 @@ export default function TemperatureStudio() {
     ];
   }, [celsiusValue]);
 
-  const handleScaleChange = (_event, nextScale) => {
+  const handleScaleChange = (nextScale) => {
     if (!nextScale || nextScale === scale) return;
     const nextScaleConfig = getScale(nextScale);
     if (!nextScaleConfig || !activeScale) {
@@ -431,8 +371,9 @@ export default function TemperatureStudio() {
     setValue(clamped);
   };
 
-  const handleSliderChange = (_event, sliderValue) => {
-    const numeric = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
+  const handleSliderChange = (event) => {
+    const numeric = Number(event.target.value);
+    if (!Number.isFinite(numeric)) return;
     setValue(numeric);
     setRawInput(toInputString(numeric));
   };
@@ -450,11 +391,7 @@ export default function TemperatureStudio() {
   };
 
   const handleAddHistory = () => {
-    if (
-      !Number.isFinite(value) ||
-      !Number.isFinite(celsiusValue) ||
-      conversions.length === 0
-    ) {
+    if (!Number.isFinite(value) || !Number.isFinite(celsiusValue) || conversions.length === 0) {
       return;
     }
 
@@ -556,9 +493,13 @@ export default function TemperatureStudio() {
     fetchWeather("台北");
   }, [fetchWeather]);
 
-  const handleWeatherSubmit = useCallback(() => {
-    fetchWeather(weatherQuery);
-  }, [fetchWeather, weatherQuery]);
+  const handleWeatherSubmit = useCallback(
+    (event) => {
+      event?.preventDefault();
+      fetchWeather(weatherQuery);
+    },
+    [fetchWeather, weatherQuery],
+  );
 
   const handleWeatherPreset = useCallback(
     (preset) => {
@@ -572,749 +513,389 @@ export default function TemperatureStudio() {
     ? clamp(value, sliderRange.min, sliderRange.max)
     : clamp(25, sliderRange.min, sliderRange.max);
 
+  const sliderStep = (sliderRange.max - sliderRange.min) / 400 || 1;
+
   const relativeSolarProgress = Number.isFinite(kelvinValue)
     ? clamp((kelvinValue / SOLAR_SURFACE_K) * 100, 0, 130)
     : 0;
 
+  const mood = getThermalMood(celsiusValue);
+
   return (
-    <main className={`${styles.main}`}>
-      <Container className={styles.content} maxWidth="lg">
-        <Box className={styles.centeredArea}>
-          <Stack spacing={{ xs: 6, md: 8 }} sx={{ width: "100%" }}>
-            <Stack
-              spacing={{ xs: 3.8, md: 4.8 }}
-              alignItems="center"
-              textAlign="center"
-            >
-              <Chip
-                icon={<BoltIcon />}
-                label="Multi-Scale Temperature Studio"
-                variant="outlined"
-                sx={{
-                  borderColor: "rgba(148, 163, 184, 0.4)",
-                  color: "#bae6fd",
-                  backgroundColor: "rgba(30, 64, 175, 0.25)",
-                }}
-              />
-              <Typography
-                variant="h2"
-                className={styles.heroTitle}
-                fontSize={{ xs: 36, md: 48 }}
+    <main className="py-12 pb-24">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 sm:px-8 lg:px-10">
+        <section className="flex flex-col items-center gap-6 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 bg-blue-950/40 px-4 py-1 text-sm font-medium text-sky-200">
+            ⚡ Multi-Scale Temperature Studio
+          </span>
+          <h1 className="text-4xl font-bold leading-tight text-slate-50 md:text-5xl">
+            溫度實驗室 · 智慧轉換平台
+          </h1>
+          <p className="max-w-2xl text-base leading-relaxed text-slate-300 md:text-lg">
+            即時轉換六種常見與歷史溫標、加入情境分析與轉換紀錄。無論是烹飪、科研、工業或創作，這裡都能給你漂亮又專業的一站式體驗。
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => handlePresetSelect(preset)}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-sky-400/60 hover:bg-sky-400/10"
               >
-                溫度實驗室 · 智慧轉換平台
-              </Typography>
-              <Typography
-                variant="body1"
-                maxWidth={640}
-                color="text.secondary"
-                sx={{ lineHeight: 1.7 }}
-              >
-                即時轉換六種常見與歷史溫標、加入情境分析與轉換紀錄。無論是烹飪、科研、工業或創作，
-                這裡都能給你漂亮又專業的一站式體驗。
-              </Typography>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                className={styles.chipRow}
-                justifyContent="center"
-                sx={{ width: "100%" }}
-              >
-                {PRESETS.map((preset) => (
-                  <Chip
-                    key={preset.label}
-                    label={`${preset.emoji} ${preset.label}`}
-                    onClick={() => handlePresetSelect(preset)}
-                    variant="outlined"
-                    sx={{
-                      cursor: "pointer",
-                      borderColor: "rgba(148, 163, 184, 0.35)",
-                      color: "#f8fafc",
-                      backgroundColor: "rgba(15, 23, 42, 0.65)",
-                      "&:hover": {
-                        backgroundColor: "rgba(56, 189, 248, 0.15)",
-                      },
-                    }}
-                  />
-                ))}
-              </Stack>
-            </Stack>
+                <span>{preset.emoji}</span>
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </section>
 
-            <Grid container spacing={{ xs: 3.5, lg: 4.8 }}>
-              <Grid size={{ xs: 12, lg: 7 }}>
-                <Card className={styles.glassCard}>
-                  <CardContent className={styles.cardSection}>
-                    <Stack spacing={{ xs: 3.5, md: 4.5 }}>
-                      <Box>
-                        <Stack
-                          direction="row"
-                          spacing={{ xs: 2.4, md: 3 }}
-                          alignItems="center"
-                          justifyContent="space-between"
-                          flexWrap="wrap"
-                          sx={{ rowGap: { xs: 1.6, md: 2.2 } }}
-                        >
-                          <Box>
-                            <Typography variant="h5" fontWeight={700}>
-                              輸入溫度
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              選擇欲輸入的溫標並輸入數值，即可同步取得所有單位結果。
-                            </Typography>
-                          </Box>
-                          <Stack
-                            direction="row"
-                            spacing={{ xs: 1.5, sm: 1.9 }}
-                            sx={{
-                              flexWrap: "wrap",
-                              justifyContent: { xs: "center", sm: "flex-end" },
-                              rowGap: { xs: 1.2, md: 0.6 },
-                            }}
-                          >
-                            <Button
-                              startIcon={<RestartAltIcon />}
-                              color="secondary"
-                              variant="outlined"
-                              onClick={handleReset}
-                            >
-                              重設
-                            </Button>
-                            <Button
-                              startIcon={<HistoryIcon />}
-                              variant="contained"
-                              color="primary"
-                              onClick={handleAddHistory}
-                              disabled={conversions.length === 0}
-                            >
-                              加入紀錄
-                            </Button>
-                          </Stack>
-                        </Stack>
-                      </Box>
-
-                      <ToggleButtonGroup
-                        color="primary"
-                        exclusive
-                        value={scale}
-                        onChange={handleScaleChange}
-                        sx={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          justifyContent: { xs: "center", sm: "flex-start" },
-                          gap: { xs: 1.1, sm: 1.4 },
-                        }}
-                      >
-                        {TEMPERATURE_SCALES.map((item) => (
-                          <ToggleButton
-                            key={item.code}
-                            value={item.code}
-                            sx={{
-                              borderRadius: 2,
-                              borderColor:
-                                "rgba(148, 163, 184, 0.35) !important",
-                              color:
-                                item.code === scale ? item.accent : "inherit",
-                              fontWeight: 600,
-                              flexGrow: 1,
-                              minWidth: { xs: "calc(50% - 0.75rem)", sm: 140 },
-                              flexBasis: { xs: "calc(50% - 0.75rem)", sm: "auto" },
-                            }}
-                          >
-                            {item.label}
-                          </ToggleButton>
-                        ))}
-                      </ToggleButtonGroup>
-
-                      <Stack spacing={{ xs: 3, sm: 3.4 }}>
-                        <TextField
-                          value={rawInput}
-                          onChange={handleInputChange}
-                          placeholder="輸入溫度值"
-                          fullWidth
-                          InputProps={{
-                            startAdornment: (
-                              <DeviceThermostatIcon
-                                color="primary"
-                                sx={{ mr: 1 }}
-                              />
-                            ),
-                            endAdornment: (
-                              <Typography
-                                color="text.secondary"
-                                fontWeight={600}
-                              >
-                                {activeScale?.symbol ?? ""}
-                              </Typography>
-                            ),
-                          }}
-                          sx={{
-                            "& .MuiInputBase-root": {
-                              fontSize: "1.25rem",
-                              paddingY: { xs: 1.1, md: 1.3 },
-                              paddingX: { xs: 1.25, md: 1.5 },
-                            },
-                          }}
-                        />
-                        <Slider
-                          value={sliderValue}
-                          min={sliderRange.min}
-                          max={sliderRange.max}
-                          step={(sliderRange.max - sliderRange.min) / 400}
-                          onChange={handleSliderChange}
-                          valueLabelDisplay="auto"
-                          sx={{
-                            color: activeScale?.accent ?? "#38bdf8",
-                            "& .MuiSlider-rail": { opacity: 0.28 },
-                            mt: { xs: 0.5, md: 0.75 },
-                          }}
-                        />
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ mt: { xs: 0.5, md: 0.75 } }}
-                        >
-                          範圍：{formatTemperature(sliderRange.min)}{" "}
-                          {activeScale?.symbol} ~{" "}
-                          {formatTemperature(sliderRange.max)}{" "}
-                          {activeScale?.symbol}
-                        </Typography>
-                      </Stack>
-
-                      <Grid container spacing={{ xs: 3.2, sm: 3.6 }}>
-                        {conversions.map((item) => (
-                          <Grid key={item.code} size={{ xs: 12, sm: 6 }}>
-                            <Card
-                              className={styles.resultCard}
-                              sx={{
-                                background: `linear-gradient(135deg, ${item.accent}33, rgba(15,23,42,0.92))`,
-                                border: `1px solid ${item.accent}44`,
-                              }}
-                            >
-                              <CardContent className={styles.innerCardSection}>
-                                <Stack
-                                  direction="row"
-                                  justifyContent="space-between"
-                                  alignItems="flex-start"
-                                  spacing={{ xs: 1.4, md: 1.8 }}
-                                >
-                                  <Box>
-                                    <Typography
-                                      variant="overline"
-                                      sx={{
-                                        color: "rgba(226, 232, 240, 0.75)",
-                                      }}
-                                    >
-                                      {item.label}
-                                    </Typography>
-                                    <Typography
-                                      variant="h4"
-                                      fontWeight={700}
-                                      sx={{
-                                        fontSize: getAdaptiveFontSize(item.result),
-                                      }}
-                                    >
-                                      {formatTemperature(item.result)}{" "}
-                                      {item.symbol}
-                                    </Typography>
-                                  </Box>
-                                  <Tooltip
-                                    title={
-                                      copiedScale === item.code
-                                        ? "已複製"
-                                        : "複製結果"
-                                    }
-                                    placement="left"
-                                    arrow
-                                  >
-                                    <span>
-                                      <IconButton
-                                        onClick={() =>
-                                          handleCopy(
-                                            `${formatTemperature(item.result)}`,
-                                            item.code,
-                                          )
-                                        }
-                                        color={
-                                          copiedScale === item.code
-                                            ? "secondary"
-                                            : "default"
-                                        }
-                                      >
-                                        <ContentCopyIcon fontSize="small" />
-                                      </IconButton>
-                                    </span>
-                                  </Tooltip>
-                                </Stack>
-                                {item.code === "celsius" && (
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    mt={{ xs: 1.1, md: 1.4 }}
-                                  >
-                                    {getThermalMood(item.result).title}
-                                  </Typography>
-                                )}
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        ))}
-                      </Grid>
-
-                      <Box>
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          spacing={{ xs: 2.6, md: 3.2 }}
-                          sx={{ flexWrap: "wrap", rowGap: { xs: 1.6, md: 0.4 } }}
-                        >
-                          <InsightsIcon color="secondary" />
-                          <Typography variant="subtitle1" fontWeight={700}>
-                            相對於太陽表面的能量比例
-                          </Typography>
-                        </Stack>
-                        <Box mt={{ xs: 2.5, md: 3 }}>
-                          <LinearProgress
-                            variant="determinate"
-                            value={relativeSolarProgress}
-                            sx={{
-                              height: 10,
-                              borderRadius: 999,
-                              backgroundColor: "rgba(148, 163, 184, 0.25)",
-                              "& .MuiLinearProgress-bar": {
-                                borderRadius: 999,
-                                background:
-                                  "linear-gradient(90deg, #38bdf8, #f472b6)",
-                              },
-                            }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {Number.isFinite(kelvinValue)
-                              ? `目前為太陽表面溫度的 ${formatTemperature(relativeSolarProgress)}%`
-                              : "輸入溫度以分析熱能比例"}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, lg: 5 }}>
-                <Stack spacing={{ xs: 3.6, md: 4.4 }}>
-                  <Card className={styles.glassCard}>
-                    <CardContent className={styles.cardSection}>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        spacing={{ xs: 2.4, md: 3 }}
-                        sx={{
-                          flexWrap: "wrap",
-                          rowGap: { xs: 1.4, md: 0 },
-                          columnGap: { xs: 1.6, md: 0 },
-                        }}
-                      >
-                        <Stack
-                          direction="row"
-                          spacing={{ xs: 2.1, md: 2.6 }}
-                          alignItems="center"
-                        >
-                          <HistoryIcon color="primary" />
-                          <Typography variant="h6" fontWeight={700}>
-                            轉換紀錄
-                          </Typography>
-                        </Stack>
-                        <Tooltip title="清除全部紀錄" arrow>
-                          <span>
-                            <IconButton
-                              onClick={handleClearHistory}
-                              disabled={history.length === 0}
-                            >
-                              <DeleteSweepIcon />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      </Stack>
-
-                      <Divider
-                        sx={{
-                          my: { xs: 2.6, md: 3.1 },
-                          borderColor: "rgba(148, 163, 184, 0.2)",
-                        }}
-                      />
-
-                      {history.length === 0 ? (
-                        <Fade in timeout={400}>
-                          <Stack
-                            spacing={2}
-                            alignItems="center"
-                            textAlign="center"
-                            py={{ xs: 3.5, md: 4 }}
-                            color="text.secondary"
-                          >
-                            <AutoAwesomeIcon
-                              fontSize="large"
-                              color="secondary"
-                            />
-                            <Typography variant="body1">還沒有紀錄</Typography>
-                            <Typography variant="body2">
-                              轉換完畢後按下「加入紀錄」，即可累積屬於你的溫度資料庫。
-                            </Typography>
-                          </Stack>
-                        </Fade>
-                      ) : (
-                        <List
-                          dense
-                          sx={{
-                            maxHeight: 360,
-                            overflowY: "auto",
-                            pr: 1,
-                          }}
-                        >
-                          {history.map((item) => {
-                            const summary = item.conversions.find(
-                              (scaleItem) => scaleItem.code === "celsius",
-                            );
-                            const displayValue = summary
-                              ? formatTemperature(summary.result)
-                              : formatTemperature(item.value);
-                            return (
-                              <ListItem
-                                key={item.id}
-                                alignItems="flex-start"
-                                sx={{
-                                  borderRadius: 2,
-                                  mb: { xs: 1.4, md: 1.9 },
-                                  px: 1.7,
-                                  backgroundColor: "rgba(15, 23, 42, 0.6)",
-                                }}
-                              >
-                                <ListItemAvatar>
-                                  <Avatar
-                                    sx={{
-                                      backgroundColor:
-                                        "rgba(56, 189, 248, 0.2)",
-                                      color: "#38bdf8",
-                                    }}
-                                  >
-                                    <ScienceIcon fontSize="small" />
-                                  </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={`${formatTemperature(item.value)} ${getScale(item.scale)?.symbol ?? ""} → ${displayValue} °C`}
-                                  secondary={
-                                    <Stack spacing={0.75} mt={0.5}>
-                                      <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                      >
-                                        {timeFormatter.format(
-                                          new Date(item.timestamp),
-                                        )}
-                                      </Typography>
-                                      <Stack
-                                        direction="row"
-                                        spacing={{ xs: 1.1, md: 1.5 }}
-                                        flexWrap="wrap"
-                                        rowGap={0.75}
-                                      >
-                                        {item.conversions.map((result) => (
-                                          <Chip
-                                            key={result.code}
-                                            size="small"
-                                            label={`${formatTemperature(result.result)} ${result.symbol}`}
-                                            sx={{
-                                              backgroundColor:
-                                                "rgba(30, 41, 59, 0.8)",
-                                              borderRadius: 999,
-                                              color: "#e2e8f0",
-                                            }}
-                                          />
-                                        ))}
-                                      </Stack>
-                                    </Stack>
-                                  }
-                                />
-                              </ListItem>
-                            );
-                          })}
-                        </List>
-                      )}
-                  </CardContent>
-                </Card>
-
-                <Card className={styles.glassCard}>
-                  <CardContent className={styles.cardSection}>
-                    <Stack
-                      direction="row"
-                      spacing={{ xs: 2.1, md: 2.6 }}
-                      alignItems="center"
-                      mb={{ xs: 2.4, md: 3 }}
-                    >
-                      <ExploreIcon color="secondary" />
-                      <Typography variant="h6" fontWeight={700}>
-                        全球氣象快查
-                      </Typography>
-                    </Stack>
-                    <Stack spacing={{ xs: 2, md: 2.4 }}>
-                      <TextField
-                        value={weatherQuery}
-                        onChange={(event) => setWeatherQuery(event.target.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            handleWeatherSubmit();
-                          }
-                        }}
-                        placeholder="輸入城市或地區，例如：台北"
-                        autoComplete="off"
-                        fullWidth
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <LocationOnIcon color="primary" />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                      <Stack
-                        direction="row"
-                        spacing={{ xs: 1.2, sm: 1.6 }}
-                        sx={{ flexWrap: "wrap", rowGap: { xs: 1, sm: 1.2 } }}
-                      >
-                        {WEATHER_PRESETS.map((preset) => (
-                          <Chip
-                            key={preset}
-                            label={preset}
-                            variant={preset === weatherQuery ? "filled" : "outlined"}
-                            color={preset === weatherQuery ? "primary" : "default"}
-                            onClick={() => handleWeatherPreset(preset)}
-                            sx={{
-                              cursor: "pointer",
-                              borderRadius: 999,
-                              backgroundColor:
-                                preset === weatherQuery
-                                  ? "rgba(56, 189, 248, 0.15)"
-                                  : "rgba(15, 23, 42, 0.65)",
-                              color: preset === weatherQuery ? "#0ea5e9" : "#e2e8f0",
-                            }}
-                          />
-                        ))}
-                      </Stack>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleWeatherSubmit}
-                        disabled={weatherLoading}
-                        fullWidth
-                        sx={{ py: { xs: 1.1, md: 1.2 } }}
-                      >
-                        {weatherLoading ? (
-                          <Stack direction="row" spacing={1.2} alignItems="center">
-                            <CircularProgress size={18} color="inherit" />
-                            <span>查詢中</span>
-                          </Stack>
-                        ) : (
-                          "取得即時天氣"
-                        )}
-                      </Button>
-                    </Stack>
-
-                    <Box mt={{ xs: 2.6, md: 3.2 }}>
-                      {weatherError ? (
-                        <Alert severity="warning" variant="outlined">
-                          {weatherError}
-                        </Alert>
-                      ) : weatherData ? (
-                        <Fade in timeout={400}>
-                          <Stack
-                            spacing={{ xs: 2, md: 2.4 }}
-                            sx={{
-                              backgroundColor: "rgba(15, 23, 42, 0.65)",
-                              borderRadius: 3,
-                              border: "1px solid rgba(148, 163, 184, 0.25)",
-                              p: { xs: 2, md: 2.6 },
-                            }}
-                          >
-                            <Stack
-                              direction={{ xs: "column", sm: "row" }}
-                              spacing={{ xs: 1, sm: 1.8 }}
-                              alignItems={{ xs: "flex-start", sm: "center" }}
-                            >
-                              <Stack direction="row" spacing={1.4} alignItems="center">
-                                <CloudOutlinedIcon color="info" />
-                                <Box>
-                                  <Typography variant="subtitle1" fontWeight={700}>
-                                    {weatherData.location}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {getWeatherDescription(weatherData.weatherCode)} · 觀測時間
-                                    {" "}
-                                    {formatWeatherTime(weatherData.observationTime)}
-                                    {weatherData.timezone
-                                      ? `（${weatherData.timezone}）`
-                                      : ""}
-                                  </Typography>
-                                </Box>
-                              </Stack>
-                              <Chip
-                                label={`體感 ${formatOptionalMetric(weatherData.apparentTemperature, "°C")}`}
-                                color="primary"
-                                sx={{
-                                  backgroundColor: "rgba(56, 189, 248, 0.15)",
-                                  color: "#38bdf8",
-                                }}
-                              />
-                            </Stack>
-
-                            <Stack spacing={{ xs: 1.4, md: 1.8 }}>
-                              <Typography variant="h3" fontWeight={700}>
-                                {formatOptionalMetric(weatherData.temperature, "°C")}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                將即時天氣帶入轉換流程，快速比較實驗室設定與當地環境條件。
-                              </Typography>
-                            </Stack>
-
-                            <Grid container spacing={{ xs: 1.8, md: 2.4 }}>
-                              <Grid size={{ xs: 12, sm: 6 }}>
-                                <Stack spacing={0.6}>
-                                  <Typography
-                                    variant="overline"
-                                    sx={{ color: "rgba(226, 232, 240, 0.65)" }}
-                                  >
-                                    相對濕度
-                                  </Typography>
-                                  <Typography variant="h6" fontWeight={600}>
-                                    {formatOptionalMetric(weatherData.humidity, "%")}
-                                  </Typography>
-                                </Stack>
-                              </Grid>
-                              <Grid size={{ xs: 12, sm: 6 }}>
-                                <Stack spacing={0.6}>
-                                  <Typography
-                                    variant="overline"
-                                    sx={{ color: "rgba(226, 232, 240, 0.65)" }}
-                                  >
-                                    風速
-                                  </Typography>
-                                  <Typography variant="h6" fontWeight={600}>
-                                    {formatOptionalMetric(weatherData.windSpeed, " m/s")}
-                                  </Typography>
-                                </Stack>
-                              </Grid>
-                            </Grid>
-                          </Stack>
-                        </Fade>
-                      ) : (
-                        <Typography variant="body2" color="text.secondary">
-                          查詢任何城市，了解環境背景後再進行溫度轉換與安全判讀。
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                </Card>
-
-                <Card className={styles.glassCard}>
-                  <CardContent className={styles.cardSection}>
-                      <Stack
-                        direction="row"
-                        spacing={{ xs: 2.1, md: 2.6 }}
-                        alignItems="center"
-                        mb={{ xs: 2.6, md: 3.1 }}
-                      >
-                        <InsightsIcon color="primary" />
-                        <Typography variant="h6" fontWeight={700}>
-                          溫度洞察
-                        </Typography>
-                      </Stack>
-                      <Grid container spacing={{ xs: 3.1, md: 3.6 }}>
-                        {insights.map((insight) => (
-                          <Grid key={insight.title} size={12}>
-                            <Card
-                              sx={{
-                                backgroundColor: "rgba(30, 41, 59, 0.7)",
-                                borderRadius: 3,
-                              }}
-                            >
-                              <CardContent
-                                className={styles.compactCardSection}
-                              >
-                                <Stack
-                                  direction="row"
-                                  spacing={{ xs: 2.1, md: 2.6 }}
-                                  alignItems="center"
-                                >
-                                  <Typography fontSize={26}>
-                                    {insight.icon}
-                                  </Typography>
-                                  <Box>
-                                    <Typography
-                                      variant="subtitle1"
-                                      fontWeight={700}
-                                    >
-                                      {insight.title}
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      color="text.secondary"
-                                    >
-                                      {insight.description}
-                                    </Typography>
-                                  </Box>
-                                </Stack>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </Stack>
-              </Grid>
-            </Grid>
-
-            <Card className={styles.glassCard}>
-              <CardContent className={styles.cardSection}>
-                <Stack
-                  direction="row"
-                  spacing={{ xs: 2.1, md: 2.6 }}
-                  alignItems="center"
-                  mb={{ xs: 3, md: 3.5 }}
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
+          <section className="space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-semibold text-slate-50">輸入溫度</h2>
+                <p className="max-w-xl text-sm leading-relaxed text-slate-300">
+                  選擇想要輸入的溫標後填入數值，系統會即時計算其他尺度並提供安全洞察與轉換紀錄。
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400"
                 >
-                  <AutoAwesomeIcon color="secondary" />
-                  <Typography variant="h6" fontWeight={700}>
-                    作品亮點
-                  </Typography>
-                </Stack>
-                <Grid container spacing={{ xs: 3.4, md: 4.2 }}>
-                  {FACTS.map((fact) => (
-                    <Grid key={fact.title} size={{ xs: 12, md: 4 }}>
-                      <Card
-                        sx={{
-                          height: "100%",
-                          background: "rgba(15, 23, 42, 0.78)",
-                          border: "1px solid rgba(148, 163, 184, 0.2)",
-                        }}
-                      >
-                        <CardContent className={styles.innerCardSection}>
-                          <Stack spacing={{ xs: 2.1, md: 2.6 }}>
-                            <Typography fontSize={32}>{fact.icon}</Typography>
-                            <Typography variant="subtitle1" fontWeight={700}>
-                              {fact.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {fact.description}
-                            </Typography>
-                          </Stack>
-                        </CardContent>
-                      </Card>
-                    </Grid>
+                  🔄 重設
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddHistory}
+                  disabled={conversions.length === 0}
+                  className="inline-flex items-center gap-2 rounded-full bg-sky-500/90 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700/60 disabled:text-slate-400"
+                >
+                  📝 加入紀錄
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {TEMPERATURE_SCALES.map((item) => (
+                <button
+                  key={item.code}
+                  type="button"
+                  onClick={() => handleScaleChange(item.code)}
+                  className={classNames(
+                    "flex-1 min-w-[150px] rounded-2xl border px-4 py-3 text-sm font-semibold transition",
+                    scale === item.code
+                      ? "border-sky-400/70 bg-sky-400/10 text-sky-200"
+                      : "border-slate-700/50 bg-slate-900/80 text-slate-200 hover:border-slate-500/70 hover:bg-slate-800/80",
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-4">
+              <label className="flex flex-col gap-2 text-left">
+                <span className="text-sm font-semibold text-slate-200">輸入數值</span>
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3 text-lg font-semibold text-slate-100 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-500/40">
+                  <span className="text-xl">🌡️</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={rawInput}
+                    onChange={handleInputChange}
+                    placeholder="輸入溫度值"
+                    className="flex-1 bg-transparent text-lg font-semibold outline-none"
+                  />
+                  <span className="text-sm font-semibold text-slate-400">
+                    {activeScale?.symbol ?? ""}
+                  </span>
+                </div>
+              </label>
+
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min={sliderRange.min}
+                  max={sliderRange.max}
+                  step={sliderStep}
+                  value={sliderValue}
+                  onChange={handleSliderChange}
+                  className="h-2 w-full rounded-full accent-sky-400"
+                />
+                <p className="text-xs text-slate-400">
+                  範圍：{formatTemperature(sliderRange.min)} {activeScale?.symbol} ~ {formatTemperature(sliderRange.max)} {activeScale?.symbol}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {conversions.map((item) => (
+                <div
+                  key={item.code}
+                  className={classNames(
+                    "relative overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900/80 p-5",
+                    "bg-gradient-to-br",
+                    item.accent,
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-2">
+                      <span className="text-xs uppercase tracking-wide text-slate-200/80">
+                        {item.label}
+                      </span>
+                      <p className="text-3xl font-bold text-slate-50">
+                        {formatTemperature(item.result)} {item.symbol}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(`${formatTemperature(item.result)}`, item.code)}
+                      className={classNames(
+                        "rounded-full border px-3 py-1 text-xs font-semibold transition",
+                        copiedScale === item.code
+                          ? "border-emerald-400/70 bg-emerald-400/10 text-emerald-200"
+                          : "border-slate-600/50 bg-slate-900/70 text-slate-300 hover:border-slate-400/70",
+                      )}
+                    >
+                      {copiedScale === item.code ? "已複製" : "複製"}
+                    </button>
+                  </div>
+                  {item.code === "celsius" && (
+                    <p className="mt-3 text-sm text-slate-200/80">{mood.title}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-slate-200">
+                <span className="text-xl">📈</span>
+                <h3 className="text-lg font-semibold">相對於太陽表面的能量比例</h3>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full border border-slate-700/60 bg-slate-800/80">
+                <div
+                  className="h-full bg-gradient-to-r from-sky-400 via-fuchsia-400 to-rose-400"
+                  style={{ width: `${relativeSolarProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-slate-400">
+                {Number.isFinite(kelvinValue)
+                  ? `目前為太陽表面溫度的 ${formatTemperature(relativeSolarProgress)}%`
+                  : "輸入溫度以分析熱能比例"}
+              </p>
+            </div>
+          </section>
+
+          <div className="space-y-8">
+            <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-7">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 text-slate-200">
+                  <span className="text-xl">🗂️</span>
+                  <h2 className="text-xl font-semibold">轉換紀錄</h2>
+                </div>
+                <p className="text-sm text-slate-300">
+                  將感興趣的轉換加入歷史紀錄，可快速對照實驗或製程所需的常用溫度設定。
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs text-slate-400">
+                  {history.length > 0
+                    ? `共 ${history.length} 筆，依時間由新到舊排序`
+                    : "尚未加入紀錄"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleClearHistory}
+                  disabled={history.length === 0}
+                  className="rounded-full border border-slate-600/50 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-rose-400/60 hover:text-rose-200 disabled:cursor-not-allowed disabled:border-slate-700/50 disabled:text-slate-500"
+                >
+                  清除紀錄
+                </button>
+              </div>
+              <div className="space-y-4">
+                {history.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="rounded-2xl border border-slate-700/40 bg-slate-900/80 p-4"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-300">
+                      <span>
+                        {timeFormatter.format(new Date(entry.timestamp))} · {formatTemperature(entry.value)} {getScale(entry.scale)?.symbol}
+                      </span>
+                      <span className="text-xs text-slate-500">{getScale(entry.scale)?.label}</span>
+                    </div>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {entry.conversions.map((item) => (
+                        <div
+                          key={`${entry.id}-${item.code}`}
+                          className="flex items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
+                        >
+                          <span className="font-medium">{item.label}</span>
+                          <span className="font-semibold">
+                            {formatTemperature(item.result)} {item.symbol}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {history.length === 0 && (
+                  <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-400">
+                    加入紀錄後，系統會保留最近八筆轉換，方便在不同實驗之間快速比對。
+                  </p>
+                )}
+              </div>
+            </section>
+
+            <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-7">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 text-slate-200">
+                  <span className="text-xl">☁️</span>
+                  <h2 className="text-xl font-semibold">全球氣象快查</h2>
+                </div>
+                <p className="text-sm text-slate-300">
+                  輸入城市名稱或直接使用熱門快捷，取得 Open-Meteo 的免費即時資料並納入轉換情境。
+                </p>
+              </div>
+
+              <form onSubmit={handleWeatherSubmit} className="space-y-4">
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3">
+                  <span className="text-lg">📍</span>
+                  <input
+                    type="text"
+                    value={weatherQuery}
+                    onChange={(event) => setWeatherQuery(event.target.value)}
+                    placeholder="輸入城市名稱"
+                    className="flex-1 bg-transparent text-sm font-semibold text-slate-100 outline-none"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {WEATHER_PRESETS.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => handleWeatherPreset(preset)}
+                      className={classNames(
+                        "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                        weatherQuery === preset
+                          ? "border-sky-400/70 bg-sky-400/15 text-sky-200"
+                          : "border-slate-700/50 bg-slate-950/70 text-slate-300 hover:border-slate-500/70",
+                      )}
+                    >
+                      {preset}
+                    </button>
                   ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          </Stack>
-        </Box>
-      </Container>
+                </div>
+                <button
+                  type="submit"
+                  disabled={weatherLoading}
+                  className="w-full rounded-full bg-fuchsia-500/90 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:bg-slate-700/60 disabled:text-slate-400"
+                >
+                  {weatherLoading ? "查詢中..." : "取得即時天氣"}
+                </button>
+              </form>
+
+              <div>
+                {weatherError ? (
+                  <p className="rounded-2xl border border-amber-400/60 bg-amber-400/10 p-4 text-sm text-amber-100">
+                    {weatherError}
+                  </p>
+                ) : weatherData ? (
+                  <div className="space-y-4 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-5">
+                    <div className="flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-base font-semibold text-slate-100">{weatherData.location}</p>
+                        <p className="text-xs text-slate-400">
+                          {getWeatherDescription(weatherData.weatherCode)} · 觀測時間 {formatWeatherTime(weatherData.observationTime)}
+                          {weatherData.timezone ? `（${weatherData.timezone}）` : ""}
+                        </p>
+                      </div>
+                      <span className="inline-flex rounded-full border border-sky-400/60 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-200">
+                        體感 {formatOptionalMetric(weatherData.apparentTemperature, "°C")}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-3xl font-bold text-slate-50">
+                        {formatOptionalMetric(weatherData.temperature, "°C")}
+                      </p>
+                      <p className="text-sm text-slate-300">
+                        將即時天氣帶入轉換流程，快速比較實驗室設定與當地環境條件。
+                      </p>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
+                        <span className="text-xs uppercase tracking-wide text-slate-400">相對濕度</span>
+                        <p className="text-lg font-semibold text-slate-100">
+                          {formatOptionalMetric(weatherData.humidity, "%")}
+                        </p>
+                      </div>
+                      <div className="space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
+                        <span className="text-xs uppercase tracking-wide text-slate-400">風速</span>
+                        <p className="text-lg font-semibold text-slate-100">
+                          {formatOptionalMetric(weatherData.windSpeed, " m/s")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-400">
+                    查詢任何城市，了解環境背景後再進行溫度轉換與安全判讀。
+                  </p>
+                )}
+              </div>
+            </section>
+
+            <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-7">
+              <div className="flex items-center gap-3 text-slate-200">
+                <span className="text-xl">💡</span>
+                <h2 className="text-xl font-semibold">溫度洞察</h2>
+              </div>
+              <div className="space-y-4">
+                {insights.map((insight) => (
+                  <div
+                    key={insight.title}
+                    className="flex items-start gap-4 rounded-2xl border border-slate-700/40 bg-slate-900/75 p-4"
+                  >
+                    <span className="text-2xl">{insight.icon}</span>
+                    <div className="space-y-1">
+                      <p className="text-base font-semibold text-slate-100">{insight.title}</p>
+                      <p className="text-sm text-slate-300">{insight.description}</p>
+                    </div>
+                  </div>
+                ))}
+                {insights.length === 0 && (
+                  <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-400">
+                    先輸入溫度，即可獲得冰點、沸點與風險評估等即時分析。
+                  </p>
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <section className="rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-8">
+          <div className="flex items-center gap-3 text-slate-200">
+            <span className="text-xl">✨</span>
+            <h2 className="text-xl font-semibold">作品亮點</h2>
+          </div>
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            {FACTS.map((fact) => (
+              <div
+                key={fact.title}
+                className="h-full space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/75 p-5"
+              >
+                <div className="text-3xl">{fact.icon}</div>
+                <p className="text-lg font-semibold text-slate-100">{fact.title}</p>
+                <p className="text-sm leading-relaxed text-slate-300">{fact.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
