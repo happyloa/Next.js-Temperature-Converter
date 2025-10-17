@@ -2,6 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { FactsSection } from "./components/FactsSection";
+import { HeroSection } from "./components/HeroSection";
+import { HistorySection } from "./components/HistorySection";
+import { InsightsSection } from "./components/InsightsSection";
+import { TemperatureInputCard } from "./components/TemperatureInputCard";
+import { WeatherSection } from "./components/WeatherSection";
+
 const TEMPERATURE_SCALES = [
   {
     code: "celsius",
@@ -236,8 +243,6 @@ const getThermalMood = (celsiusValue) => {
   };
 };
 
-const classNames = (...values) => values.filter(Boolean).join(" ");
-
 export default function TemperatureStudio() {
   const [scale, setScale] = useState("celsius");
   const [value, setValue] = useState(25);
@@ -399,6 +404,8 @@ export default function TemperatureStudio() {
       id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
       scale,
+      scaleLabel: activeScale?.label ?? "",
+      scaleSymbol: activeScale?.symbol ?? "",
       value,
       conversions: conversions.map((item) => ({
         code: item.code,
@@ -515,386 +522,71 @@ export default function TemperatureStudio() {
 
   const sliderStep = (sliderRange.max - sliderRange.min) / 400 || 1;
 
-  const relativeSolarProgress = Number.isFinite(kelvinValue)
+  const hasKelvinValue = Number.isFinite(kelvinValue);
+
+  const relativeSolarProgress = hasKelvinValue
     ? clamp((kelvinValue / SOLAR_SURFACE_K) * 100, 0, 130)
     : 0;
 
-  const mood = getThermalMood(celsiusValue);
+  const mood = Number.isFinite(celsiusValue) ? getThermalMood(celsiusValue) : null;
+
+  const canAddHistory =
+    Number.isFinite(value) && Number.isFinite(celsiusValue) && conversions.length > 0;
 
   return (
     <main className="py-12 pb-24">
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 sm:px-8 lg:px-10">
-        <section className="flex flex-col items-center gap-6 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 bg-blue-950/40 px-4 py-1 text-sm font-medium text-sky-200">
-            ⚡ Multi-Scale Temperature Studio
-          </span>
-          <h1 className="text-4xl font-bold leading-tight text-slate-50 md:text-5xl">
-            溫度實驗室 · 智慧轉換平台
-          </h1>
-          <p className="max-w-2xl text-base leading-relaxed text-slate-300 md:text-lg">
-            即時轉換六種常見與歷史溫標、加入情境分析與轉換紀錄。無論是烹飪、科研、工業或創作，這裡都能給你漂亮又專業的一站式體驗。
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {PRESETS.map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => handlePresetSelect(preset)}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-sky-400/60 hover:bg-sky-400/10"
-              >
-                <span>{preset.emoji}</span>
-                {preset.label}
-              </button>
-            ))}
-          </div>
-        </section>
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
+        <HeroSection presets={PRESETS} onPresetSelect={handlePresetSelect} />
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
-          <section className="space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold text-slate-50">輸入溫度</h2>
-                <p className="max-w-xl text-sm leading-relaxed text-slate-300">
-                  選擇想要輸入的溫標後填入數值，系統會即時計算其他尺度並提供安全洞察與轉換紀錄。
-                </p>
-              </div>
-              <div className="flex flex-wrap justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400"
-                >
-                  🔄 重設
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAddHistory}
-                  disabled={conversions.length === 0}
-                  className="inline-flex items-center gap-2 rounded-full bg-sky-500/90 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700/60 disabled:text-slate-400"
-                >
-                  📝 加入紀錄
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {TEMPERATURE_SCALES.map((item) => (
-                <button
-                  key={item.code}
-                  type="button"
-                  onClick={() => handleScaleChange(item.code)}
-                  className={classNames(
-                    "flex-1 min-w-[150px] rounded-2xl border px-4 py-3 text-sm font-semibold transition",
-                    scale === item.code
-                      ? "border-sky-400/70 bg-sky-400/10 text-sky-200"
-                      : "border-slate-700/50 bg-slate-900/80 text-slate-200 hover:border-slate-500/70 hover:bg-slate-800/80",
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-4">
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-sm font-semibold text-slate-200">輸入數值</span>
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3 text-lg font-semibold text-slate-100 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-500/40">
-                  <span className="text-xl">🌡️</span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={rawInput}
-                    onChange={handleInputChange}
-                    placeholder="輸入溫度值"
-                    className="flex-1 bg-transparent text-lg font-semibold outline-none"
-                  />
-                  <span className="text-sm font-semibold text-slate-400">
-                    {activeScale?.symbol ?? ""}
-                  </span>
-                </div>
-              </label>
-
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min={sliderRange.min}
-                  max={sliderRange.max}
-                  step={sliderStep}
-                  value={sliderValue}
-                  onChange={handleSliderChange}
-                  className="h-2 w-full rounded-full accent-sky-400"
-                />
-                <p className="text-xs text-slate-400">
-                  範圍：{formatTemperature(sliderRange.min)} {activeScale?.symbol} ~ {formatTemperature(sliderRange.max)} {activeScale?.symbol}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {conversions.map((item) => (
-                <div
-                  key={item.code}
-                  className={classNames(
-                    "relative overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900/80 p-5",
-                    "bg-gradient-to-br",
-                    item.accent,
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-2">
-                      <span className="text-xs uppercase tracking-wide text-slate-200/80">
-                        {item.label}
-                      </span>
-                      <p className="text-3xl font-bold text-slate-50">
-                        {formatTemperature(item.result)} {item.symbol}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(`${formatTemperature(item.result)}`, item.code)}
-                      className={classNames(
-                        "rounded-full border px-3 py-1 text-xs font-semibold transition",
-                        copiedScale === item.code
-                          ? "border-emerald-400/70 bg-emerald-400/10 text-emerald-200"
-                          : "border-slate-600/50 bg-slate-900/70 text-slate-300 hover:border-slate-400/70",
-                      )}
-                    >
-                      {copiedScale === item.code ? "已複製" : "複製"}
-                    </button>
-                  </div>
-                  {item.code === "celsius" && (
-                    <p className="mt-3 text-sm text-slate-200/80">{mood.title}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-slate-200">
-                <span className="text-xl">📈</span>
-                <h3 className="text-lg font-semibold">相對於太陽表面的能量比例</h3>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full border border-slate-700/60 bg-slate-800/80">
-                <div
-                  className="h-full bg-gradient-to-r from-sky-400 via-fuchsia-400 to-rose-400"
-                  style={{ width: `${relativeSolarProgress}%` }}
-                />
-              </div>
-              <p className="text-xs text-slate-400">
-                {Number.isFinite(kelvinValue)
-                  ? `目前為太陽表面溫度的 ${formatTemperature(relativeSolarProgress)}%`
-                  : "輸入溫度以分析熱能比例"}
-              </p>
-            </div>
-          </section>
+          <TemperatureInputCard
+            scale={scale}
+            scales={TEMPERATURE_SCALES}
+            onScaleChange={handleScaleChange}
+            rawInput={rawInput}
+            onInputChange={handleInputChange}
+            activeSymbol={activeScale?.symbol}
+            onReset={handleReset}
+            onAddHistory={handleAddHistory}
+            canAddHistory={canAddHistory}
+            sliderRange={sliderRange}
+            sliderValue={sliderValue}
+            sliderStep={sliderStep}
+            onSliderChange={handleSliderChange}
+            conversions={conversions}
+            copiedScale={copiedScale}
+            onCopy={handleCopy}
+            mood={mood}
+            relativeSolarProgress={relativeSolarProgress}
+            showSolarProgress={hasKelvinValue}
+            formatTemperature={formatTemperature}
+          />
 
           <div className="space-y-8">
-            <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-7">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3 text-slate-200">
-                  <span className="text-xl">🗂️</span>
-                  <h2 className="text-xl font-semibold">轉換紀錄</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  將感興趣的轉換加入歷史紀錄，可快速對照實驗或製程所需的常用溫度設定。
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-xs text-slate-400">
-                  {history.length > 0
-                    ? `共 ${history.length} 筆，依時間由新到舊排序`
-                    : "尚未加入紀錄"}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleClearHistory}
-                  disabled={history.length === 0}
-                  className="rounded-full border border-slate-600/50 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-rose-400/60 hover:text-rose-200 disabled:cursor-not-allowed disabled:border-slate-700/50 disabled:text-slate-500"
-                >
-                  清除紀錄
-                </button>
-              </div>
-              <div className="space-y-4">
-                {history.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="rounded-2xl border border-slate-700/40 bg-slate-900/80 p-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-300">
-                      <span>
-                        {timeFormatter.format(new Date(entry.timestamp))} · {formatTemperature(entry.value)} {getScale(entry.scale)?.symbol}
-                      </span>
-                      <span className="text-xs text-slate-500">{getScale(entry.scale)?.label}</span>
-                    </div>
-                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                      {entry.conversions.map((item) => (
-                        <div
-                          key={`${entry.id}-${item.code}`}
-                          className="flex items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
-                        >
-                          <span className="font-medium">{item.label}</span>
-                          <span className="font-semibold">
-                            {formatTemperature(item.result)} {item.symbol}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                {history.length === 0 && (
-                  <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-400">
-                    加入紀錄後，系統會保留最近八筆轉換，方便在不同實驗之間快速比對。
-                  </p>
-                )}
-              </div>
-            </section>
-
-            <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-7">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3 text-slate-200">
-                  <span className="text-xl">☁️</span>
-                  <h2 className="text-xl font-semibold">全球氣象快查</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  輸入城市名稱或直接使用熱門快捷，取得 Open-Meteo 的免費即時資料並納入轉換情境。
-                </p>
-              </div>
-
-              <form onSubmit={handleWeatherSubmit} className="space-y-4">
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3">
-                  <span className="text-lg">📍</span>
-                  <input
-                    type="text"
-                    value={weatherQuery}
-                    onChange={(event) => setWeatherQuery(event.target.value)}
-                    placeholder="輸入城市名稱"
-                    className="flex-1 bg-transparent text-sm font-semibold text-slate-100 outline-none"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {WEATHER_PRESETS.map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => handleWeatherPreset(preset)}
-                      className={classNames(
-                        "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
-                        weatherQuery === preset
-                          ? "border-sky-400/70 bg-sky-400/15 text-sky-200"
-                          : "border-slate-700/50 bg-slate-950/70 text-slate-300 hover:border-slate-500/70",
-                      )}
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="submit"
-                  disabled={weatherLoading}
-                  className="w-full rounded-full bg-fuchsia-500/90 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:bg-slate-700/60 disabled:text-slate-400"
-                >
-                  {weatherLoading ? "查詢中..." : "取得即時天氣"}
-                </button>
-              </form>
-
-              <div>
-                {weatherError ? (
-                  <p className="rounded-2xl border border-amber-400/60 bg-amber-400/10 p-4 text-sm text-amber-100">
-                    {weatherError}
-                  </p>
-                ) : weatherData ? (
-                  <div className="space-y-4 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-5">
-                    <div className="flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-base font-semibold text-slate-100">{weatherData.location}</p>
-                        <p className="text-xs text-slate-400">
-                          {getWeatherDescription(weatherData.weatherCode)} · 觀測時間 {formatWeatherTime(weatherData.observationTime)}
-                          {weatherData.timezone ? `（${weatherData.timezone}）` : ""}
-                        </p>
-                      </div>
-                      <span className="inline-flex rounded-full border border-sky-400/60 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-200">
-                        體感 {formatOptionalMetric(weatherData.apparentTemperature, "°C")}
-                      </span>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-3xl font-bold text-slate-50">
-                        {formatOptionalMetric(weatherData.temperature, "°C")}
-                      </p>
-                      <p className="text-sm text-slate-300">
-                        將即時天氣帶入轉換流程，快速比較實驗室設定與當地環境條件。
-                      </p>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
-                        <span className="text-xs uppercase tracking-wide text-slate-400">相對濕度</span>
-                        <p className="text-lg font-semibold text-slate-100">
-                          {formatOptionalMetric(weatherData.humidity, "%")}
-                        </p>
-                      </div>
-                      <div className="space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
-                        <span className="text-xs uppercase tracking-wide text-slate-400">風速</span>
-                        <p className="text-lg font-semibold text-slate-100">
-                          {formatOptionalMetric(weatherData.windSpeed, " m/s")}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-400">
-                    查詢任何城市，了解環境背景後再進行溫度轉換與安全判讀。
-                  </p>
-                )}
-              </div>
-            </section>
-
-            <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-7">
-              <div className="flex items-center gap-3 text-slate-200">
-                <span className="text-xl">💡</span>
-                <h2 className="text-xl font-semibold">溫度洞察</h2>
-              </div>
-              <div className="space-y-4">
-                {insights.map((insight) => (
-                  <div
-                    key={insight.title}
-                    className="flex items-start gap-4 rounded-2xl border border-slate-700/40 bg-slate-900/75 p-4"
-                  >
-                    <span className="text-2xl">{insight.icon}</span>
-                    <div className="space-y-1">
-                      <p className="text-base font-semibold text-slate-100">{insight.title}</p>
-                      <p className="text-sm text-slate-300">{insight.description}</p>
-                    </div>
-                  </div>
-                ))}
-                {insights.length === 0 && (
-                  <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-400">
-                    先輸入溫度，即可獲得冰點、沸點與風險評估等即時分析。
-                  </p>
-                )}
-              </div>
-            </section>
+            <HistorySection
+              history={history}
+              onClearHistory={handleClearHistory}
+              formatTemperature={formatTemperature}
+              formatTime={(date) => timeFormatter.format(date)}
+            />
+            <WeatherSection
+              query={weatherQuery}
+              onQueryChange={setWeatherQuery}
+              onSubmit={handleWeatherSubmit}
+              presets={WEATHER_PRESETS}
+              onPresetSelect={handleWeatherPreset}
+              loading={weatherLoading}
+              error={weatherError}
+              data={weatherData}
+              formatOptionalMetric={formatOptionalMetric}
+              formatWeatherTime={formatWeatherTime}
+              getWeatherDescription={getWeatherDescription}
+            />
+            <InsightsSection insights={insights} />
           </div>
         </div>
 
-        <section className="rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur md:p-8">
-          <div className="flex items-center gap-3 text-slate-200">
-            <span className="text-xl">✨</span>
-            <h2 className="text-xl font-semibold">作品亮點</h2>
-          </div>
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-            {FACTS.map((fact) => (
-              <div
-                key={fact.title}
-                className="h-full space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/75 p-5"
-              >
-                <div className="text-3xl">{fact.icon}</div>
-                <p className="text-lg font-semibold text-slate-100">{fact.title}</p>
-                <p className="text-sm leading-relaxed text-slate-300">{fact.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <FactsSection facts={FACTS} />
       </div>
     </main>
   );
