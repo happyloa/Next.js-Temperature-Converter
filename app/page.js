@@ -122,7 +122,7 @@ const WEATHER_CODE_MAP = {
   99: "強雷陣雨伴隨冰雹",
 };
 
-const WEATHER_PRESETS = ["台北", "東京", "紐約", "倫敦"];
+const WEATHER_PRESETS = ["高雄", "東京", "紐約", "倫敦"];
 
 const numberFormatter = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 2,
@@ -249,7 +249,7 @@ export default function TemperatureStudio() {
   const [rawInput, setRawInput] = useState("25");
   const [history, setHistory] = useState([]);
   const [copiedScale, setCopiedScale] = useState(null);
-  const [weatherQuery, setWeatherQuery] = useState("台北");
+  const [weatherQuery, setWeatherQuery] = useState("高雄");
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState(null);
@@ -497,7 +497,7 @@ export default function TemperatureStudio() {
   }, []);
 
   useEffect(() => {
-    fetchWeather("台北");
+    fetchWeather("高雄");
   }, [fetchWeather]);
 
   const handleWeatherSubmit = useCallback(
