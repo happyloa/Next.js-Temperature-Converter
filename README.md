@@ -16,8 +16,7 @@
 
 ## 技術棧
 - [Next.js 15 App Router](https://nextjs.org/docs/app)（React 19）
-- [Material UI 7](https://mui.com/material-ui/) 與 [Emotion](https://emotion.sh/docs/introduction) 主題系統
-- CSS Modules 與全域樣式（`app/page.module.css`、`app/globals.css`）
+- [Tailwind CSS](https://tailwindcss.com/)
 
 ## 專案結構重點
 ```
