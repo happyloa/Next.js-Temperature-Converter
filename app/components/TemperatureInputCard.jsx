@@ -23,8 +23,8 @@ export function TemperatureInputCard({
   formatTemperature,
 }) {
   return (
-    <section className="space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+    <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:[&>*]:min-w-0">
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold text-slate-50">輸入溫度</h2>
           <p className="max-w-xl text-sm leading-relaxed text-slate-300">
@@ -50,14 +50,14 @@ export function TemperatureInputCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {scales.map((item) => (
           <button
             key={item.code}
             type="button"
             onClick={() => onScaleChange(item.code)}
             className={classNames(
-              "rounded-2xl border px-3 py-3 text-xs font-semibold transition sm:text-sm",
+              "w-full min-w-0 rounded-2xl border px-3 py-3 text-xs font-semibold transition sm:text-sm",
               scale === item.code
                 ? "border-sky-400/70 bg-sky-400/10 text-sky-200"
                 : "border-slate-700/50 bg-slate-900/80 text-slate-200 hover:border-slate-500/70 hover:bg-slate-800/80",
@@ -108,7 +108,7 @@ export function TemperatureInputCard({
             <div
               key={item.code}
               className={classNames(
-                "relative overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900/80 p-5",
+                "relative min-w-0 overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900/80 p-5",
                 "bg-gradient-to-br",
                 item.accent,
               )}

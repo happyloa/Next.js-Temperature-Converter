@@ -534,11 +534,11 @@ export default function TemperatureStudio() {
     Number.isFinite(value) && Number.isFinite(celsiusValue) && conversions.length > 0;
 
   return (
-    <main className="py-12 pb-24">
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
+    <main className="w-full max-w-full py-12 pb-24">
+      <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
         <HeroSection presets={PRESETS} onPresetSelect={handlePresetSelect} />
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
           <TemperatureInputCard
             scale={scale}
             scales={TEMPERATURE_SCALES}
@@ -562,7 +562,7 @@ export default function TemperatureStudio() {
             formatTemperature={formatTemperature}
           />
 
-          <div className="space-y-8">
+          <div className="min-w-0 space-y-8">
             <HistorySection
               history={history}
               onClearHistory={handleClearHistory}

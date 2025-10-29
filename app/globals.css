@@ -8,12 +8,16 @@
     scroll-behavior: smooth;
   }
 
+  html {
+    @apply max-w-full overflow-x-hidden;
+  }
+
   * {
     @apply box-border m-0 p-0;
   }
 
   body {
-    @apply min-h-screen w-full overflow-x-hidden bg-slate-950 text-slate-100 antialiased;
+    @apply min-h-screen w-full max-w-full overflow-x-hidden bg-slate-950 text-slate-100 antialiased;
     background-image:
       radial-gradient(circle at 20% -10%, rgba(59, 130, 246, 0.25), transparent 45%),
       radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.22), transparent 40%),
