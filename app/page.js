@@ -535,7 +535,7 @@ export default function TemperatureStudio() {
 
   return (
     <main className="w-full max-w-full py-12 pb-24">
-      <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
+      <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
         <HeroSection presets={PRESETS} onPresetSelect={handlePresetSelect} />
 
         <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
