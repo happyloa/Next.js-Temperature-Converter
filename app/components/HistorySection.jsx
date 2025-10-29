@@ -1,6 +1,6 @@
 export function HistorySection({ history, onClearHistory, formatTemperature, formatTime }) {
   return (
-    <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-7">
+    <section className="w-full min-w-0 space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-7">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3 text-slate-200">
           <span className="text-xl">🗂️</span>
@@ -25,7 +25,7 @@ export function HistorySection({ history, onClearHistory, formatTemperature, for
       </div>
       <div className="space-y-4">
         {history.map((entry) => (
-          <div key={entry.id} className="rounded-2xl border border-slate-700/40 bg-slate-900/80 p-4">
+          <div key={entry.id} className="min-w-0 rounded-2xl border border-slate-700/40 bg-slate-900/80 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-300">
               <span>
                 {formatTime(new Date(entry.timestamp))} · {formatTemperature(entry.value)} {entry.scaleSymbol}
@@ -36,7 +36,7 @@ export function HistorySection({ history, onClearHistory, formatTemperature, for
               {entry.conversions.map((item) => (
                 <div
                   key={`${entry.id}-${item.code}`}
-                  className="flex items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
+                  className="flex min-w-0 items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
                 >
                   <span className="font-medium">{item.label}</span>
                   <span className="font-semibold">

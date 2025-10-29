@@ -14,7 +14,7 @@ export function WeatherSection({
   getWeatherDescription,
 }) {
   return (
-    <section className="space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-7">
+    <section className="w-full min-w-0 space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-7">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3 text-slate-200">
           <span className="text-xl">☁️</span>
@@ -36,14 +36,14 @@ export function WeatherSection({
             className="flex-1 bg-transparent text-sm font-semibold text-slate-100 outline-none"
           />
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-wrap">
           {presets.map((preset) => (
             <button
               key={preset}
               type="button"
               onClick={() => onPresetSelect(preset)}
               className={classNames(
-                "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                "w-full rounded-full border px-3 py-1.5 text-xs font-semibold transition md:w-auto",
                 query === preset
                   ? "border-sky-400/70 bg-sky-400/15 text-sky-200"
                   : "border-slate-700/50 bg-slate-950/70 text-slate-300 hover:border-slate-500/70",
@@ -66,7 +66,7 @@ export function WeatherSection({
         {error ? (
           <p className="rounded-2xl border border-amber-400/60 bg-amber-400/10 p-4 text-sm text-amber-100">{error}</p>
         ) : data ? (
-          <div className="space-y-4 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-5">
+          <div className="min-w-0 space-y-4 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-5">
             <div className="flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-base font-semibold text-slate-100">{data.location}</p>
@@ -90,13 +90,13 @@ export function WeatherSection({
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
+              <div className="min-w-0 space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
                 <span className="text-xs uppercase tracking-wide text-slate-400">相對濕度</span>
                 <p className="text-lg font-semibold text-slate-100">
                   {formatOptionalMetric(data.humidity, "%")}
                 </p>
               </div>
-              <div className="space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
+              <div className="min-w-0 space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
                 <span className="text-xs uppercase tracking-wide text-slate-400">風速</span>
                 <p className="text-lg font-semibold text-slate-100">
                   {formatOptionalMetric(data.windSpeed, " m/s")}

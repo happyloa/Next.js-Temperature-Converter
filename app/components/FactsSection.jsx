@@ -1,6 +1,6 @@
 export function FactsSection({ facts }) {
   return (
-    <section className="rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
+    <section className="w-full min-w-0 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
       <div className="flex items-center gap-3 text-slate-200">
         <span className="text-xl">✨</span>
         <h2 className="text-xl font-semibold">作品亮點</h2>
@@ -9,7 +9,7 @@ export function FactsSection({ facts }) {
         {facts.map((fact) => (
           <div
             key={fact.title}
-            className="h-full space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/75 p-5"
+            className="h-full min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/75 p-5"
           >
             <div className="text-3xl">{fact.icon}</div>
             <p className="text-lg font-semibold text-slate-100">{fact.title}</p>
