@@ -186,7 +186,7 @@ export function WeatherSection({
               </div>
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <div className="grid gap-6">
               <div className="min-w-0 space-y-5">
                 <div className="space-y-3">
                   <p className="text-4xl font-bold text-slate-50">
@@ -197,7 +197,7 @@ export function WeatherSection({
                   </p>
                 </div>
                 {climateHighlights.length ? (
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-3">
                     {climateHighlights.map((item) => (
                       <div
                         key={item.label}
@@ -239,7 +239,7 @@ export function WeatherSection({
               )}
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6">
               <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
                 <div className="flex items-center justify-between text-xs text-slate-400">
                   <span className="uppercase tracking-wide text-slate-300">空氣品質</span>
@@ -250,7 +250,7 @@ export function WeatherSection({
                     <p className="text-3xl font-bold text-slate-50">
                       {formatOptionalMetric(data.airQuality.aqi, data.airQuality.aqiUnit ?? "")}
                     </p>
-                    <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
+                    <div className="grid gap-3 text-sm text-slate-200">
                       <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
                         <span className="text-xs uppercase tracking-wide text-slate-400">PM2.5</span>
                         <p className="font-semibold">
@@ -287,7 +287,7 @@ export function WeatherSection({
                       <span>日照長度</span>
                       <span className="font-semibold">{formatDayLength(data.dayLengthSeconds)}</span>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3">
                       <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
                         <span className="text-xs uppercase tracking-wide text-slate-400">日出</span>
                         <p className="font-semibold">

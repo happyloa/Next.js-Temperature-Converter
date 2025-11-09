@@ -722,28 +722,31 @@ export default function TemperatureStudio() {
         <HeroSection presets={PRESETS} onPresetSelect={handlePresetSelect} />
 
         <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
-          <TemperatureInputCard
-            scale={scale}
-            scales={TEMPERATURE_SCALES}
-            onScaleChange={handleScaleChange}
-            rawInput={rawInput}
-            onInputChange={handleInputChange}
-            activeSymbol={activeScale?.symbol}
-            onReset={handleReset}
-            onAddHistory={handleAddHistory}
-            canAddHistory={canAddHistory}
-            sliderRange={sliderRange}
-            sliderValue={sliderValue}
-            sliderStep={sliderStep}
-            onSliderChange={handleSliderChange}
-            conversions={conversions}
-            copiedScale={copiedScale}
-            onCopy={handleCopy}
-            mood={mood}
-            relativeSolarProgress={relativeSolarProgress}
-            showSolarProgress={hasKelvinValue}
-            formatTemperature={formatTemperature}
-          />
+          <div className="min-w-0 space-y-8">
+            <TemperatureInputCard
+              scale={scale}
+              scales={TEMPERATURE_SCALES}
+              onScaleChange={handleScaleChange}
+              rawInput={rawInput}
+              onInputChange={handleInputChange}
+              activeSymbol={activeScale?.symbol}
+              onReset={handleReset}
+              onAddHistory={handleAddHistory}
+              canAddHistory={canAddHistory}
+              sliderRange={sliderRange}
+              sliderValue={sliderValue}
+              sliderStep={sliderStep}
+              onSliderChange={handleSliderChange}
+              conversions={conversions}
+              copiedScale={copiedScale}
+              onCopy={handleCopy}
+              mood={mood}
+              relativeSolarProgress={relativeSolarProgress}
+              showSolarProgress={hasKelvinValue}
+              formatTemperature={formatTemperature}
+            />
+            <InsightsSection insights={insights} />
+          </div>
 
           <div className="min-w-0 space-y-8">
             <HistorySection
@@ -770,7 +773,6 @@ export default function TemperatureStudio() {
               formatCoordinate={formatCoordinate}
               formatWeekday={formatWeekday}
             />
-            <InsightsSection insights={insights} />
           </div>
         </div>
 
