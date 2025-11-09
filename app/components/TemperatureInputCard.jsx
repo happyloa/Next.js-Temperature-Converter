@@ -35,7 +35,7 @@ export function TemperatureInputCard({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400"
+            className="theme-outline-button"
           >
             🔄 重設
           </button>
@@ -43,7 +43,7 @@ export function TemperatureInputCard({
             type="button"
             onClick={onAddHistory}
             disabled={!canAddHistory}
-            className="inline-flex items-center gap-2 rounded-full bg-sky-500/90 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700/60 disabled:text-slate-400"
+            className="theme-primary-button px-6"
           >
             📝 加入紀錄
           </button>
@@ -56,12 +56,7 @@ export function TemperatureInputCard({
             key={item.code}
             type="button"
             onClick={() => onScaleChange(item.code)}
-            className={classNames(
-              "w-full min-w-0 rounded-2xl border px-3 py-3 text-xs font-semibold transition sm:text-sm",
-              scale === item.code
-                ? "border-sky-400/70 bg-sky-400/10 text-sky-200"
-                : "border-slate-700/50 bg-slate-900/80 text-slate-200 hover:border-slate-500/70 hover:bg-slate-800/80",
-            )}
+            className={classNames("theme-segment", scale === item.code ? "theme-segment--active" : "")}
           >
             {item.label}
           </button>
@@ -71,7 +66,7 @@ export function TemperatureInputCard({
       <div className="space-y-5">
         <label className="flex flex-col gap-2 text-left">
           <span className="text-sm font-semibold text-slate-200">輸入數值</span>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3 text-lg font-semibold text-slate-100 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-500/40">
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3 text-lg font-semibold text-slate-100 focus-within:border-[#FF5E5B] focus-within:ring-2 focus-within:ring-[#FF5E5B]/40">
             <span className="text-xl">🌡️</span>
             <input
               type="text"
@@ -96,7 +91,7 @@ export function TemperatureInputCard({
             step={sliderStep}
             value={sliderValue}
             onChange={onSliderChange}
-            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-sky-400"
+            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-[#FF5E5B]"
           />
         </label>
       </div>
@@ -124,10 +119,8 @@ export function TemperatureInputCard({
                   type="button"
                   onClick={() => onCopy(`${formatTemperature(item.result)}`, item.code)}
                   className={classNames(
-                    "rounded-full border px-3 py-1 text-xs font-semibold transition",
-                    copiedScale === item.code
-                      ? "border-emerald-400/70 bg-emerald-400/10 text-emerald-200"
-                      : "border-slate-600/50 bg-slate-900/70 text-slate-300 hover:border-slate-400/70",
+                    "theme-outline-button theme-outline-button--small",
+                    copiedScale === item.code ? "theme-outline-button--success" : "",
                   )}
                 >
                   {copiedScale === item.code ? "已複製" : "複製"}
@@ -148,7 +141,7 @@ export function TemperatureInputCard({
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full border border-slate-700/60 bg-slate-800/80">
           <div
-            className="h-full bg-gradient-to-r from-sky-400 via-fuchsia-400 to-rose-400"
+            className="h-full bg-gradient-to-r from-[#00CECB] via-[#FFED66] to-[#FF5E5B]"
             style={{ width: `${relativeSolarProgress}%` }}
           />
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { FactsSection } from "./components/FactsSection";
 import { HeroSection } from "./components/HeroSection";
@@ -14,7 +14,7 @@ const TEMPERATURE_SCALES = [
     code: "celsius",
     label: "攝氏 (°C)",
     symbol: "°C",
-    accent: "from-sky-400/30 via-sky-400/15 to-sky-400/5",
+    accent: "from-[#FF5E5B]/35 via-[#FFED66]/20 to-[#FFFFEA]/10",
     toKelvin: (value) => value + 273.15,
     fromKelvin: (value) => value - 273.15,
   },
@@ -22,7 +22,7 @@ const TEMPERATURE_SCALES = [
     code: "fahrenheit",
     label: "華氏 (°F)",
     symbol: "°F",
-    accent: "from-orange-400/30 via-orange-400/15 to-orange-400/5",
+    accent: "from-[#FFED66]/30 via-[#FF5E5B]/18 to-[#D8D8D8]/10",
     toKelvin: (value) => ((value + 459.67) * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5 - 459.67,
   },
@@ -30,7 +30,7 @@ const TEMPERATURE_SCALES = [
     code: "kelvin",
     label: "絕對溫標 (K)",
     symbol: "K",
-    accent: "from-cyan-400/30 via-cyan-400/15 to-cyan-400/5",
+    accent: "from-[#00CECB]/28 via-[#FFED66]/18 to-[#FFFFEA]/10",
     toKelvin: (value) => value,
     fromKelvin: (value) => value,
   },
@@ -38,7 +38,7 @@ const TEMPERATURE_SCALES = [
     code: "rankine",
     label: "蘭氏 (°R)",
     symbol: "°R",
-    accent: "from-violet-400/30 via-violet-400/15 to-violet-400/5",
+    accent: "from-[#FF5E5B]/28 via-[#00CECB]/18 to-[#D8D8D8]/10",
     toKelvin: (value) => (value * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5,
   },
@@ -46,7 +46,7 @@ const TEMPERATURE_SCALES = [
     code: "reaumur",
     label: "列氏 (°Ré)",
     symbol: "°Ré",
-    accent: "from-emerald-400/30 via-emerald-400/15 to-emerald-400/5",
+    accent: "from-[#00CECB]/30 via-[#D8D8D8]/18 to-[#FFFFEA]/10",
     toKelvin: (value) => value * 1.25 + 273.15,
     fromKelvin: (value) => (value - 273.15) * 0.8,
   },
@@ -54,7 +54,7 @@ const TEMPERATURE_SCALES = [
     code: "newton",
     label: "牛頓氏 (°N)",
     symbol: "°N",
-    accent: "from-rose-400/30 via-rose-400/15 to-rose-400/5",
+    accent: "from-[#FFED66]/28 via-[#FF5E5B]/18 to-[#00CECB]/12",
     toKelvin: (value) => value * (100 / 33) + 273.15,
     fromKelvin: (value) => (value - 273.15) * (33 / 100),
   },
@@ -72,22 +72,21 @@ const PRESETS = [
 
 const FACTS = [
   {
+    icon: "🌍",
+    title: "全球環境整合",
+    description: "結合 Open-Meteo 天氣與 World Time API 時區資訊，瞬間掌握外部環境。",
+  },
+  {
     icon: "🧪",
     title: "六種溫標一次掌握",
     description:
-      "內建攝氏、華氏、絕對溫標、蘭氏、列氏與牛頓氏，方便面對各種歷史與現代科學情境。",
+      "攝氏、華氏、絕對溫標、蘭氏、列氏與牛頓氏一次整合，跨領域作業不再需要手動換算。",
   },
   {
     icon: "🗂️",
-    title: "智慧紀錄",
+    title: "儀表板級的操作體驗",
     description:
-      "將重要的轉換加入歷史紀錄，可快速回顧對照常用的測試情境或設備校正數據。",
-  },
-  {
-    icon: "📊",
-    title: "情境洞察",
-    description:
-      "透過演算法分析溫度與冰點、沸點及生活級距的距離，協助快速判斷安全與風險。",
+      "輸入、滑桿、歷史紀錄與環境數據集中呈現，成為可直接對外展示的溫度管理產品。",
   },
 ];
 
@@ -144,6 +143,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("zh-TW", {
 
 const ABSOLUTE_ZERO_K = 0;
 const SOLAR_SURFACE_K = 5778;
+const HISTORY_STORAGE_KEY = "temperature-studio-history";
 
 const decimalPattern = /^-?\d*(\.\d*)?$/;
 
@@ -174,6 +174,50 @@ const formatWeatherTime = (value) => {
     return value;
   }
   return dateTimeFormatter.format(date);
+};
+
+const WEEKDAY_LABELS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+
+const formatLocalClock = (value, timezone, { withSeconds = false } = {}) => {
+  if (!value) return "--";
+
+  try {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    const formatter = new Intl.DateTimeFormat("zh-TW", {
+      hour: "2-digit",
+      minute: "2-digit",
+      ...(withSeconds ? { second: "2-digit" } : {}),
+      timeZone: timezone ?? "UTC",
+    });
+
+    return formatter.format(date);
+  } catch (error) {
+    console.error("formatLocalClock", error);
+    return value;
+  }
+};
+
+const formatUtcOffset = (value) => {
+  if (!value) return "UTC±00:00";
+  const normalized = `${value}`.trim();
+  if (/^[+-]\d{2}:\d{2}$/.test(normalized)) {
+    return `UTC${normalized}`;
+  }
+  return `UTC${normalized}`;
+};
+
+const formatWeekday = (index) => {
+  if (!Number.isFinite(index)) return "--";
+  return WEEKDAY_LABELS[index] ?? `週${index}`;
+};
+
+const formatCoordinate = (value) => {
+  if (!Number.isFinite(value)) return "--";
+  return numberFormatter.format(value);
 };
 
 const getScale = (code) =>
@@ -248,11 +292,15 @@ export default function TemperatureStudio() {
   const [value, setValue] = useState(25);
   const [rawInput, setRawInput] = useState("25");
   const [history, setHistory] = useState([]);
+  const [historyHydrated, setHistoryHydrated] = useState(false);
   const [copiedScale, setCopiedScale] = useState(null);
   const [weatherQuery, setWeatherQuery] = useState("高雄");
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState(null);
+  const [theme, setTheme] = useState("dark");
+
+  const historyStorageRef = useRef("local");
 
   const activeScale = useMemo(() => getScale(scale), [scale]);
 
@@ -430,6 +478,95 @@ export default function TemperatureStudio() {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.dataset.theme = theme;
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storages = [
+      { name: "local", storage: window.localStorage },
+      { name: "session", storage: window.sessionStorage },
+    ];
+
+    for (const { name, storage } of storages) {
+      try {
+        const raw = storage.getItem(HISTORY_STORAGE_KEY);
+        if (!raw) {
+          continue;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setHistory(parsed);
+          historyStorageRef.current = name;
+          break;
+        }
+      } catch (error) {
+        console.error("Failed to restore history", error);
+      }
+    }
+
+    setHistoryHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !historyHydrated) {
+      return;
+    }
+
+    const payload = history.length > 0 ? JSON.stringify(history) : null;
+
+    const storages =
+      historyStorageRef.current === "session"
+        ? [
+            { name: "session", storage: window.sessionStorage },
+            { name: "local", storage: window.localStorage },
+          ]
+        : [
+            { name: "local", storage: window.localStorage },
+            { name: "session", storage: window.sessionStorage },
+          ];
+
+    const isQuotaExceeded = (error) => {
+      if (!error) return false;
+      if (error instanceof DOMException) {
+        return (
+          error.name === "QuotaExceededError" ||
+          error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+          error.code === 22 ||
+          error.code === 1014
+        );
+      }
+      return false;
+    };
+
+    for (const { name, storage } of storages) {
+      try {
+        if (!payload) {
+          storage.removeItem(HISTORY_STORAGE_KEY);
+        } else {
+          storage.setItem(HISTORY_STORAGE_KEY, payload);
+        }
+        historyStorageRef.current = name;
+        return;
+      } catch (error) {
+        if (isQuotaExceeded(error)) {
+          continue;
+        }
+        console.error("Failed to persist history", error);
+        return;
+      }
+    }
+  }, [history, historyHydrated]);
+
   const fetchWeather = useCallback(async (query) => {
     const trimmed = query.trim();
     if (!trimmed) {
@@ -462,30 +599,126 @@ export default function TemperatureStudio() {
       }
 
       const location = geoData.results[0];
+      const timezone = location.timezone ?? "auto";
 
-      const forecastResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code`,
+      const forecastUrl = new URL("https://api.open-meteo.com/v1/forecast");
+      forecastUrl.searchParams.set("latitude", location.latitude);
+      forecastUrl.searchParams.set("longitude", location.longitude);
+      forecastUrl.searchParams.set(
+        "current",
+        [
+          "temperature_2m",
+          "apparent_temperature",
+          "relative_humidity_2m",
+          "wind_speed_10m",
+          "weather_code",
+          "pressure_msl",
+          "surface_pressure",
+          "precipitation",
+          "uv_index",
+          "is_day",
+        ].join(","),
       );
+      forecastUrl.searchParams.set("daily", ["temperature_2m_max", "temperature_2m_min"].join(","));
+      forecastUrl.searchParams.set("forecast_days", "1");
+      forecastUrl.searchParams.set("timezone", timezone);
 
-      if (!forecastResponse.ok) {
+      const airQualityUrl = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
+      airQualityUrl.searchParams.set("latitude", location.latitude);
+      airQualityUrl.searchParams.set("longitude", location.longitude);
+      airQualityUrl.searchParams.set("current", ["european_aqi", "pm2_5", "pm10"].join(","));
+      airQualityUrl.searchParams.set("timezone", timezone);
+
+      const [forecastResult, airQualityResult, timeResult] = await Promise.allSettled([
+        fetch(forecastUrl.toString()),
+        fetch(airQualityUrl.toString()),
+        location.timezone
+          ? fetch(`https://worldtimeapi.org/api/timezone/${encodeURIComponent(location.timezone)}`)
+          : Promise.resolve(null),
+      ]);
+
+      if (forecastResult.status !== "fulfilled" || !forecastResult.value?.ok) {
         throw new Error("天氣資料取得失敗");
       }
 
-      const forecast = await forecastResponse.json();
+      const forecast = await forecastResult.value.json();
 
       if (!forecast?.current) {
         throw new Error("目前無法取得天氣資訊");
       }
 
+      let airQualityPayload = null;
+      if (airQualityResult.status === "fulfilled" && airQualityResult.value?.ok) {
+        try {
+          airQualityPayload = await airQualityResult.value.json();
+        } catch (error) {
+          console.error("airQualityPayload", error);
+        }
+      }
+
+      let timePayload = null;
+      if (timeResult.status === "fulfilled" && timeResult.value?.ok) {
+        try {
+          timePayload = await timeResult.value.json();
+        } catch (error) {
+          console.error("timePayload", error);
+        }
+      }
+
+      const resolvedTimezone =
+        location.timezone ?? timePayload?.timezone ?? forecast.timezone ?? "UTC";
+
       setWeatherData({
         location: `${location.name}${location.country ? ` · ${location.country}` : ""}`,
-        timezone: forecast.timezone_abbreviation,
+        administrative: [location.admin1, location.admin2, location.admin3].filter(Boolean),
+        coordinates: {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+        timezone: resolvedTimezone,
+        timezoneAbbreviation:
+          timePayload?.abbreviation ?? forecast.timezone_abbreviation ?? resolvedTimezone,
         observationTime: forecast.current.time,
         temperature: forecast.current.temperature_2m,
+        temperatureUnit: forecast.current_units?.temperature_2m ?? "°C",
         apparentTemperature: forecast.current.apparent_temperature,
+        apparentTemperatureUnit: forecast.current_units?.apparent_temperature ?? "°C",
         humidity: forecast.current.relative_humidity_2m,
+        humidityUnit: forecast.current_units?.relative_humidity_2m ?? "%",
         windSpeed: forecast.current.wind_speed_10m,
+        windSpeedUnit: forecast.current_units?.wind_speed_10m ?? "m/s",
+        pressure:
+          forecast.current.surface_pressure ?? forecast.current.pressure_msl ?? Number.NaN,
+        pressureUnit:
+          forecast.current_units?.surface_pressure ??
+          forecast.current_units?.pressure_msl ??
+          "hPa",
+        precipitation: forecast.current.precipitation,
+        precipitationUnit: forecast.current_units?.precipitation ?? "mm",
+        uvIndex: forecast.current.uv_index,
+        uvIndexUnit: forecast.current_units?.uv_index ?? "",
         weatherCode: forecast.current.weather_code,
+        isDay: forecast.current.is_day === 1,
+        dailyHigh: forecast.daily?.temperature_2m_max?.[0] ?? Number.NaN,
+        dailyLow: forecast.daily?.temperature_2m_min?.[0] ?? Number.NaN,
+        dailyTemperatureUnit: forecast.daily_units?.temperature_2m_max ?? "°C",
+        airQuality:
+          airQualityPayload?.current
+            ? {
+                aqi: airQualityPayload.current.european_aqi,
+                aqiUnit: airQualityPayload.current_units?.european_aqi ?? "",
+                pm25: airQualityPayload.current.pm2_5,
+                pm25Unit: airQualityPayload.current_units?.pm2_5 ?? "µg/m³",
+                pm10: airQualityPayload.current.pm10,
+                pm10Unit: airQualityPayload.current_units?.pm10 ?? "µg/m³",
+                time: airQualityPayload.current.time,
+              }
+            : null,
+        localTime: timePayload?.datetime ?? null,
+        utcOffset: timePayload?.utc_offset ?? null,
+        dayOfWeek: Number.isFinite(timePayload?.day_of_week)
+          ? timePayload.day_of_week
+          : null,
       });
     } catch (error) {
       console.error("fetchWeather", error);
@@ -539,28 +772,31 @@ export default function TemperatureStudio() {
         <HeroSection presets={PRESETS} onPresetSelect={handlePresetSelect} />
 
         <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
-          <TemperatureInputCard
-            scale={scale}
-            scales={TEMPERATURE_SCALES}
-            onScaleChange={handleScaleChange}
-            rawInput={rawInput}
-            onInputChange={handleInputChange}
-            activeSymbol={activeScale?.symbol}
-            onReset={handleReset}
-            onAddHistory={handleAddHistory}
-            canAddHistory={canAddHistory}
-            sliderRange={sliderRange}
-            sliderValue={sliderValue}
-            sliderStep={sliderStep}
-            onSliderChange={handleSliderChange}
-            conversions={conversions}
-            copiedScale={copiedScale}
-            onCopy={handleCopy}
-            mood={mood}
-            relativeSolarProgress={relativeSolarProgress}
-            showSolarProgress={hasKelvinValue}
-            formatTemperature={formatTemperature}
-          />
+          <div className="min-w-0 space-y-8">
+            <TemperatureInputCard
+              scale={scale}
+              scales={TEMPERATURE_SCALES}
+              onScaleChange={handleScaleChange}
+              rawInput={rawInput}
+              onInputChange={handleInputChange}
+              activeSymbol={activeScale?.symbol}
+              onReset={handleReset}
+              onAddHistory={handleAddHistory}
+              canAddHistory={canAddHistory}
+              sliderRange={sliderRange}
+              sliderValue={sliderValue}
+              sliderStep={sliderStep}
+              onSliderChange={handleSliderChange}
+              conversions={conversions}
+              copiedScale={copiedScale}
+              onCopy={handleCopy}
+              mood={mood}
+              relativeSolarProgress={relativeSolarProgress}
+              showSolarProgress={hasKelvinValue}
+              formatTemperature={formatTemperature}
+            />
+            <InsightsSection insights={insights} />
+          </div>
 
           <div className="min-w-0 space-y-8">
             <HistorySection
@@ -581,13 +817,33 @@ export default function TemperatureStudio() {
               formatOptionalMetric={formatOptionalMetric}
               formatWeatherTime={formatWeatherTime}
               getWeatherDescription={getWeatherDescription}
+              formatLocalClock={formatLocalClock}
+              formatUtcOffset={formatUtcOffset}
+              formatCoordinate={formatCoordinate}
+              formatWeekday={formatWeekday}
             />
-            <InsightsSection insights={insights} />
           </div>
         </div>
 
         <FactsSection facts={FACTS} />
       </div>
+
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}
+        aria-pressed={theme === "light"}
+        className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+          theme === "dark"
+            ? "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-[#00CECB]"
+            : "bg-[#FF5E5B] text-slate-900 hover:bg-[#ff766f] focus-visible:outline-[#00CECB]"
+        }`}
+        title={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}
+      >
+        <span className="text-2xl" role="img" aria-hidden="true">
+          {theme === "dark" ? "🌙" : "☀️"}
+        </span>
+      </button>
     </main>
   );
 }
