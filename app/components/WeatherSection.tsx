@@ -1,4 +1,75 @@
-const classNames = (...values) => values.filter(Boolean).join(" ");
+import type { FormEvent } from "react";
+
+const classNames = (
+  ...values: Array<string | false | null | undefined>
+): string => values.filter(Boolean).join(" ");
+
+export type WeatherAirQuality = {
+  aqi: number;
+  aqiUnit: string;
+  pm25: number;
+  pm25Unit: string;
+  pm10: number;
+  pm10Unit: string;
+  time: string;
+};
+
+export type WeatherData = {
+  location: string;
+  administrative: string[];
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  } | null;
+  timezone: string;
+  timezoneAbbreviation: string;
+  observationTime: string;
+  temperature: number;
+  temperatureUnit: string;
+  apparentTemperature: number;
+  apparentTemperatureUnit: string;
+  humidity: number;
+  humidityUnit: string;
+  windSpeed: number;
+  windSpeedUnit: string;
+  pressure: number;
+  pressureUnit: string;
+  precipitation: number;
+  precipitationUnit: string;
+  uvIndex: number;
+  uvIndexUnit: string;
+  weatherCode: number;
+  isDay: boolean;
+  dailyHigh: number;
+  dailyLow: number;
+  dailyTemperatureUnit: string;
+  airQuality: WeatherAirQuality | null;
+  localTime: string | null;
+  utcOffset: string | null;
+  dayOfWeek: number | null;
+};
+
+type WeatherSectionProps = {
+  query: string;
+  onQueryChange: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  presets: string[];
+  onPresetSelect: (preset: string) => void;
+  loading: boolean;
+  error: string | null;
+  data: WeatherData | null;
+  formatOptionalMetric: (value: number, suffix?: string) => string;
+  formatWeatherTime: (value: string | null) => string;
+  getWeatherDescription: (code: number) => string;
+  formatLocalClock: (
+    value: string | null,
+    timezone: string | null | undefined,
+    options?: { withSeconds?: boolean }
+  ) => string;
+  formatUtcOffset: (value: string | null) => string;
+  formatCoordinate: (value: number | null) => string;
+  formatWeekday: (index: number | null) => string;
+};
 
 export function WeatherSection({
   query,
@@ -16,61 +87,69 @@ export function WeatherSection({
   formatUtcOffset,
   formatCoordinate,
   formatWeekday,
-}) {
-  const toCardinalCoordinate = (value, positive, negative) => {
+}: WeatherSectionProps) {
+  const toCardinalCoordinate = (
+    value: number | null,
+    positive: string,
+    negative: string
+  ): string => {
     if (!Number.isFinite(value)) return "--";
-    const direction = value >= 0 ? positive : negative;
-    return `${formatCoordinate(Math.abs(value))}°${direction}`;
+    const direction = (value ?? 0) >= 0 ? positive : negative;
+    return `${formatCoordinate(Math.abs(value ?? 0))}°${direction}`;
   };
 
   const climateHighlights = data
-    ? [
-        {
-          label: "體感溫度",
-          value: data.apparentTemperature,
-          unit: data.apparentTemperatureUnit ?? "°C",
-        },
-        {
-          label: "日最高",
-          value: data.dailyHigh,
-          unit: data.dailyTemperatureUnit ?? "°C",
-        },
-        {
-          label: "日最低",
-          value: data.dailyLow,
-          unit: data.dailyTemperatureUnit ?? "°C",
-        },
-      ].filter((item) => Number.isFinite(item.value))
+    ? (
+        [
+          {
+            label: "體感溫度",
+            value: data.apparentTemperature,
+            unit: data.apparentTemperatureUnit ?? "°C",
+          },
+          {
+            label: "日最高",
+            value: data.dailyHigh,
+            unit: data.dailyTemperatureUnit ?? "°C",
+          },
+          {
+            label: "日最低",
+            value: data.dailyLow,
+            unit: data.dailyTemperatureUnit ?? "°C",
+          },
+        ] satisfies Array<{ label: string; value: number; unit: string }>
+      ).filter((item) => Number.isFinite(item.value))
     : [];
 
   const environmentMetrics = data
-    ? [
-        {
-          label: "相對濕度",
-          value: data.humidity,
-          unit: data.humidityUnit ?? "%",
-        },
-        {
-          label: "風速",
-          value: data.windSpeed,
-          unit: data.windSpeedUnit ? ` ${data.windSpeedUnit}` : " m/s",
-        },
-        {
-          label: "氣壓",
-          value: data.pressure,
-          unit: data.pressureUnit ? ` ${data.pressureUnit}` : " hPa",
-        },
-        {
-          label: "降水量",
-          value: data.precipitation,
-          unit: data.precipitationUnit ? ` ${data.precipitationUnit}` : " mm",
-        },
-        {
-          label: "紫外線指數",
-          value: data.uvIndex,
-          unit: data.uvIndexUnit ?? "",
-        },
-      ].filter((item) => Number.isFinite(item.value))
+    ? (
+        [
+          {
+            label: "相對濕度",
+            value: data.humidity,
+            unit: data.humidityUnit ?? "%",
+          },
+          {
+            label: "風速",
+            value: data.windSpeed,
+            unit: data.windSpeedUnit ? ` ${data.windSpeedUnit}` : " m/s",
+          },
+          {
+            label: "氣壓",
+            value: data.pressure,
+            unit: data.pressureUnit ? ` ${data.pressureUnit}` : " hPa",
+          },
+          {
+            label: "降水量",
+            value: data.precipitation,
+            unit: data.precipitationUnit ? ` ${data.precipitationUnit}` : " mm",
+          },
+          {
+            label: "紫外線指數",
+            value: data.uvIndex,
+            unit: data.uvIndexUnit ?? "",
+          },
+        ] satisfies Array<{ label: string; value: number; unit: string }>
+      ).filter((item) => Number.isFinite(item.value))
     : [];
 
   const coordinatesText = data?.coordinates
@@ -119,7 +198,8 @@ export function WeatherSection({
               className={classNames(
                 "theme-chip w-full md:w-auto",
                 query === preset ? "theme-chip--active" : ""
-              )}>
+              )}
+            >
               {preset}
             </button>
           ))}
@@ -127,7 +207,8 @@ export function WeatherSection({
         <button
           type="submit"
           disabled={loading}
-          className="theme-primary-button w-full">
+          className="theme-primary-button w-full"
+        >
           {loading ? (
             <>
               <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-[#00CECB]/70 border-t-transparent" />
@@ -156,24 +237,20 @@ export function WeatherSection({
                 <p className="text-base font-semibold text-slate-100">
                   {data.location}
                 </p>
-                {data.administrative?.length ? (
+                {data.administrative.length ? (
                   <p className="text-xs text-slate-400">
                     {data.administrative.join(" · ")}
                   </p>
                 ) : null}
                 <p className="text-xs text-slate-400">
-                  {getWeatherDescription(data.weatherCode)} · 觀測時間{" "}
-                  {formatWeatherTime(data.observationTime)}
-                  {data.timezoneAbbreviation
-                    ? `（${data.timezoneAbbreviation}）`
-                    : ""}
+                  {getWeatherDescription(data.weatherCode)} · 觀測時間 {formatWeatherTime(data.observationTime)}
+                  {data.timezoneAbbreviation ? `（${data.timezoneAbbreviation}）` : ""}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 {data.localTime ? (
                   <span className="theme-badge">
-                    🕑 當地{" "}
-                    {formatLocalClock(data.localTime, data.timezone, {
+                    🕑 當地 {formatLocalClock(data.localTime, data.timezone, {
                       withSeconds: true,
                     })}
                   </span>
@@ -196,10 +273,7 @@ export function WeatherSection({
               <div className="min-w-0 space-y-5">
                 <div className="space-y-3">
                   <p className="text-4xl font-bold text-slate-50">
-                    {formatOptionalMetric(
-                      data.temperature,
-                      data.temperatureUnit ?? "°C"
-                    )}
+                    {formatOptionalMetric(data.temperature, data.temperatureUnit ?? "°C")}
                   </p>
                   <p className="text-sm text-slate-300">
                     將即時環境條件與溫度轉換結合，減少外部誤差與判斷成本。
@@ -210,7 +284,8 @@ export function WeatherSection({
                     {climateHighlights.map((item) => (
                       <div
                         key={item.label}
-                        className="min-w-0 space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3">
+                        className="min-w-0 space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3"
+                      >
                         <span className="text-xs uppercase tracking-wide text-slate-400">
                           {item.label}
                         </span>
@@ -236,7 +311,8 @@ export function WeatherSection({
                     {environmentMetrics.map((item) => (
                       <div
                         key={item.label}
-                        className="flex items-center justify-between text-sm text-slate-200">
+                        className="flex items-center justify-between text-sm text-slate-200"
+                      >
                         <span>{item.label}</span>
                         <span className="font-semibold">
                           {formatOptionalMetric(item.value, item.unit)}
@@ -266,10 +342,7 @@ export function WeatherSection({
                 {data.airQuality ? (
                   <div className="space-y-4">
                     <p className="text-3xl font-bold text-slate-50">
-                      {formatOptionalMetric(
-                        data.airQuality.aqi,
-                        data.airQuality.aqiUnit ?? ""
-                      )}
+                      {formatOptionalMetric(data.airQuality.aqi, data.airQuality.aqiUnit ?? "")}
                     </p>
                     <div className="grid gap-3 text-sm text-slate-200">
                       <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
@@ -279,9 +352,7 @@ export function WeatherSection({
                         <p className="font-semibold">
                           {formatOptionalMetric(
                             data.airQuality.pm25,
-                            data.airQuality.pm25Unit
-                              ? ` ${data.airQuality.pm25Unit}`
-                              : ""
+                            data.airQuality.pm25Unit ? ` ${data.airQuality.pm25Unit}` : ""
                           )}
                         </p>
                       </div>
@@ -292,9 +363,7 @@ export function WeatherSection({
                         <p className="font-semibold">
                           {formatOptionalMetric(
                             data.airQuality.pm10,
-                            data.airQuality.pm10Unit
-                              ? ` ${data.airQuality.pm10Unit}`
-                              : ""
+                            data.airQuality.pm10Unit ? ` ${data.airQuality.pm10Unit}` : ""
                           )}
                         </p>
                       </div>
@@ -312,8 +381,7 @@ export function WeatherSection({
             </div>
 
             <p className="text-xs text-slate-500">
-              若需更精細的自動化流程，可將這些 API
-              串接至監控儀表板或報表系統中。
+              若需更精細的自動化流程，可將這些 API 串接至監控儀表板或報表系統中。
             </p>
           </div>
         ) : (

@@ -1,4 +1,14 @@
-export function FactsSection({ facts }) {
+export type Fact = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
+type FactsSectionProps = {
+  facts: Fact[];
+};
+
+export function FactsSection({ facts }: FactsSectionProps) {
   return (
     <section className="w-full min-w-0 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
       <div className="flex items-center gap-3 text-slate-200">

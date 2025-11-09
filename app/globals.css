@@ -136,6 +136,7 @@
     @apply min-h-screen w-full max-w-full overflow-x-hidden antialiased transition-colors duration-500 ease-out;
     background-image: var(--body-background);
     color: var(--text-strong);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
   }
 
   a {

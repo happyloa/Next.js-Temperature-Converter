@@ -1,4 +1,14 @@
-export function InsightsSection({ insights }) {
+export type ThermalInsight = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
+type InsightsSectionProps = {
+  insights: ThermalInsight[];
+};
+
+export function InsightsSection({ insights }: InsightsSectionProps) {
   return (
     <section className="w-full min-w-0 space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-7">
       <div className="flex items-center gap-3 text-slate-200">

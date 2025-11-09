@@ -1,15 +1,118 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { FactsSection } from "./components/FactsSection";
+import type { Fact } from "./components/FactsSection";
 import { HeroSection } from "./components/HeroSection";
+import type { TemperaturePreset } from "./components/HeroSection";
 import { HistorySection } from "./components/HistorySection";
+import type {
+  HistoryEntry,
+  TemperatureConversionSummary,
+} from "./components/HistorySection";
 import { InsightsSection } from "./components/InsightsSection";
+import type { ThermalInsight } from "./components/InsightsSection";
 import { TemperatureInputCard } from "./components/TemperatureInputCard";
+import type {
+  TemperatureConversion,
+  TemperatureScale,
+  TemperatureScaleCode,
+  ThermalMood,
+} from "./components/TemperatureInputCard";
 import { WeatherSection } from "./components/WeatherSection";
+import type { WeatherData } from "./components/WeatherSection";
 
-const TEMPERATURE_SCALES = [
+const TEMPERATURE_SCALE_CODES: TemperatureScaleCode[] = [
+  "celsius",
+  "fahrenheit",
+  "kelvin",
+  "rankine",
+  "reaumur",
+  "newton",
+];
+
+type GeoApiLocation = {
+  name: string;
+  latitude: number;
+  longitude: number;
+  timezone?: string;
+  country?: string;
+  admin1?: string;
+  admin2?: string;
+  admin3?: string;
+};
+
+type GeoApiResponse = {
+  results?: GeoApiLocation[];
+};
+
+type ForecastApiResponse = {
+  current: {
+    time: string;
+    temperature_2m: number;
+    apparent_temperature: number;
+    relative_humidity_2m: number;
+    wind_speed_10m: number;
+    weather_code: number;
+    surface_pressure?: number;
+    pressure_msl?: number;
+    precipitation: number;
+    uv_index: number;
+    is_day: number;
+  };
+  current_units?: {
+    temperature_2m?: string;
+    apparent_temperature?: string;
+    relative_humidity_2m?: string;
+    wind_speed_10m?: string;
+    surface_pressure?: string;
+    pressure_msl?: string;
+    precipitation?: string;
+    uv_index?: string;
+  };
+  daily?: {
+    temperature_2m_max?: number[];
+    temperature_2m_min?: number[];
+  };
+  daily_units?: {
+    temperature_2m_max?: string;
+    temperature_2m_min?: string;
+  };
+  timezone?: string;
+  timezone_abbreviation?: string;
+};
+
+type AirQualityApiResponse = {
+  current?: {
+    european_aqi: number;
+    pm2_5: number;
+    pm10: number;
+    time: string;
+  };
+  current_units?: {
+    european_aqi?: string;
+    pm2_5?: string;
+    pm10?: string;
+  };
+};
+
+type TimeApiResponse = {
+  timezone?: string;
+  abbreviation?: string;
+  datetime?: string;
+  utc_offset?: string;
+  day_of_week?: number | null;
+};
+
+const TEMPERATURE_SCALES: TemperatureScale[] = [
   {
     code: "celsius",
     label: "攝氏 (°C)",
@@ -60,7 +163,7 @@ const TEMPERATURE_SCALES = [
   },
 ];
 
-const PRESETS = [
+const PRESETS: TemperaturePreset[] = [
   { label: "絕對零度", value: 0, scale: "kelvin", emoji: "🧊" },
   { label: "冰點", value: 0, scale: "celsius", emoji: "❄️" },
   { label: "體溫", value: 98.6, scale: "fahrenheit", emoji: "🫀" },
@@ -70,7 +173,7 @@ const PRESETS = [
   { label: "太陽表面", value: 5778, scale: "kelvin", emoji: "☀️" },
 ];
 
-const FACTS = [
+const FACTS: Fact[] = [
   {
     icon: "🌍",
     title: "全球環境整合",
@@ -91,7 +194,7 @@ const FACTS = [
   },
 ];
 
-const WEATHER_CODE_MAP = {
+const WEATHER_CODE_MAP: Record<number, string> = {
   0: "晴朗無雲",
   1: "大致晴朗",
   2: "局部多雲",
@@ -122,7 +225,7 @@ const WEATHER_CODE_MAP = {
   99: "強雷陣雨伴隨冰雹",
 };
 
-const WEATHER_PRESETS = ["高雄", "東京", "紐約", "倫敦"];
+const WEATHER_PRESETS: string[] = ["高雄", "東京", "紐約", "倫敦"];
 
 const numberFormatter = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 2,
@@ -148,27 +251,29 @@ const HISTORY_STORAGE_KEY = "temperature-studio-history";
 
 const decimalPattern = /^-?\d*(\.\d*)?$/;
 
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(Math.max(value, min), max);
 
-const toInputString = (value) => {
+const toInputString = (value: number): string => {
   if (!Number.isFinite(value)) return "";
   const trimmed = Number(value.toFixed(4));
   return `${trimmed}`;
 };
 
-const formatTemperature = (value) => numberFormatter.format(value);
+const formatTemperature = (value: number): string =>
+  numberFormatter.format(value);
 
-const getWeatherDescription = (code) =>
+const getWeatherDescription = (code: number): string =>
   WEATHER_CODE_MAP[code] ?? "天氣狀況不明，請再試一次。";
 
-const formatOptionalMetric = (value, suffix = "") => {
+const formatOptionalMetric = (value: number, suffix = ""): string => {
   if (!Number.isFinite(value)) {
     return suffix ? `--${suffix}` : "--";
   }
   return `${formatTemperature(value)}${suffix}`;
 };
 
-const formatWeatherTime = (value) => {
+const formatWeatherTime = (value: string | null): string => {
   if (!value) return "--";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -177,9 +282,13 @@ const formatWeatherTime = (value) => {
   return dateTimeFormatter.format(date);
 };
 
-const WEEKDAY_LABELS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+const WEEKDAY_LABELS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"] as const;
 
-const formatLocalClock = (value, timezone, { withSeconds = false } = {}) => {
+const formatLocalClock = (
+  value: string | null,
+  timezone: string | null | undefined,
+  { withSeconds = false }: { withSeconds?: boolean } = {}
+): string => {
   if (!value) return "--";
 
   try {
@@ -202,7 +311,7 @@ const formatLocalClock = (value, timezone, { withSeconds = false } = {}) => {
   }
 };
 
-const formatUtcOffset = (value) => {
+const formatUtcOffset = (value: string | null): string => {
   if (!value) return "UTC±00:00";
   const normalized = `${value}`.trim();
   if (/^[+-]\d{2}:\d{2}$/.test(normalized)) {
@@ -211,20 +320,20 @@ const formatUtcOffset = (value) => {
   return `UTC${normalized}`;
 };
 
-const formatWeekday = (index) => {
+const formatWeekday = (index: number | null): string => {
   if (!Number.isFinite(index)) return "--";
-  return WEEKDAY_LABELS[index] ?? `週${index}`;
+  return WEEKDAY_LABELS[index as number] ?? `週${index}`;
 };
 
-const formatCoordinate = (value) => {
+const formatCoordinate = (value: number | null): string => {
   if (!Number.isFinite(value)) return "--";
-  return numberFormatter.format(value);
+  return numberFormatter.format(value as number);
 };
 
-const getScale = (code) =>
+const getScale = (code: TemperatureScaleCode): TemperatureScale | undefined =>
   TEMPERATURE_SCALES.find((item) => item.code === code);
 
-const getThermalMood = (celsiusValue) => {
+const getThermalMood = (celsiusValue: number): ThermalMood => {
   if (!Number.isFinite(celsiusValue)) {
     return {
       title: "等待輸入",
@@ -288,26 +397,75 @@ const getThermalMood = (celsiusValue) => {
   };
 };
 
+const isTemperatureConversionSummary = (
+  value: unknown
+): value is TemperatureConversionSummary => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<TemperatureConversionSummary>;
+  return (
+    typeof candidate.label === "string" &&
+    typeof candidate.symbol === "string" &&
+    typeof candidate.result === "number" &&
+    typeof candidate.code === "string" &&
+    TEMPERATURE_SCALE_CODES.includes(candidate.code as TemperatureScaleCode)
+  );
+};
+
+const isHistoryEntry = (value: unknown): value is HistoryEntry => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<HistoryEntry>;
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.timestamp === "string" &&
+    typeof candidate.scale === "string" &&
+    TEMPERATURE_SCALE_CODES.includes(candidate.scale as TemperatureScaleCode) &&
+    typeof candidate.scaleLabel === "string" &&
+    typeof candidate.scaleSymbol === "string" &&
+    typeof candidate.value === "number" &&
+    Array.isArray(candidate.conversions) &&
+    candidate.conversions.every(isTemperatureConversionSummary)
+  );
+};
+
+const parseHistoryPayload = (value: unknown): HistoryEntry[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(isHistoryEntry);
+};
+
 export default function TemperatureStudio() {
-  const [scale, setScale] = useState("celsius");
-  const [value, setValue] = useState(25);
-  const [rawInput, setRawInput] = useState("25");
-  const [history, setHistory] = useState([]);
+  const [scale, setScale] = useState<TemperatureScaleCode>("celsius");
+  const [value, setValue] = useState<number>(25);
+  const [rawInput, setRawInput] = useState<string>("25");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyHydrated, setHistoryHydrated] = useState(false);
-  const [copiedScale, setCopiedScale] = useState(null);
-  const [weatherQuery, setWeatherQuery] = useState("高雄");
-  const [weatherData, setWeatherData] = useState(null);
+  const [copiedScale, setCopiedScale] = useState<TemperatureScaleCode | null>(
+    null
+  );
+  const [weatherQuery, setWeatherQuery] = useState<string>("高雄");
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
-  const [weatherError, setWeatherError] = useState(null);
-  const [theme, setTheme] = useState("dark");
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
-  const historyStorageRef = useRef("local");
+  const historyStorageRef = useRef<"local" | "session">("local");
 
-  const activeScale = useMemo(() => getScale(scale), [scale]);
+  const activeScale = useMemo(
+    () => getScale(scale),
+    [scale]
+  );
 
   const sliderRange = useMemo(() => {
     if (!activeScale) {
-      return { min: -273.15, max: 6000 };
+      return { min: -273.15, max: 6000 } as const;
     }
     const min = activeScale.fromKelvin(ABSOLUTE_ZERO_K);
     const max = activeScale.fromKelvin(SOLAR_SURFACE_K);
@@ -317,7 +475,7 @@ export default function TemperatureStudio() {
     };
   }, [activeScale]);
 
-  const conversions = useMemo(() => {
+  const conversions = useMemo<TemperatureConversion[]>(() => {
     if (!activeScale) return [];
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return [];
@@ -339,7 +497,7 @@ export default function TemperatureStudio() {
     return kelvinScale ? kelvinScale.result : Number.NaN;
   }, [conversions]);
 
-  const insights = useMemo(() => {
+  const insights = useMemo<ThermalInsight[]>(() => {
     if (!Number.isFinite(celsiusValue)) return [];
 
     const mood = getThermalMood(celsiusValue);
@@ -377,7 +535,7 @@ export default function TemperatureStudio() {
     ];
   }, [celsiusValue]);
 
-  const handleScaleChange = (nextScale) => {
+  const handleScaleChange = (nextScale: TemperatureScaleCode) => {
     if (!nextScale || nextScale === scale) return;
     const nextScaleConfig = getScale(nextScale);
     if (!nextScaleConfig || !activeScale) {
@@ -400,7 +558,7 @@ export default function TemperatureStudio() {
     setRawInput(toInputString(converted));
   };
 
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value: nextValue } = event.target;
     if (!decimalPattern.test(nextValue)) return;
     setRawInput(nextValue);
@@ -425,7 +583,7 @@ export default function TemperatureStudio() {
     setValue(clamped);
   };
 
-  const handleSliderChange = (event) => {
+  const handleSliderChange = (event: ChangeEvent<HTMLInputElement>) => {
     const numeric = Number(event.target.value);
     if (!Number.isFinite(numeric)) return;
     setValue(numeric);
@@ -438,7 +596,7 @@ export default function TemperatureStudio() {
     setRawInput("25");
   };
 
-  const handlePresetSelect = (preset) => {
+  const handlePresetSelect = (preset: TemperaturePreset) => {
     setScale(preset.scale);
     setValue(preset.value);
     setRawInput(toInputString(preset.value));
@@ -448,19 +606,20 @@ export default function TemperatureStudio() {
     if (
       !Number.isFinite(value) ||
       !Number.isFinite(celsiusValue) ||
-      conversions.length === 0
+      conversions.length === 0 ||
+      !activeScale
     ) {
       return;
     }
 
-    const entry = {
+    const entry: HistoryEntry = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
       scale,
-      scaleLabel: activeScale?.label ?? "",
-      scaleSymbol: activeScale?.symbol ?? "",
+      scaleLabel: activeScale.label,
+      scaleSymbol: activeScale.symbol,
       value,
-      conversions: conversions.map((item) => ({
+      conversions: conversions.map<TemperatureConversionSummary>((item) => ({
         code: item.code,
         label: item.label,
         symbol: item.symbol,
@@ -473,15 +632,18 @@ export default function TemperatureStudio() {
 
   const handleClearHistory = () => setHistory([]);
 
-  const handleCopy = useCallback(async (text, code) => {
-    try {
-      await navigator.clipboard?.writeText(text);
-      setCopiedScale(code);
-      setTimeout(() => setCopiedScale(null), 1800);
-    } catch (error) {
-      console.error("Failed to copy", error);
-    }
-  }, []);
+  const handleCopy = useCallback(
+    async (text: string, code: TemperatureScaleCode) => {
+      try {
+        await navigator.clipboard?.writeText(text);
+        setCopiedScale(code);
+        setTimeout(() => setCopiedScale(null), 1800);
+      } catch (error) {
+        console.error("Failed to copy", error);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -496,7 +658,7 @@ export default function TemperatureStudio() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const storages = [
+    const storages: Array<{ name: "local" | "session"; storage: Storage }> = [
       { name: "local", storage: window.localStorage },
       { name: "session", storage: window.sessionStorage },
     ];
@@ -508,8 +670,8 @@ export default function TemperatureStudio() {
           continue;
         }
 
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
+        const parsed = parseHistoryPayload(JSON.parse(raw) as unknown);
+        if (parsed.length) {
           setHistory(parsed);
           historyStorageRef.current = name;
           break;
@@ -529,7 +691,7 @@ export default function TemperatureStudio() {
 
     const payload = history.length > 0 ? JSON.stringify(history) : null;
 
-    const storages =
+    const storages: Array<{ name: "local" | "session"; storage: Storage }> =
       historyStorageRef.current === "session"
         ? [
             { name: "session", storage: window.sessionStorage },
@@ -540,7 +702,7 @@ export default function TemperatureStudio() {
             { name: "session", storage: window.sessionStorage },
           ];
 
-    const isQuotaExceeded = (error) => {
+    const isQuotaExceeded = (error: unknown): boolean => {
       if (!error) return false;
       if (error instanceof DOMException) {
         return (
@@ -572,7 +734,7 @@ export default function TemperatureStudio() {
     }
   }, [history, historyHydrated]);
 
-  const fetchWeather = useCallback(async (query) => {
+  const fetchWeather = useCallback(async (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) {
       setWeatherError("請輸入地點名稱");
@@ -595,7 +757,7 @@ export default function TemperatureStudio() {
         throw new Error("地理定位服務暫時無法使用");
       }
 
-      const geoData = await geoResponse.json();
+      const geoData = (await geoResponse.json()) as GeoApiResponse;
 
       if (!geoData?.results?.length) {
         setWeatherData(null);
@@ -603,12 +765,12 @@ export default function TemperatureStudio() {
         return;
       }
 
-      const location = geoData.results[0];
+      const location = geoData.results[0]!;
       const timezone = location.timezone ?? "auto";
 
       const forecastUrl = new URL("https://api.open-meteo.com/v1/forecast");
-      forecastUrl.searchParams.set("latitude", location.latitude);
-      forecastUrl.searchParams.set("longitude", location.longitude);
+      forecastUrl.searchParams.set("latitude", String(location.latitude));
+      forecastUrl.searchParams.set("longitude", String(location.longitude));
       forecastUrl.searchParams.set(
         "current",
         [
@@ -634,8 +796,8 @@ export default function TemperatureStudio() {
       const airQualityUrl = new URL(
         "https://air-quality-api.open-meteo.com/v1/air-quality"
       );
-      airQualityUrl.searchParams.set("latitude", location.latitude);
-      airQualityUrl.searchParams.set("longitude", location.longitude);
+      airQualityUrl.searchParams.set("latitude", String(location.latitude));
+      airQualityUrl.searchParams.set("longitude", String(location.longitude));
       airQualityUrl.searchParams.set(
         "current",
         ["european_aqi", "pm2_5", "pm10"].join(",")
@@ -652,35 +814,35 @@ export default function TemperatureStudio() {
                   location.timezone
                 )}`
               )
-            : Promise.resolve(null),
+            : Promise.resolve<Response | null>(null),
         ]);
 
       if (forecastResult.status !== "fulfilled" || !forecastResult.value?.ok) {
         throw new Error("天氣資料取得失敗");
       }
 
-      const forecast = await forecastResult.value.json();
+      const forecast = (await forecastResult.value.json()) as ForecastApiResponse;
 
       if (!forecast?.current) {
         throw new Error("目前無法取得天氣資訊");
       }
 
-      let airQualityPayload = null;
+      let airQualityPayload: AirQualityApiResponse | null = null;
       if (
         airQualityResult.status === "fulfilled" &&
         airQualityResult.value?.ok
       ) {
         try {
-          airQualityPayload = await airQualityResult.value.json();
+          airQualityPayload = (await airQualityResult.value.json()) as AirQualityApiResponse;
         } catch (error) {
           console.error("airQualityPayload", error);
         }
       }
 
-      let timePayload = null;
+      let timePayload: TimeApiResponse | null = null;
       if (timeResult.status === "fulfilled" && timeResult.value?.ok) {
         try {
-          timePayload = await timeResult.value.json();
+          timePayload = (await timeResult.value.json()) as TimeApiResponse;
         } catch (error) {
           console.error("timePayload", error);
         }
@@ -700,7 +862,7 @@ export default function TemperatureStudio() {
           location.admin1,
           location.admin2,
           location.admin3,
-        ].filter(Boolean),
+        ].filter((item): item is string => Boolean(item)),
         coordinates: {
           latitude: location.latitude,
           longitude: location.longitude,
@@ -736,28 +898,36 @@ export default function TemperatureStudio() {
         isDay: forecast.current.is_day === 1,
         dailyHigh: forecast.daily?.temperature_2m_max?.[0] ?? Number.NaN,
         dailyLow: forecast.daily?.temperature_2m_min?.[0] ?? Number.NaN,
-        dailyTemperatureUnit: forecast.daily_units?.temperature_2m_max ?? "°C",
+        dailyTemperatureUnit:
+          forecast.daily_units?.temperature_2m_max ?? "°C",
         airQuality: airQualityPayload?.current
           ? {
               aqi: airQualityPayload.current.european_aqi,
-              aqiUnit: airQualityPayload.current_units?.european_aqi ?? "",
+              aqiUnit:
+                airQualityPayload.current_units?.european_aqi ?? "",
               pm25: airQualityPayload.current.pm2_5,
-              pm25Unit: airQualityPayload.current_units?.pm2_5 ?? "µg/m³",
+              pm25Unit:
+                airQualityPayload.current_units?.pm2_5 ?? "µg/m³",
               pm10: airQualityPayload.current.pm10,
-              pm10Unit: airQualityPayload.current_units?.pm10 ?? "µg/m³",
+              pm10Unit:
+                airQualityPayload.current_units?.pm10 ?? "µg/m³",
               time: airQualityPayload.current.time,
             }
           : null,
         localTime: timePayload?.datetime ?? null,
         utcOffset: timePayload?.utc_offset ?? null,
         dayOfWeek: Number.isFinite(timePayload?.day_of_week)
-          ? timePayload.day_of_week
+          ? (timePayload?.day_of_week as number)
           : null,
       });
     } catch (error) {
       console.error("fetchWeather", error);
       setWeatherData(null);
-      setWeatherError(error.message ?? "無法取得天氣資訊，請稍後再試。");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "無法取得天氣資訊，請稍後再試。";
+      setWeatherError(message);
     } finally {
       setWeatherLoading(false);
     }
@@ -768,15 +938,15 @@ export default function TemperatureStudio() {
   }, [fetchWeather]);
 
   const handleWeatherSubmit = useCallback(
-    (event) => {
-      event?.preventDefault();
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
       fetchWeather(weatherQuery);
     },
     [fetchWeather, weatherQuery]
   );
 
   const handleWeatherPreset = useCallback(
-    (preset) => {
+    (preset: string) => {
       setWeatherQuery(preset);
       fetchWeather(preset);
     },
@@ -876,7 +1046,8 @@ export default function TemperatureStudio() {
             ? "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-[#00CECB]"
             : "bg-[#FF5E5B] text-slate-900 hover:bg-[#ff766f] focus-visible:outline-[#00CECB]"
         }`}
-        title={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}>
+        title={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}
+      >
         <span className="text-2xl" role="img" aria-hidden="true">
           {theme === "dark" ? "🌙" : "☀️"}
         </span>
