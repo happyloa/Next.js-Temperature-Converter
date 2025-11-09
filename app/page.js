@@ -74,8 +74,7 @@ const FACTS = [
   {
     icon: "🌍",
     title: "全球環境整合",
-    description:
-      "結合 Open-Meteo 天氣、World Time API 時區與 Sunrise-Sunset 日照資訊，瞬間掌握外部環境。",
+    description: "結合 Open-Meteo 天氣與 World Time API 時區資訊，瞬間掌握外部環境。",
   },
   {
     icon: "🧪",
@@ -215,24 +214,6 @@ const formatWeekday = (index) => {
   return WEEKDAY_LABELS[index] ?? `週${index}`;
 };
 
-const parseDayLength = (value) => {
-  if (typeof value !== "string") return Number.NaN;
-  const segments = value.split(":").map((segment) => Number(segment));
-  if (segments.length !== 3 || segments.some((segment) => Number.isNaN(segment))) {
-    return Number.NaN;
-  }
-  const [hours, minutes, seconds] = segments;
-  return hours * 3600 + minutes * 60 + seconds;
-};
-
-const formatDayLength = (seconds) => {
-  if (!Number.isFinite(seconds)) return "--";
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainSeconds = Math.round(seconds % 60);
-  return `${hours} 小時 ${minutes} 分 ${remainSeconds} 秒`;
-};
-
 const formatCoordinate = (value) => {
   if (!Number.isFinite(value)) return "--";
   return numberFormatter.format(value);
@@ -315,6 +296,7 @@ export default function TemperatureStudio() {
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState(null);
+  const [theme, setTheme] = useState("dark");
 
   const activeScale = useMemo(() => getScale(scale), [scale]);
 
@@ -492,6 +474,16 @@ export default function TemperatureStudio() {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.dataset.theme = theme;
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  }, []);
+
   const fetchWeather = useCallback(async (query) => {
     const trimmed = query.trim();
     if (!trimmed) {
@@ -554,18 +546,12 @@ export default function TemperatureStudio() {
       airQualityUrl.searchParams.set("current", ["european_aqi", "pm2_5", "pm10"].join(","));
       airQualityUrl.searchParams.set("timezone", timezone);
 
-      const sunriseUrl = new URL("https://api.sunrise-sunset.org/json");
-      sunriseUrl.searchParams.set("lat", location.latitude);
-      sunriseUrl.searchParams.set("lng", location.longitude);
-      sunriseUrl.searchParams.set("formatted", "0");
-
-      const [forecastResult, airQualityResult, timeResult, sunriseResult] = await Promise.allSettled([
+      const [forecastResult, airQualityResult, timeResult] = await Promise.allSettled([
         fetch(forecastUrl.toString()),
         fetch(airQualityUrl.toString()),
         location.timezone
           ? fetch(`https://worldtimeapi.org/api/timezone/${encodeURIComponent(location.timezone)}`)
           : Promise.resolve(null),
-        fetch(sunriseUrl.toString()),
       ]);
 
       if (forecastResult.status !== "fulfilled" || !forecastResult.value?.ok) {
@@ -595,20 +581,6 @@ export default function TemperatureStudio() {
           console.error("timePayload", error);
         }
       }
-
-      let sunrisePayload = null;
-      if (sunriseResult.status === "fulfilled" && sunriseResult.value?.ok) {
-        try {
-          sunrisePayload = await sunriseResult.value.json();
-        } catch (error) {
-          console.error("sunrisePayload", error);
-        }
-      }
-
-      const dayLengthSeconds =
-        sunrisePayload?.status === "OK"
-          ? parseDayLength(sunrisePayload?.results?.day_length)
-          : Number.NaN;
 
       const resolvedTimezone =
         location.timezone ?? timePayload?.timezone ?? forecast.timezone ?? "UTC";
@@ -664,11 +636,6 @@ export default function TemperatureStudio() {
         dayOfWeek: Number.isFinite(timePayload?.day_of_week)
           ? timePayload.day_of_week
           : null,
-        sunrise:
-          sunrisePayload?.status === "OK" ? sunrisePayload?.results?.sunrise ?? null : null,
-        sunset:
-          sunrisePayload?.status === "OK" ? sunrisePayload?.results?.sunset ?? null : null,
-        dayLengthSeconds,
       });
     } catch (error) {
       console.error("fetchWeather", error);
@@ -768,7 +735,6 @@ export default function TemperatureStudio() {
               formatWeatherTime={formatWeatherTime}
               getWeatherDescription={getWeatherDescription}
               formatLocalClock={formatLocalClock}
-              formatDayLength={formatDayLength}
               formatUtcOffset={formatUtcOffset}
               formatCoordinate={formatCoordinate}
               formatWeekday={formatWeekday}
@@ -778,6 +744,23 @@ export default function TemperatureStudio() {
 
         <FactsSection facts={FACTS} />
       </div>
+
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}
+        aria-pressed={theme === "light"}
+        className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+          theme === "dark"
+            ? "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-sky-400"
+            : "bg-[#FF5E5B] text-slate-900 hover:bg-[#ff766f] focus-visible:outline-[#00CECB]"
+        }`}
+        title={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}
+      >
+        <span className="text-2xl" role="img" aria-hidden="true">
+          {theme === "dark" ? "🌙" : "☀️"}
+        </span>
+      </button>
     </main>
   );
 }

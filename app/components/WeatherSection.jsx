@@ -13,7 +13,6 @@ export function WeatherSection({
   formatWeatherTime,
   getWeatherDescription,
   formatLocalClock,
-  formatDayLength,
   formatUtcOffset,
   formatCoordinate,
   formatWeekday,
@@ -86,9 +85,6 @@ export function WeatherSection({
     ? formatLocalClock(data.airQuality.time, data.timezone, { withSeconds: false })
     : "--";
 
-  const daylightAvailable =
-    Number.isFinite(data?.dayLengthSeconds) && data?.sunrise && data?.sunset;
-
   return (
     <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur sm:p-7">
       <div className="flex flex-col gap-3">
@@ -97,7 +93,7 @@ export function WeatherSection({
           <h2 className="text-xl font-semibold">全球環境儀表板</h2>
         </div>
         <p className="text-sm text-slate-300">
-          串接 Open-Meteo 天氣、World Time API 與 Sunrise-Sunset 日照資訊，讓溫度轉換具備完整的情境背景。
+          串接 Open-Meteo 天氣與 World Time API，讓溫度轉換具備完整的情境背景。
         </p>
       </div>
 
@@ -275,37 +271,6 @@ export function WeatherSection({
                 ) : (
                   <p className="rounded-xl border border-dashed border-slate-700/40 bg-slate-950/40 px-3 py-4 text-xs text-slate-400">
                     此地點暫無空氣品質資訊。
-                  </p>
-                )}
-              </div>
-
-              <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
-                <span className="text-xs uppercase tracking-wide text-slate-300">日照資訊</span>
-                {daylightAvailable ? (
-                  <div className="space-y-3 text-sm text-slate-200">
-                    <div className="flex items-center justify-between">
-                      <span>日照長度</span>
-                      <span className="font-semibold">{formatDayLength(data.dayLengthSeconds)}</span>
-                    </div>
-                    <div className="grid gap-3">
-                      <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
-                        <span className="text-xs uppercase tracking-wide text-slate-400">日出</span>
-                        <p className="font-semibold">
-                          {formatLocalClock(data.sunrise, data.timezone, { withSeconds: false })}
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
-                        <span className="text-xs uppercase tracking-wide text-slate-400">日落</span>
-                        <p className="font-semibold">
-                          {formatLocalClock(data.sunset, data.timezone, { withSeconds: false })}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">數據來源：Sunrise-Sunset.org</p>
-                  </div>
-                ) : (
-                  <p className="rounded-xl border border-dashed border-slate-700/40 bg-slate-950/40 px-3 py-4 text-xs text-slate-400">
-                    暫時無法取得此地點的日照資訊。
                   </p>
                 )}
               </div>
