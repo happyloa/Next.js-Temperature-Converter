@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { FactsSection } from "./components/FactsSection";
 import { HeroSection } from "./components/HeroSection";
@@ -143,6 +143,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("zh-TW", {
 
 const ABSOLUTE_ZERO_K = 0;
 const SOLAR_SURFACE_K = 5778;
+const HISTORY_STORAGE_KEY = "temperature-studio-history";
 
 const decimalPattern = /^-?\d*(\.\d*)?$/;
 
@@ -291,12 +292,15 @@ export default function TemperatureStudio() {
   const [value, setValue] = useState(25);
   const [rawInput, setRawInput] = useState("25");
   const [history, setHistory] = useState([]);
+  const [historyHydrated, setHistoryHydrated] = useState(false);
   const [copiedScale, setCopiedScale] = useState(null);
   const [weatherQuery, setWeatherQuery] = useState("高雄");
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState(null);
   const [theme, setTheme] = useState("dark");
+
+  const historyStorageRef = useRef("local");
 
   const activeScale = useMemo(() => getScale(scale), [scale]);
 
@@ -483,6 +487,85 @@ export default function TemperatureStudio() {
   const toggleTheme = useCallback(() => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storages = [
+      { name: "local", storage: window.localStorage },
+      { name: "session", storage: window.sessionStorage },
+    ];
+
+    for (const { name, storage } of storages) {
+      try {
+        const raw = storage.getItem(HISTORY_STORAGE_KEY);
+        if (!raw) {
+          continue;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setHistory(parsed);
+          historyStorageRef.current = name;
+          break;
+        }
+      } catch (error) {
+        console.error("Failed to restore history", error);
+      }
+    }
+
+    setHistoryHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !historyHydrated) {
+      return;
+    }
+
+    const payload = history.length > 0 ? JSON.stringify(history) : null;
+
+    const storages =
+      historyStorageRef.current === "session"
+        ? [
+            { name: "session", storage: window.sessionStorage },
+            { name: "local", storage: window.localStorage },
+          ]
+        : [
+            { name: "local", storage: window.localStorage },
+            { name: "session", storage: window.sessionStorage },
+          ];
+
+    const isQuotaExceeded = (error) => {
+      if (!error) return false;
+      if (error instanceof DOMException) {
+        return (
+          error.name === "QuotaExceededError" ||
+          error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+          error.code === 22 ||
+          error.code === 1014
+        );
+      }
+      return false;
+    };
+
+    for (const { name, storage } of storages) {
+      try {
+        if (!payload) {
+          storage.removeItem(HISTORY_STORAGE_KEY);
+        } else {
+          storage.setItem(HISTORY_STORAGE_KEY, payload);
+        }
+        historyStorageRef.current = name;
+        return;
+      } catch (error) {
+        if (isQuotaExceeded(error)) {
+          continue;
+        }
+        console.error("Failed to persist history", error);
+        return;
+      }
+    }
+  }, [history, historyHydrated]);
 
   const fetchWeather = useCallback(async (query) => {
     const trimmed = query.trim();
