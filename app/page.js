@@ -74,7 +74,8 @@ const FACTS = [
   {
     icon: "🌍",
     title: "全球環境整合",
-    description: "結合 Open-Meteo 天氣與 World Time API 時區資訊，瞬間掌握外部環境。",
+    description:
+      "結合 Open-Meteo 天氣與 World Time API 時區資訊，瞬間掌握外部環境。",
   },
   {
     icon: "🧪",
@@ -444,7 +445,11 @@ export default function TemperatureStudio() {
   };
 
   const handleAddHistory = () => {
-    if (!Number.isFinite(value) || !Number.isFinite(celsiusValue) || conversions.length === 0) {
+    if (
+      !Number.isFinite(value) ||
+      !Number.isFinite(celsiusValue) ||
+      conversions.length === 0
+    ) {
       return;
     }
 
@@ -582,8 +587,8 @@ export default function TemperatureStudio() {
     try {
       const geoResponse = await fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-          trimmed,
-        )}&count=1&language=zh&format=json`,
+          trimmed
+        )}&count=1&language=zh&format=json`
       );
 
       if (!geoResponse.ok) {
@@ -617,25 +622,38 @@ export default function TemperatureStudio() {
           "precipitation",
           "uv_index",
           "is_day",
-        ].join(","),
+        ].join(",")
       );
-      forecastUrl.searchParams.set("daily", ["temperature_2m_max", "temperature_2m_min"].join(","));
+      forecastUrl.searchParams.set(
+        "daily",
+        ["temperature_2m_max", "temperature_2m_min"].join(",")
+      );
       forecastUrl.searchParams.set("forecast_days", "1");
       forecastUrl.searchParams.set("timezone", timezone);
 
-      const airQualityUrl = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
+      const airQualityUrl = new URL(
+        "https://air-quality-api.open-meteo.com/v1/air-quality"
+      );
       airQualityUrl.searchParams.set("latitude", location.latitude);
       airQualityUrl.searchParams.set("longitude", location.longitude);
-      airQualityUrl.searchParams.set("current", ["european_aqi", "pm2_5", "pm10"].join(","));
+      airQualityUrl.searchParams.set(
+        "current",
+        ["european_aqi", "pm2_5", "pm10"].join(",")
+      );
       airQualityUrl.searchParams.set("timezone", timezone);
 
-      const [forecastResult, airQualityResult, timeResult] = await Promise.allSettled([
-        fetch(forecastUrl.toString()),
-        fetch(airQualityUrl.toString()),
-        location.timezone
-          ? fetch(`https://worldtimeapi.org/api/timezone/${encodeURIComponent(location.timezone)}`)
-          : Promise.resolve(null),
-      ]);
+      const [forecastResult, airQualityResult, timeResult] =
+        await Promise.allSettled([
+          fetch(forecastUrl.toString()),
+          fetch(airQualityUrl.toString()),
+          location.timezone
+            ? fetch(
+                `https://worldtimeapi.org/api/timezone/${encodeURIComponent(
+                  location.timezone
+                )}`
+              )
+            : Promise.resolve(null),
+        ]);
 
       if (forecastResult.status !== "fulfilled" || !forecastResult.value?.ok) {
         throw new Error("天氣資料取得失敗");
@@ -648,7 +666,10 @@ export default function TemperatureStudio() {
       }
 
       let airQualityPayload = null;
-      if (airQualityResult.status === "fulfilled" && airQualityResult.value?.ok) {
+      if (
+        airQualityResult.status === "fulfilled" &&
+        airQualityResult.value?.ok
+      ) {
         try {
           airQualityPayload = await airQualityResult.value.json();
         } catch (error) {
@@ -666,29 +687,43 @@ export default function TemperatureStudio() {
       }
 
       const resolvedTimezone =
-        location.timezone ?? timePayload?.timezone ?? forecast.timezone ?? "UTC";
+        location.timezone ??
+        timePayload?.timezone ??
+        forecast.timezone ??
+        "UTC";
 
       setWeatherData({
-        location: `${location.name}${location.country ? ` · ${location.country}` : ""}`,
-        administrative: [location.admin1, location.admin2, location.admin3].filter(Boolean),
+        location: `${location.name}${
+          location.country ? ` · ${location.country}` : ""
+        }`,
+        administrative: [
+          location.admin1,
+          location.admin2,
+          location.admin3,
+        ].filter(Boolean),
         coordinates: {
           latitude: location.latitude,
           longitude: location.longitude,
         },
         timezone: resolvedTimezone,
         timezoneAbbreviation:
-          timePayload?.abbreviation ?? forecast.timezone_abbreviation ?? resolvedTimezone,
+          timePayload?.abbreviation ??
+          forecast.timezone_abbreviation ??
+          resolvedTimezone,
         observationTime: forecast.current.time,
         temperature: forecast.current.temperature_2m,
         temperatureUnit: forecast.current_units?.temperature_2m ?? "°C",
         apparentTemperature: forecast.current.apparent_temperature,
-        apparentTemperatureUnit: forecast.current_units?.apparent_temperature ?? "°C",
+        apparentTemperatureUnit:
+          forecast.current_units?.apparent_temperature ?? "°C",
         humidity: forecast.current.relative_humidity_2m,
         humidityUnit: forecast.current_units?.relative_humidity_2m ?? "%",
         windSpeed: forecast.current.wind_speed_10m,
         windSpeedUnit: forecast.current_units?.wind_speed_10m ?? "m/s",
         pressure:
-          forecast.current.surface_pressure ?? forecast.current.pressure_msl ?? Number.NaN,
+          forecast.current.surface_pressure ??
+          forecast.current.pressure_msl ??
+          Number.NaN,
         pressureUnit:
           forecast.current_units?.surface_pressure ??
           forecast.current_units?.pressure_msl ??
@@ -702,18 +737,17 @@ export default function TemperatureStudio() {
         dailyHigh: forecast.daily?.temperature_2m_max?.[0] ?? Number.NaN,
         dailyLow: forecast.daily?.temperature_2m_min?.[0] ?? Number.NaN,
         dailyTemperatureUnit: forecast.daily_units?.temperature_2m_max ?? "°C",
-        airQuality:
-          airQualityPayload?.current
-            ? {
-                aqi: airQualityPayload.current.european_aqi,
-                aqiUnit: airQualityPayload.current_units?.european_aqi ?? "",
-                pm25: airQualityPayload.current.pm2_5,
-                pm25Unit: airQualityPayload.current_units?.pm2_5 ?? "µg/m³",
-                pm10: airQualityPayload.current.pm10,
-                pm10Unit: airQualityPayload.current_units?.pm10 ?? "µg/m³",
-                time: airQualityPayload.current.time,
-              }
-            : null,
+        airQuality: airQualityPayload?.current
+          ? {
+              aqi: airQualityPayload.current.european_aqi,
+              aqiUnit: airQualityPayload.current_units?.european_aqi ?? "",
+              pm25: airQualityPayload.current.pm2_5,
+              pm25Unit: airQualityPayload.current_units?.pm2_5 ?? "µg/m³",
+              pm10: airQualityPayload.current.pm10,
+              pm10Unit: airQualityPayload.current_units?.pm10 ?? "µg/m³",
+              time: airQualityPayload.current.time,
+            }
+          : null,
         localTime: timePayload?.datetime ?? null,
         utcOffset: timePayload?.utc_offset ?? null,
         dayOfWeek: Number.isFinite(timePayload?.day_of_week)
@@ -738,7 +772,7 @@ export default function TemperatureStudio() {
       event?.preventDefault();
       fetchWeather(weatherQuery);
     },
-    [fetchWeather, weatherQuery],
+    [fetchWeather, weatherQuery]
   );
 
   const handleWeatherPreset = useCallback(
@@ -746,7 +780,7 @@ export default function TemperatureStudio() {
       setWeatherQuery(preset);
       fetchWeather(preset);
     },
-    [fetchWeather],
+    [fetchWeather]
   );
 
   const sliderValue = Number.isFinite(value)
@@ -761,10 +795,14 @@ export default function TemperatureStudio() {
     ? clamp((kelvinValue / SOLAR_SURFACE_K) * 100, 0, 130)
     : 0;
 
-  const mood = Number.isFinite(celsiusValue) ? getThermalMood(celsiusValue) : null;
+  const mood = Number.isFinite(celsiusValue)
+    ? getThermalMood(celsiusValue)
+    : null;
 
   const canAddHistory =
-    Number.isFinite(value) && Number.isFinite(celsiusValue) && conversions.length > 0;
+    Number.isFinite(value) &&
+    Number.isFinite(celsiusValue) &&
+    conversions.length > 0;
 
   return (
     <main className="w-full max-w-full py-12 pb-24">
@@ -798,7 +836,7 @@ export default function TemperatureStudio() {
             <InsightsSection insights={insights} />
           </div>
 
-          <div className="min-w-0 space-y-8">
+          <aside className="min-w-0 space-y-8">
             <HistorySection
               history={history}
               onClearHistory={handleClearHistory}
@@ -822,7 +860,7 @@ export default function TemperatureStudio() {
               formatCoordinate={formatCoordinate}
               formatWeekday={formatWeekday}
             />
-          </div>
+          </aside>
         </div>
 
         <FactsSection facts={FACTS} />
@@ -838,8 +876,7 @@ export default function TemperatureStudio() {
             ? "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-[#00CECB]"
             : "bg-[#FF5E5B] text-slate-900 hover:bg-[#ff766f] focus-visible:outline-[#00CECB]"
         }`}
-        title={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}
-      >
+        title={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}>
         <span className="text-2xl" role="img" aria-hidden="true">
           {theme === "dark" ? "🌙" : "☀️"}
         </span>
