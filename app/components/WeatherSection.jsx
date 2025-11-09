@@ -115,24 +115,18 @@ export function WeatherSection({
               type="button"
               onClick={() => onPresetSelect(preset)}
               className={classNames(
-                "w-full rounded-full border px-3 py-1.5 text-xs font-semibold transition md:w-auto",
-                query === preset
-                  ? "border-sky-400/70 bg-sky-400/15 text-sky-200"
-                  : "border-slate-700/50 bg-slate-950/70 text-slate-300 hover:border-slate-500/70",
+                "theme-chip w-full md:w-auto",
+                query === preset ? "theme-chip--active" : "",
               )}
             >
               {preset}
             </button>
           ))}
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-fuchsia-500/90 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:bg-slate-700/60 disabled:text-slate-400"
-        >
+        <button type="submit" disabled={loading} className="theme-primary-button w-full">
           {loading ? (
             <>
-              <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-slate-900/70 border-t-transparent" />
+              <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-[#00CECB]/70 border-t-transparent" />
               串接中...
             </>
           ) : (
@@ -143,10 +137,10 @@ export function WeatherSection({
 
       <div>
         {error ? (
-          <p className="rounded-2xl border border-amber-400/60 bg-amber-400/10 p-4 text-sm text-amber-100">{error}</p>
+          <p className="rounded-2xl border border-[#FF5E5B]/60 bg-[#FF5E5B]/10 p-4 text-sm text-[#FF5E5B]">{error}</p>
         ) : loading ? (
           <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-6 text-sm text-slate-300">
-            <span className="inline-flex h-10 w-10 animate-spin rounded-full border-2 border-sky-400/70 border-t-transparent" />
+            <span className="inline-flex h-10 w-10 animate-spin rounded-full border-2 border-[#00CECB]/70 border-t-transparent" />
             正在取得環境資訊...
           </div>
         ) : data ? (
@@ -164,18 +158,18 @@ export function WeatherSection({
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 {data.localTime ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-sky-400/50 bg-sky-400/10 px-3 py-1 font-semibold text-sky-100">
+                  <span className="theme-badge">
                     🕑 當地 {formatLocalClock(data.localTime, data.timezone, { withSeconds: true })}
                   </span>
                 ) : null}
                 {data.utcOffset ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 font-semibold text-emerald-100">
+                  <span className="theme-badge">
                     ⏱️ {formatUtcOffset(data.utcOffset)}
                     {Number.isFinite(data.dayOfWeek) ? `· ${formatWeekday(data.dayOfWeek)}` : ""}
                   </span>
                 ) : null}
                 {coordinatesText ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-3 py-1 font-semibold text-violet-100">
+                  <span className="theme-badge">
                     📡 {coordinatesText}
                   </span>
                 ) : null}

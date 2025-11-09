@@ -1,7 +1,7 @@
 export function HeroSection({ presets, onPresetSelect }) {
   return (
     <section className="flex w-full min-w-0 max-w-full flex-col items-center gap-6 text-center">
-      <span className="inline-flex items-center gap-2 rounded-full border border-slate-600/40 bg-blue-950/40 px-4 py-1 text-sm font-medium text-sky-200">
+      <span className="theme-tag">
         ⚡ Temperature Intelligence Platform
       </span>
       <h1 className="text-3xl font-bold leading-tight text-slate-50 sm:text-4xl md:text-5xl">
@@ -16,7 +16,7 @@ export function HeroSection({ presets, onPresetSelect }) {
             key={preset.label}
             type="button"
             onClick={() => onPresetSelect(preset)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-600/40 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-100 transition hover:border-sky-400/60 hover:bg-sky-400/10 sm:text-sm"
+            className="theme-chip w-full px-4 py-2 text-xs font-medium sm:text-sm"
           >
             <span>{preset.emoji}</span>
             {preset.label}

@@ -14,7 +14,7 @@ const TEMPERATURE_SCALES = [
     code: "celsius",
     label: "攝氏 (°C)",
     symbol: "°C",
-    accent: "from-sky-400/30 via-sky-400/15 to-sky-400/5",
+    accent: "from-[#FF5E5B]/35 via-[#FFED66]/20 to-[#FFFFEA]/10",
     toKelvin: (value) => value + 273.15,
     fromKelvin: (value) => value - 273.15,
   },
@@ -22,7 +22,7 @@ const TEMPERATURE_SCALES = [
     code: "fahrenheit",
     label: "華氏 (°F)",
     symbol: "°F",
-    accent: "from-orange-400/30 via-orange-400/15 to-orange-400/5",
+    accent: "from-[#FFED66]/30 via-[#FF5E5B]/18 to-[#D8D8D8]/10",
     toKelvin: (value) => ((value + 459.67) * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5 - 459.67,
   },
@@ -30,7 +30,7 @@ const TEMPERATURE_SCALES = [
     code: "kelvin",
     label: "絕對溫標 (K)",
     symbol: "K",
-    accent: "from-cyan-400/30 via-cyan-400/15 to-cyan-400/5",
+    accent: "from-[#00CECB]/28 via-[#FFED66]/18 to-[#FFFFEA]/10",
     toKelvin: (value) => value,
     fromKelvin: (value) => value,
   },
@@ -38,7 +38,7 @@ const TEMPERATURE_SCALES = [
     code: "rankine",
     label: "蘭氏 (°R)",
     symbol: "°R",
-    accent: "from-violet-400/30 via-violet-400/15 to-violet-400/5",
+    accent: "from-[#FF5E5B]/28 via-[#00CECB]/18 to-[#D8D8D8]/10",
     toKelvin: (value) => (value * 5) / 9,
     fromKelvin: (value) => (value * 9) / 5,
   },
@@ -46,7 +46,7 @@ const TEMPERATURE_SCALES = [
     code: "reaumur",
     label: "列氏 (°Ré)",
     symbol: "°Ré",
-    accent: "from-emerald-400/30 via-emerald-400/15 to-emerald-400/5",
+    accent: "from-[#00CECB]/30 via-[#D8D8D8]/18 to-[#FFFFEA]/10",
     toKelvin: (value) => value * 1.25 + 273.15,
     fromKelvin: (value) => (value - 273.15) * 0.8,
   },
@@ -54,7 +54,7 @@ const TEMPERATURE_SCALES = [
     code: "newton",
     label: "牛頓氏 (°N)",
     symbol: "°N",
-    accent: "from-rose-400/30 via-rose-400/15 to-rose-400/5",
+    accent: "from-[#FFED66]/28 via-[#FF5E5B]/18 to-[#00CECB]/12",
     toKelvin: (value) => value * (100 / 33) + 273.15,
     fromKelvin: (value) => (value - 273.15) * (33 / 100),
   },
@@ -752,7 +752,7 @@ export default function TemperatureStudio() {
         aria-pressed={theme === "light"}
         className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
           theme === "dark"
-            ? "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-sky-400"
+            ? "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-[#00CECB]"
             : "bg-[#FF5E5B] text-slate-900 hover:bg-[#ff766f] focus-visible:outline-[#00CECB]"
         }`}
         title={theme === "dark" ? "切換為淺色主題" : "切換為深色主題"}
