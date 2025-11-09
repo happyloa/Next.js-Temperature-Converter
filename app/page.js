@@ -72,22 +72,22 @@ const PRESETS = [
 
 const FACTS = [
   {
+    icon: "🌍",
+    title: "全球環境整合",
+    description:
+      "結合 Open-Meteo 天氣、World Time API 時區與 Sunrise-Sunset 日照資訊，瞬間掌握外部環境。",
+  },
+  {
     icon: "🧪",
     title: "六種溫標一次掌握",
     description:
-      "內建攝氏、華氏、絕對溫標、蘭氏、列氏與牛頓氏，方便面對各種歷史與現代科學情境。",
+      "攝氏、華氏、絕對溫標、蘭氏、列氏與牛頓氏一次整合，跨領域作業不再需要手動換算。",
   },
   {
     icon: "🗂️",
-    title: "智慧紀錄",
+    title: "儀表板級的操作體驗",
     description:
-      "將重要的轉換加入歷史紀錄，可快速回顧對照常用的測試情境或設備校正數據。",
-  },
-  {
-    icon: "📊",
-    title: "情境洞察",
-    description:
-      "透過演算法分析溫度與冰點、沸點及生活級距的距離，協助快速判斷安全與風險。",
+      "輸入、滑桿、歷史紀錄與環境數據集中呈現，成為可直接對外展示的溫度管理產品。",
   },
 ];
 
@@ -174,6 +174,68 @@ const formatWeatherTime = (value) => {
     return value;
   }
   return dateTimeFormatter.format(date);
+};
+
+const WEEKDAY_LABELS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+
+const formatLocalClock = (value, timezone, { withSeconds = false } = {}) => {
+  if (!value) return "--";
+
+  try {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    const formatter = new Intl.DateTimeFormat("zh-TW", {
+      hour: "2-digit",
+      minute: "2-digit",
+      ...(withSeconds ? { second: "2-digit" } : {}),
+      timeZone: timezone ?? "UTC",
+    });
+
+    return formatter.format(date);
+  } catch (error) {
+    console.error("formatLocalClock", error);
+    return value;
+  }
+};
+
+const formatUtcOffset = (value) => {
+  if (!value) return "UTC±00:00";
+  const normalized = `${value}`.trim();
+  if (/^[+-]\d{2}:\d{2}$/.test(normalized)) {
+    return `UTC${normalized}`;
+  }
+  return `UTC${normalized}`;
+};
+
+const formatWeekday = (index) => {
+  if (!Number.isFinite(index)) return "--";
+  return WEEKDAY_LABELS[index] ?? `週${index}`;
+};
+
+const parseDayLength = (value) => {
+  if (typeof value !== "string") return Number.NaN;
+  const segments = value.split(":").map((segment) => Number(segment));
+  if (segments.length !== 3 || segments.some((segment) => Number.isNaN(segment))) {
+    return Number.NaN;
+  }
+  const [hours, minutes, seconds] = segments;
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
+const formatDayLength = (seconds) => {
+  if (!Number.isFinite(seconds)) return "--";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainSeconds = Math.round(seconds % 60);
+  return `${hours} 小時 ${minutes} 分 ${remainSeconds} 秒`;
+};
+
+const formatCoordinate = (value) => {
+  if (!Number.isFinite(value)) return "--";
+  return numberFormatter.format(value);
 };
 
 const getScale = (code) =>
@@ -462,30 +524,151 @@ export default function TemperatureStudio() {
       }
 
       const location = geoData.results[0];
+      const timezone = location.timezone ?? "auto";
 
-      const forecastResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code`,
+      const forecastUrl = new URL("https://api.open-meteo.com/v1/forecast");
+      forecastUrl.searchParams.set("latitude", location.latitude);
+      forecastUrl.searchParams.set("longitude", location.longitude);
+      forecastUrl.searchParams.set(
+        "current",
+        [
+          "temperature_2m",
+          "apparent_temperature",
+          "relative_humidity_2m",
+          "wind_speed_10m",
+          "weather_code",
+          "pressure_msl",
+          "surface_pressure",
+          "precipitation",
+          "uv_index",
+          "is_day",
+        ].join(","),
       );
+      forecastUrl.searchParams.set("daily", ["temperature_2m_max", "temperature_2m_min"].join(","));
+      forecastUrl.searchParams.set("forecast_days", "1");
+      forecastUrl.searchParams.set("timezone", timezone);
 
-      if (!forecastResponse.ok) {
+      const airQualityUrl = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
+      airQualityUrl.searchParams.set("latitude", location.latitude);
+      airQualityUrl.searchParams.set("longitude", location.longitude);
+      airQualityUrl.searchParams.set("current", ["european_aqi", "pm2_5", "pm10"].join(","));
+      airQualityUrl.searchParams.set("timezone", timezone);
+
+      const sunriseUrl = new URL("https://api.sunrise-sunset.org/json");
+      sunriseUrl.searchParams.set("lat", location.latitude);
+      sunriseUrl.searchParams.set("lng", location.longitude);
+      sunriseUrl.searchParams.set("formatted", "0");
+
+      const [forecastResult, airQualityResult, timeResult, sunriseResult] = await Promise.allSettled([
+        fetch(forecastUrl.toString()),
+        fetch(airQualityUrl.toString()),
+        location.timezone
+          ? fetch(`https://worldtimeapi.org/api/timezone/${encodeURIComponent(location.timezone)}`)
+          : Promise.resolve(null),
+        fetch(sunriseUrl.toString()),
+      ]);
+
+      if (forecastResult.status !== "fulfilled" || !forecastResult.value?.ok) {
         throw new Error("天氣資料取得失敗");
       }
 
-      const forecast = await forecastResponse.json();
+      const forecast = await forecastResult.value.json();
 
       if (!forecast?.current) {
         throw new Error("目前無法取得天氣資訊");
       }
 
+      let airQualityPayload = null;
+      if (airQualityResult.status === "fulfilled" && airQualityResult.value?.ok) {
+        try {
+          airQualityPayload = await airQualityResult.value.json();
+        } catch (error) {
+          console.error("airQualityPayload", error);
+        }
+      }
+
+      let timePayload = null;
+      if (timeResult.status === "fulfilled" && timeResult.value?.ok) {
+        try {
+          timePayload = await timeResult.value.json();
+        } catch (error) {
+          console.error("timePayload", error);
+        }
+      }
+
+      let sunrisePayload = null;
+      if (sunriseResult.status === "fulfilled" && sunriseResult.value?.ok) {
+        try {
+          sunrisePayload = await sunriseResult.value.json();
+        } catch (error) {
+          console.error("sunrisePayload", error);
+        }
+      }
+
+      const dayLengthSeconds =
+        sunrisePayload?.status === "OK"
+          ? parseDayLength(sunrisePayload?.results?.day_length)
+          : Number.NaN;
+
+      const resolvedTimezone =
+        location.timezone ?? timePayload?.timezone ?? forecast.timezone ?? "UTC";
+
       setWeatherData({
         location: `${location.name}${location.country ? ` · ${location.country}` : ""}`,
-        timezone: forecast.timezone_abbreviation,
+        administrative: [location.admin1, location.admin2, location.admin3].filter(Boolean),
+        coordinates: {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+        timezone: resolvedTimezone,
+        timezoneAbbreviation:
+          timePayload?.abbreviation ?? forecast.timezone_abbreviation ?? resolvedTimezone,
         observationTime: forecast.current.time,
         temperature: forecast.current.temperature_2m,
+        temperatureUnit: forecast.current_units?.temperature_2m ?? "°C",
         apparentTemperature: forecast.current.apparent_temperature,
+        apparentTemperatureUnit: forecast.current_units?.apparent_temperature ?? "°C",
         humidity: forecast.current.relative_humidity_2m,
+        humidityUnit: forecast.current_units?.relative_humidity_2m ?? "%",
         windSpeed: forecast.current.wind_speed_10m,
+        windSpeedUnit: forecast.current_units?.wind_speed_10m ?? "m/s",
+        pressure:
+          forecast.current.surface_pressure ?? forecast.current.pressure_msl ?? Number.NaN,
+        pressureUnit:
+          forecast.current_units?.surface_pressure ??
+          forecast.current_units?.pressure_msl ??
+          "hPa",
+        precipitation: forecast.current.precipitation,
+        precipitationUnit: forecast.current_units?.precipitation ?? "mm",
+        uvIndex: forecast.current.uv_index,
+        uvIndexUnit: forecast.current_units?.uv_index ?? "",
         weatherCode: forecast.current.weather_code,
+        isDay: forecast.current.is_day === 1,
+        dailyHigh: forecast.daily?.temperature_2m_max?.[0] ?? Number.NaN,
+        dailyLow: forecast.daily?.temperature_2m_min?.[0] ?? Number.NaN,
+        dailyTemperatureUnit: forecast.daily_units?.temperature_2m_max ?? "°C",
+        airQuality:
+          airQualityPayload?.current
+            ? {
+                aqi: airQualityPayload.current.european_aqi,
+                aqiUnit: airQualityPayload.current_units?.european_aqi ?? "",
+                pm25: airQualityPayload.current.pm2_5,
+                pm25Unit: airQualityPayload.current_units?.pm2_5 ?? "µg/m³",
+                pm10: airQualityPayload.current.pm10,
+                pm10Unit: airQualityPayload.current_units?.pm10 ?? "µg/m³",
+                time: airQualityPayload.current.time,
+              }
+            : null,
+        localTime: timePayload?.datetime ?? null,
+        utcOffset: timePayload?.utc_offset ?? null,
+        dayOfWeek: Number.isFinite(timePayload?.day_of_week)
+          ? timePayload.day_of_week
+          : null,
+        sunrise:
+          sunrisePayload?.status === "OK" ? sunrisePayload?.results?.sunrise ?? null : null,
+        sunset:
+          sunrisePayload?.status === "OK" ? sunrisePayload?.results?.sunset ?? null : null,
+        dayLengthSeconds,
       });
     } catch (error) {
       console.error("fetchWeather", error);
@@ -581,6 +764,11 @@ export default function TemperatureStudio() {
               formatOptionalMetric={formatOptionalMetric}
               formatWeatherTime={formatWeatherTime}
               getWeatherDescription={getWeatherDescription}
+              formatLocalClock={formatLocalClock}
+              formatDayLength={formatDayLength}
+              formatUtcOffset={formatUtcOffset}
+              formatCoordinate={formatCoordinate}
+              formatWeekday={formatWeekday}
             />
             <InsightsSection insights={insights} />
           </div>
