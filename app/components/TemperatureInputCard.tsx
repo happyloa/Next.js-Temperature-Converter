@@ -1,4 +1,56 @@
-const classNames = (...values) => values.filter(Boolean).join(" ");
+import type { ChangeEventHandler, MouseEventHandler } from "react";
+
+export type TemperatureScaleCode =
+  | "celsius"
+  | "fahrenheit"
+  | "kelvin"
+  | "rankine"
+  | "reaumur"
+  | "newton";
+
+export type TemperatureScale = {
+  code: TemperatureScaleCode;
+  label: string;
+  symbol: string;
+  accent: string;
+  toKelvin: (value: number) => number;
+  fromKelvin: (value: number) => number;
+};
+
+export type TemperatureConversion = TemperatureScale & { result: number };
+
+export type ThermalMood = {
+  title: string;
+  description: string;
+  emoji: string;
+};
+
+type TemperatureInputCardProps = {
+  scale: TemperatureScaleCode;
+  scales: TemperatureScale[];
+  onScaleChange: (code: TemperatureScaleCode) => void;
+  rawInput: string;
+  onInputChange: ChangeEventHandler<HTMLInputElement>;
+  activeSymbol?: string;
+  onReset: MouseEventHandler<HTMLButtonElement>;
+  onAddHistory: MouseEventHandler<HTMLButtonElement>;
+  canAddHistory: boolean;
+  sliderRange: { min: number; max: number };
+  sliderValue: number;
+  sliderStep: number;
+  onSliderChange: ChangeEventHandler<HTMLInputElement>;
+  conversions: TemperatureConversion[];
+  copiedScale: TemperatureScaleCode | null;
+  onCopy: (text: string, code: TemperatureScaleCode) => void | Promise<void>;
+  mood: ThermalMood | null;
+  relativeSolarProgress: number;
+  showSolarProgress: boolean;
+  formatTemperature: (value: number) => string;
+};
+
+const classNames = (
+  ...values: Array<string | false | null | undefined>
+): string => values.filter(Boolean).join(" ");
 
 export function TemperatureInputCard({
   scale,
@@ -21,7 +73,7 @@ export function TemperatureInputCard({
   relativeSolarProgress,
   showSolarProgress,
   formatTemperature,
-}) {
+}: TemperatureInputCardProps) {
   return (
     <main className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:[&>*]:min-w-0">
@@ -35,14 +87,16 @@ export function TemperatureInputCard({
           <button
             type="button"
             onClick={onReset}
-            className="theme-outline-button">
+            className="theme-outline-button"
+          >
             🔄 重設
           </button>
           <button
             type="button"
             onClick={onAddHistory}
             disabled={!canAddHistory}
-            className="theme-primary-button px-6">
+            className="theme-primary-button px-6"
+          >
             📝 加入紀錄
           </button>
         </div>
@@ -57,7 +111,8 @@ export function TemperatureInputCard({
             className={classNames(
               "theme-segment",
               scale === item.code ? "theme-segment--active" : ""
-            )}>
+            )}
+          >
             {item.label}
           </button>
         ))}
@@ -84,8 +139,7 @@ export function TemperatureInputCard({
 
         <label className="flex flex-col gap-2">
           <span className="text-sm font-semibold text-slate-200">
-            範圍滑桿（{formatTemperature(sliderRange.min)} ~{" "}
-            {formatTemperature(sliderRange.max)}）
+            範圍滑桿（{formatTemperature(sliderRange.min)} ~ {formatTemperature(sliderRange.max)}）
           </span>
           <input
             type="range"
@@ -109,7 +163,8 @@ export function TemperatureInputCard({
                 "relative min-w-0 overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900/80 p-5",
                 "bg-gradient-to-br",
                 item.accent
-              )}>
+              )}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-2">
                   <span className="text-xs uppercase tracking-wide text-slate-200/80">
@@ -121,15 +176,14 @@ export function TemperatureInputCard({
                 </div>
                 <button
                   type="button"
-                  onClick={() =>
-                    onCopy(`${formatTemperature(item.result)}`, item.code)
-                  }
+                  onClick={() => onCopy(`${formatTemperature(item.result)}`, item.code)}
                   className={classNames(
                     "theme-outline-button theme-outline-button--small",
                     copiedScale === item.code
                       ? "theme-outline-button--success"
                       : ""
-                  )}>
+                  )}
+                >
                   {copiedScale === item.code ? "已複製" : "複製"}
                 </button>
               </div>
@@ -156,9 +210,7 @@ export function TemperatureInputCard({
         </div>
         <p className="text-xs text-slate-400">
           {showSolarProgress
-            ? `目前為太陽表面溫度的 ${formatTemperature(
-                relativeSolarProgress
-              )}%`
+            ? `目前為太陽表面溫度的 ${formatTemperature(relativeSolarProgress)}%`
             : "輸入溫度以分析熱能比例"}
         </p>
       </div>

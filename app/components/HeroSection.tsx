@@ -1,4 +1,18 @@
-export function HeroSection({ presets, onPresetSelect }) {
+import type { TemperatureScaleCode } from "./TemperatureInputCard";
+
+export type TemperaturePreset = {
+  label: string;
+  value: number;
+  scale: TemperatureScaleCode;
+  emoji: string;
+};
+
+type HeroSectionProps = {
+  presets: TemperaturePreset[];
+  onPresetSelect: (preset: TemperaturePreset) => void;
+};
+
+export function HeroSection({ presets, onPresetSelect }: HeroSectionProps) {
   return (
     <section className="flex w-full min-w-0 max-w-full flex-col items-center gap-6 text-center">
       <span className="theme-tag">⚡ Temperature Intelligence Platform</span>
@@ -14,7 +28,8 @@ export function HeroSection({ presets, onPresetSelect }) {
             key={preset.label}
             type="button"
             onClick={() => onPresetSelect(preset)}
-            className="theme-chip w-full px-4 py-2 text-xs font-medium sm:text-sm">
+            className="theme-chip w-full px-4 py-2 text-xs font-medium sm:text-sm"
+          >
             <span>{preset.emoji}</span>
             {preset.label}
           </button>

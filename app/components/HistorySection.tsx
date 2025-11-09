@@ -1,9 +1,35 @@
+import type { TemperatureScaleCode } from "./TemperatureInputCard";
+
+export type TemperatureConversionSummary = {
+  code: TemperatureScaleCode;
+  label: string;
+  symbol: string;
+  result: number;
+};
+
+export type HistoryEntry = {
+  id: string;
+  timestamp: string;
+  scale: TemperatureScaleCode;
+  scaleLabel: string;
+  scaleSymbol: string;
+  value: number;
+  conversions: TemperatureConversionSummary[];
+};
+
+type HistorySectionProps = {
+  history: HistoryEntry[];
+  onClearHistory: () => void;
+  formatTemperature: (value: number) => string;
+  formatTime: (value: Date) => string;
+};
+
 export function HistorySection({
   history,
   onClearHistory,
   formatTemperature,
   formatTime,
-}) {
+}: HistorySectionProps) {
   return (
     <section className="w-full min-w-0 space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-7">
       <div className="flex flex-col gap-3">
@@ -25,7 +51,8 @@ export function HistorySection({
           type="button"
           onClick={onClearHistory}
           disabled={history.length === 0}
-          className="theme-outline-button theme-outline-button--small">
+          className="theme-outline-button theme-outline-button--small"
+        >
           清除紀錄
         </button>
       </div>
@@ -33,11 +60,11 @@ export function HistorySection({
         {history.map((entry) => (
           <div
             key={entry.id}
-            className="min-w-0 rounded-2xl border border-slate-700/40 bg-slate-900/80 p-4">
+            className="min-w-0 rounded-2xl border border-slate-700/40 bg-slate-900/80 p-4"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-300">
               <span>
-                {formatTime(new Date(entry.timestamp))} ·{" "}
-                {formatTemperature(entry.value)} {entry.scaleSymbol}
+                {formatTime(new Date(entry.timestamp))} · {formatTemperature(entry.value)} {entry.scaleSymbol}
               </span>
               <span className="text-xs text-slate-500">{entry.scaleLabel}</span>
             </div>
@@ -45,7 +72,8 @@ export function HistorySection({
               {entry.conversions.map((item) => (
                 <div
                   key={`${entry.id}-${item.code}`}
-                  className="flex min-w-0 items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200">
+                  className="flex min-w-0 items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
+                >
                   <span className="font-medium">{item.label}</span>
                   <span className="font-semibold">
                     {formatTemperature(item.result)} {item.symbol}
