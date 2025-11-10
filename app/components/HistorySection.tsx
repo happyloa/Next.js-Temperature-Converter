@@ -110,14 +110,26 @@ export function HistorySection({
                   {entry.scaleLabel}
                   <span
                     aria-hidden="true"
-                    className={`transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}
+                    className={`transition-transform duration-300 ${
+                      isOpen ? "rotate-180" : "rotate-0"
+                    }`}
                   >
                     ▼
                   </span>
                 </span>
               </button>
-              {isOpen && (
-                <div id={contentId} className="border-t border-slate-700/40 px-4 pb-4 pt-3">
+              <div
+                id={contentId}
+                aria-hidden={!isOpen}
+                className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+                  isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                }`}
+              >
+                <div
+                  className={`overflow-hidden border-t border-slate-700/40 px-4 pb-4 pt-3 transition-opacity duration-300 ease-in-out ${
+                    isOpen ? "opacity-100" : "opacity-0"
+                  }`}
+                >
                   <div className="grid gap-2">
                     {entry.conversions.map((item) => (
                       <div
@@ -132,7 +144,7 @@ export function HistorySection({
                     ))}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           );
         })}
