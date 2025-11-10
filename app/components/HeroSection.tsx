@@ -1,11 +1,8 @@
-import type { TemperatureScaleCode } from "./TemperatureInputCard";
+import type { TemperaturePreset } from "../types/temperature";
 
-export type TemperaturePreset = {
-  label: string;
-  value: number;
-  scale: TemperatureScaleCode;
-  emoji: string;
-};
+/**
+ * 首屏英雄橫幅，簡述產品定位並提供常用溫度快速鍵。
+ */
 
 type HeroSectionProps = {
   presets: TemperaturePreset[];

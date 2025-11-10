@@ -1,0 +1,269 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import type { FormEvent } from "react";
+
+import type { WeatherData } from "../types/weather";
+
+/**
+ * 整合地理、天氣、空氣品質與時間 API 的 hook，提供統一的查詢介面。
+ */
+export function useWeatherDashboard(defaultQuery: string) {
+  const [weatherQuery, setWeatherQuery] = useState<string>(defaultQuery);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+
+  type GeoApiLocation = {
+    name: string;
+    latitude: number;
+    longitude: number;
+    timezone?: string;
+    country?: string;
+    admin1?: string;
+    admin2?: string;
+    admin3?: string;
+  };
+
+  type GeoApiResponse = {
+    results?: GeoApiLocation[];
+  };
+
+  type ForecastApiResponse = {
+    current: {
+      time: string;
+      temperature_2m: number;
+      apparent_temperature: number;
+      relative_humidity_2m: number;
+      wind_speed_10m: number;
+      weather_code: number;
+      surface_pressure?: number;
+      pressure_msl?: number;
+      precipitation: number;
+      uv_index: number;
+      is_day: number;
+    };
+    current_units?: {
+      temperature_2m?: string;
+      apparent_temperature?: string;
+      relative_humidity_2m?: string;
+      wind_speed_10m?: string;
+      surface_pressure?: string;
+      pressure_msl?: string;
+      precipitation?: string;
+      uv_index?: string;
+    };
+    daily?: {
+      temperature_2m_max?: number[];
+      temperature_2m_min?: number[];
+    };
+    daily_units?: {
+      temperature_2m_max?: string;
+      temperature_2m_min?: string;
+    };
+    timezone?: string;
+    timezone_abbreviation?: string;
+  };
+
+  type AirQualityApiResponse = {
+    current?: {
+      european_aqi: number;
+      pm2_5: number;
+      pm10: number;
+      time: string;
+    };
+    current_units?: {
+      european_aqi?: string;
+      pm2_5?: string;
+      pm10?: string;
+    };
+  };
+
+  type TimeApiResponse = {
+    timezone?: string;
+    abbreviation?: string;
+    datetime?: string;
+    utc_offset?: string;
+    day_of_week?: number | null;
+  };
+
+  const fetchWeather = useCallback(
+    async (query: string) => {
+      const trimmed = query.trim();
+      if (!trimmed) {
+        setWeatherError("請輸入地點名稱");
+        setWeatherData(null);
+        setWeatherLoading(false);
+        return;
+      }
+
+      setWeatherLoading(true);
+      setWeatherError(null);
+
+      try {
+        const geoResponse = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+            trimmed
+          )}&count=1&language=zh&format=json`
+        );
+
+        if (!geoResponse.ok) {
+          throw new Error("地理定位服務暫時無法使用");
+        }
+
+        const geoData = (await geoResponse.json()) as GeoApiResponse;
+
+        if (!geoData?.results?.length) {
+          throw new Error("找不到對應的地點，請嘗試輸入更完整的名稱。");
+        }
+
+        const [location] = geoData.results;
+
+        const [forecastResult, airQualityResult, timeResult] = await Promise.allSettled([
+          fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=${encodeURIComponent(
+              location.timezone ?? "auto"
+            )}`
+          ),
+          fetch(
+            `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,pm2_5,pm10`
+          ),
+          fetch(
+            `https://worldtimeapi.org/api/timezone/${encodeURIComponent(
+              location.timezone ?? "Etc/UTC"
+            )}`
+          ),
+        ]);
+
+        if (forecastResult.status !== "fulfilled" || !forecastResult.value?.ok) {
+          throw new Error("無法取得天氣資訊，請稍後再試。");
+        }
+
+        const forecast = (await forecastResult.value.json()) as ForecastApiResponse;
+
+        let airQualityPayload: AirQualityApiResponse["current"] | null = null;
+        let airQualityUnits: AirQualityApiResponse["current_units"] | null = null;
+        if (airQualityResult.status === "fulfilled" && airQualityResult.value?.ok) {
+          try {
+            const parsed = (await airQualityResult.value.json()) as AirQualityApiResponse;
+            airQualityPayload = parsed.current ?? null;
+            airQualityUnits = parsed.current_units ?? null;
+          } catch (error) {
+            console.error("airQualityPayload", error);
+          }
+        }
+
+        let timePayload: TimeApiResponse | null = null;
+        if (timeResult.status === "fulfilled" && timeResult.value?.ok) {
+          try {
+            timePayload = (await timeResult.value.json()) as TimeApiResponse;
+          } catch (error) {
+            console.error("timePayload", error);
+          }
+        }
+
+        const resolvedTimezone =
+          location.timezone ?? timePayload?.timezone ?? forecast.timezone ?? "UTC";
+
+        setWeatherData({
+          location: `${location.name}${location.country ? ` · ${location.country}` : ""}`,
+          administrative: [
+            location.admin1,
+            location.admin2,
+            location.admin3,
+          ].filter((item): item is string => Boolean(item)),
+          coordinates: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+          timezone: resolvedTimezone,
+          timezoneAbbreviation:
+            timePayload?.abbreviation ?? forecast.timezone_abbreviation ?? resolvedTimezone,
+          observationTime: forecast.current.time,
+          temperature: forecast.current.temperature_2m,
+          temperatureUnit: forecast.current_units?.temperature_2m ?? "°C",
+          apparentTemperature: forecast.current.apparent_temperature,
+          apparentTemperatureUnit:
+            forecast.current_units?.apparent_temperature ?? "°C",
+          humidity: forecast.current.relative_humidity_2m,
+          humidityUnit: forecast.current_units?.relative_humidity_2m ?? "%",
+          windSpeed: forecast.current.wind_speed_10m,
+          windSpeedUnit: forecast.current_units?.wind_speed_10m ?? "m/s",
+          pressure:
+            forecast.current.surface_pressure ??
+            forecast.current.pressure_msl ??
+            Number.NaN,
+          pressureUnit:
+            forecast.current_units?.surface_pressure ??
+            forecast.current_units?.pressure_msl ??
+            "hPa",
+          precipitation: forecast.current.precipitation,
+          precipitationUnit: forecast.current_units?.precipitation ?? "mm",
+          uvIndex: forecast.current.uv_index,
+          uvIndexUnit: forecast.current_units?.uv_index ?? "",
+          weatherCode: forecast.current.weather_code,
+          isDay: forecast.current.is_day === 1,
+          dailyHigh: forecast.daily?.temperature_2m_max?.[0] ?? Number.NaN,
+          dailyLow: forecast.daily?.temperature_2m_min?.[0] ?? Number.NaN,
+          dailyTemperatureUnit: forecast.daily_units?.temperature_2m_max ?? "°C",
+          airQuality: airQualityPayload
+            ? {
+                aqi: airQualityPayload.european_aqi,
+                aqiUnit: airQualityUnits?.european_aqi ?? "",
+                pm25: airQualityPayload.pm2_5,
+                pm25Unit: airQualityUnits?.pm2_5 ?? "µg/m³",
+                pm10: airQualityPayload.pm10,
+                pm10Unit: airQualityUnits?.pm10 ?? "µg/m³",
+                time: airQualityPayload.time,
+              }
+            : null,
+          localTime: timePayload?.datetime ?? null,
+          utcOffset: timePayload?.utc_offset ?? null,
+          dayOfWeek: Number.isFinite(timePayload?.day_of_week)
+            ? (timePayload?.day_of_week as number)
+            : null,
+        });
+      } catch (error) {
+        console.error("fetchWeather", error);
+        setWeatherData(null);
+        const message =
+          error instanceof Error ? error.message : "無法取得天氣資訊，請稍後再試。";
+        setWeatherError(message);
+      } finally {
+        setWeatherLoading(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    fetchWeather(defaultQuery);
+  }, [defaultQuery, fetchWeather]);
+
+  const handleWeatherSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      fetchWeather(weatherQuery);
+    },
+    [fetchWeather, weatherQuery]
+  );
+
+  const handleWeatherPreset = useCallback(
+    (preset: string) => {
+      setWeatherQuery(preset);
+      fetchWeather(preset);
+    },
+    [fetchWeather]
+  );
+
+  return {
+    weatherQuery,
+    setWeatherQuery,
+    weatherData,
+    weatherLoading,
+    weatherError,
+    fetchWeather,
+    handleWeatherSubmit,
+    handleWeatherPreset,
+  };
+}

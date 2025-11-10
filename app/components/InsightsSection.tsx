@@ -1,12 +1,12 @@
-export type ThermalInsight = {
-  icon: string;
-  title: string;
-  description: string;
-};
+import type { ThermalInsight } from "../types/insight";
 
 type InsightsSectionProps = {
   insights: ThermalInsight[];
 };
+
+/**
+ * 依據輸入溫度提供即時建議與安全提示的資訊區塊。
+ */
 
 export function InsightsSection({ insights }: InsightsSectionProps) {
   return (
