@@ -1,13 +1,12 @@
-export type Fact = {
-  icon: string;
-  title: string;
-  description: string;
-};
+import type { Fact } from "../types/fact";
 
 type FactsSectionProps = {
   facts: Fact[];
 };
 
+/**
+ * 收斂專案特色的說明區塊，方便在履歷與作品集介紹時引用。
+ */
 export function FactsSection({ facts }: FactsSectionProps) {
   return (
     <section className="w-full min-w-0 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">

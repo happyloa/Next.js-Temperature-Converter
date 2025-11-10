@@ -1,0 +1,50 @@
+/**
+ * 空氣品質的補充資訊。
+ */
+export type WeatherAirQuality = {
+  aqi: number;
+  aqiUnit: string;
+  pm25: number;
+  pm25Unit: string;
+  pm10: number;
+  pm10Unit: string;
+  time: string;
+};
+
+/**
+ * 整合 Open-Meteo 與 World Time API 後得到的天氣儀表板資料結構。
+ */
+export type WeatherData = {
+  location: string;
+  administrative: string[];
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  } | null;
+  timezone: string;
+  timezoneAbbreviation: string;
+  observationTime: string;
+  temperature: number;
+  temperatureUnit: string;
+  apparentTemperature: number;
+  apparentTemperatureUnit: string;
+  humidity: number;
+  humidityUnit: string;
+  windSpeed: number;
+  windSpeedUnit: string;
+  pressure: number;
+  pressureUnit: string;
+  precipitation: number;
+  precipitationUnit: string;
+  uvIndex: number;
+  uvIndexUnit: string;
+  weatherCode: number;
+  isDay: boolean;
+  dailyHigh: number;
+  dailyLow: number;
+  dailyTemperatureUnit: string;
+  airQuality: WeatherAirQuality | null;
+  localTime: string | null;
+  utcOffset: string | null;
+  dayOfWeek: number | null;
+};

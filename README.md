@@ -26,13 +26,29 @@ app/
 ├─ layout.tsx          # 全域佈局與字體設定
 ├─ page.tsx            # 溫度工作室主頁與互動邏輯（TypeScript）
 ├─ globals.css         # 全域背景、排版與實用工具類
-└─ components/
-   ├─ FactsSection.tsx
-   ├─ HeroSection.tsx
-   ├─ HistorySection.tsx
-   ├─ InsightsSection.tsx
-   ├─ TemperatureInputCard.tsx
-   └─ WeatherSection.tsx
+├─ components/
+│  ├─ FactsSection.tsx          # 作品亮點卡片
+│  ├─ HeroSection.tsx           # 首屏預設按鈕與標語
+│  ├─ HistorySection.tsx        # 轉換紀錄手風琴
+│  ├─ InsightsSection.tsx       # 安全洞察卡片
+│  ├─ TemperatureInputCard.tsx  # 輸入與轉換主卡片（拆分子元件）
+│  ├─ ThemeToggleButton.tsx     # 固定位置的深淺色切換
+│  └─ WeatherSection.tsx        # 全球環境儀表板
+├─ hooks/
+│  ├─ useHistoryStore.ts        # local/sessionStorage 自動 fallback
+│  ├─ useTemperatureConversion.ts # 輸入/轉換邏輯封裝
+│  └─ useWeatherDashboard.ts    # 天氣、時區與空污 API 整合
+├─ lib/
+│  ├─ format.ts                 # 格式化工具與共用函式
+│  ├─ history.ts                # 歷史紀錄序列化/反序列化
+│  ├─ temperature.ts            # 溫標常數、預設值與情境判斷
+│  └─ weather.ts                # 天氣代碼與預設城市
+└─ types/
+   ├─ fact.ts
+   ├─ history.ts
+   ├─ insight.ts
+   ├─ temperature.ts
+   └─ weather.ts
 ```
 
 ## 開發環境需求
@@ -62,7 +78,8 @@ npm run lint    # 執行 Next.js 內建 ESLint 與 TypeScript 檢查
 
 ## TypeScript 筆記
 - 專案使用 `tsconfig.json` 啟用嚴格型別，並提供 `@/*` 的路徑別名。
-- 共用型別定義主要放在元件檔案內，並透過 `import type` 供頁面與其他元件重用。
+- 共用型別集中於 `app/types/`，搭配 `import type` 使用，避免產生額外的 JavaScript 負擔。
+- 關鍵邏輯拆分為 hooks 與 lib 模組，利於撰寫單元測試或在其他頁面重用。
 - 建議在開發時搭配 IDE 的 TypeScript 支援與 `npm run lint`，確保型別與語法一致性。
 
 ## 貢獻與回饋

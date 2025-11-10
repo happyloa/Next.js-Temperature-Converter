@@ -1,53 +1,13 @@
 import type { FormEvent } from "react";
 
+import type { WeatherData } from "../types/weather";
+
+/**
+ * 小工具：動態組合 Tailwind class。
+ */
 const classNames = (
   ...values: Array<string | false | null | undefined>
 ): string => values.filter(Boolean).join(" ");
-
-export type WeatherAirQuality = {
-  aqi: number;
-  aqiUnit: string;
-  pm25: number;
-  pm25Unit: string;
-  pm10: number;
-  pm10Unit: string;
-  time: string;
-};
-
-export type WeatherData = {
-  location: string;
-  administrative: string[];
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  } | null;
-  timezone: string;
-  timezoneAbbreviation: string;
-  observationTime: string;
-  temperature: number;
-  temperatureUnit: string;
-  apparentTemperature: number;
-  apparentTemperatureUnit: string;
-  humidity: number;
-  humidityUnit: string;
-  windSpeed: number;
-  windSpeedUnit: string;
-  pressure: number;
-  pressureUnit: string;
-  precipitation: number;
-  precipitationUnit: string;
-  uvIndex: number;
-  uvIndexUnit: string;
-  weatherCode: number;
-  isDay: boolean;
-  dailyHigh: number;
-  dailyLow: number;
-  dailyTemperatureUnit: string;
-  airQuality: WeatherAirQuality | null;
-  localTime: string | null;
-  utcOffset: string | null;
-  dayOfWeek: number | null;
-};
 
 type WeatherSectionProps = {
   query: string;
@@ -71,6 +31,9 @@ type WeatherSectionProps = {
   formatWeekday: (index: number | null) => string;
 };
 
+/**
+ * 天氣與環境儀表板，呈現查詢地點的即時與日常數據。
+ */
 export function WeatherSection({
   query,
   onQueryChange,

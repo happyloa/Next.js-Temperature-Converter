@@ -2,24 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { TemperatureScaleCode } from "./TemperatureInputCard";
+import type {
+  HistoryEntry,
+  TemperatureConversionSummary,
+} from "../types/history";
 
-export type TemperatureConversionSummary = {
-  code: TemperatureScaleCode;
-  label: string;
-  symbol: string;
-  result: number;
-};
-
-export type HistoryEntry = {
-  id: string;
-  timestamp: string;
-  scale: TemperatureScaleCode;
-  scaleLabel: string;
-  scaleSymbol: string;
-  value: number;
-  conversions: TemperatureConversionSummary[];
-};
+/**
+ * 歷史紀錄區塊，使用手風琴呈現最新八筆轉換內容。
+ */
 
 type HistorySectionProps = {
   history: HistoryEntry[];
@@ -194,6 +184,9 @@ function useAccordionPanel(isOpen: boolean) {
   const panelRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 
+  /**
+   * 透過動態計算高度，達成平滑的手風琴開合效果。
+   */
   useEffect(() => {
     const panel = panelRef.current;
     if (!panel) {
