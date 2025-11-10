@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef, useState } from "react";
 
 import type { TemperatureScaleCode } from "./TemperatureInputCard";
@@ -61,18 +63,18 @@ export function HistorySection({
   };
 
   return (
-    <section className="w-full min-w-0 space-y-6 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-7">
+    <section className="w-full min-w-0 space-y-6 rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-glass backdrop-blur transition-colors dark:border-slate-700/40 dark:bg-slate-900/70 sm:p-6 md:p-7">
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-3 text-slate-200">
+        <div className="flex items-center gap-3 text-slate-800 dark:text-slate-200">
           <span className="text-xl">🗂️</span>
           <h2 className="text-xl font-semibold">轉換紀錄</h2>
         </div>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-slate-600 dark:text-slate-300">
           將感興趣的轉換加入歷史紀錄，可快速對照實驗或製程所需的常用溫度設定。
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-slate-500 dark:text-slate-400">
           {history.length > 0
             ? `共 ${history.length} 筆，依時間由新到舊排序`
             : "尚未加入紀錄"}
@@ -104,7 +106,7 @@ export function HistorySection({
           );
         })}
         {history.length === 0 && (
-          <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-400">
+          <p className="rounded-2xl border border-dashed border-slate-200/70 bg-slate-100/80 p-4 text-sm text-slate-600 transition-colors dark:border-slate-700/40 dark:bg-slate-900/60 dark:text-slate-400">
             加入紀錄後，系統會保留最近八筆轉換，方便在不同實驗之間快速比對。
           </p>
         )}
@@ -133,18 +135,18 @@ function HistoryAccordionItem({
   const panelRef = useAccordionPanel(isOpen);
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-900/80">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm transition-colors dark:border-slate-700/40 dark:bg-slate-900/80">
       <button
         type="button"
         aria-expanded={isOpen}
         aria-controls={contentId}
         onClick={() => onToggle(entry.id)}
-        className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 text-left text-sm text-slate-300 transition-colors hover:bg-slate-900"
+        className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 text-left text-sm text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900"
       >
-        <span className="font-medium text-slate-200">
+        <span className="font-medium text-slate-900 dark:text-slate-200">
           {formatTime(new Date(entry.timestamp))} · {formatTemperature(entry.value)} {entry.scaleSymbol}
         </span>
-        <span className="flex items-center gap-2 text-xs text-slate-500">
+        <span className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           {entry.scaleLabel}
           <span
             aria-hidden="true"
@@ -173,7 +175,7 @@ function HistoryAccordionItem({
             {entry.conversions.map((item) => (
               <div
                 key={`${entry.id}-${item.code}`}
-                className="flex min-w-0 items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
+                className="flex min-w-0 items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 text-sm text-slate-700 transition-colors dark:border-slate-700/40 dark:bg-slate-950/60 dark:text-slate-200"
               >
                 <span className="font-medium">{item.label}</span>
                 <span className="font-semibold">
