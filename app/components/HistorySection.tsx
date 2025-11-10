@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { TemperatureScaleCode } from "./TemperatureInputCard";
 
@@ -92,60 +92,15 @@ export function HistorySection({
           const contentId = `${entry.id}-content`;
 
           return (
-            <div
+            <HistoryAccordionItem
               key={entry.id}
-              className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-900/80"
-            >
-              <button
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={contentId}
-                onClick={() => handleToggle(entry.id)}
-                className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 text-left text-sm text-slate-300 transition-colors hover:bg-slate-900"
-              >
-                <span className="font-medium text-slate-200">
-                  {formatTime(new Date(entry.timestamp))} · {formatTemperature(entry.value)} {entry.scaleSymbol}
-                </span>
-                <span className="flex items-center gap-2 text-xs text-slate-500">
-                  {entry.scaleLabel}
-                  <span
-                    aria-hidden="true"
-                    className={`transition-transform duration-300 ${
-                      isOpen ? "rotate-180" : "rotate-0"
-                    }`}
-                  >
-                    ▼
-                  </span>
-                </span>
-              </button>
-              <div
-                id={contentId}
-                aria-hidden={!isOpen}
-                className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-                  isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
-              >
-                <div
-                  className={`overflow-hidden border-t border-slate-700/40 px-4 pb-4 pt-3 transition-opacity duration-300 ease-in-out ${
-                    isOpen ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <div className="grid gap-2">
-                    {entry.conversions.map((item) => (
-                      <div
-                        key={`${entry.id}-${item.code}`}
-                        className="flex min-w-0 items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
-                      >
-                        <span className="font-medium">{item.label}</span>
-                        <span className="font-semibold">
-                          {formatTemperature(item.result)} {item.symbol}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+              contentId={contentId}
+              entry={entry}
+              isOpen={isOpen}
+              onToggle={handleToggle}
+              formatTemperature={formatTemperature}
+              formatTime={formatTime}
+            />
           );
         })}
         {history.length === 0 && (
@@ -156,4 +111,160 @@ export function HistorySection({
       </div>
     </section>
   );
+}
+
+type HistoryAccordionItemProps = {
+  contentId: string;
+  entry: HistoryEntry;
+  isOpen: boolean;
+  onToggle: (entryId: string) => void;
+  formatTemperature: (value: number) => string;
+  formatTime: (value: Date) => string;
+};
+
+function HistoryAccordionItem({
+  contentId,
+  entry,
+  isOpen,
+  onToggle,
+  formatTemperature,
+  formatTime,
+}: HistoryAccordionItemProps) {
+  const panelRef = useAccordionPanel(isOpen);
+
+  return (
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-900/80">
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={() => onToggle(entry.id)}
+        className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 text-left text-sm text-slate-300 transition-colors hover:bg-slate-900"
+      >
+        <span className="font-medium text-slate-200">
+          {formatTime(new Date(entry.timestamp))} · {formatTemperature(entry.value)} {entry.scaleSymbol}
+        </span>
+        <span className="flex items-center gap-2 text-xs text-slate-500">
+          {entry.scaleLabel}
+          <span
+            aria-hidden="true"
+            className={`transition-transform duration-400 ease-out ${
+              isOpen ? "rotate-180" : "rotate-0"
+            }`}
+          >
+            ▼
+          </span>
+        </span>
+      </button>
+      <div
+        id={contentId}
+        ref={panelRef}
+        aria-hidden={!isOpen}
+        className={`overflow-hidden border-t border-slate-700/40 transition-[height,opacity] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div
+          className={`px-4 pb-4 pt-3 transition-[opacity,transform] duration-300 ease-out ${
+            isOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
+          }`}
+        >
+          <div className="grid gap-2">
+            {entry.conversions.map((item) => (
+              <div
+                key={`${entry.id}-${item.code}`}
+                className="flex min-w-0 items-center justify-between rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-2 text-sm text-slate-200"
+              >
+                <span className="font-medium">{item.label}</span>
+                <span className="font-semibold">
+                  {formatTemperature(item.result)} {item.symbol}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useAccordionPanel(isOpen: boolean) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) {
+      return;
+    }
+
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      panel.style.height = isOpen ? "auto" : "0px";
+      return;
+    }
+
+    let animationFrameId: number | undefined;
+
+    const handleTransitionEnd = (event: TransitionEvent) => {
+      if (event.propertyName === "height" && isOpen && panelRef.current) {
+        panelRef.current.style.height = "auto";
+      }
+    };
+
+    panel.addEventListener("transitionend", handleTransitionEnd);
+
+    const measuredHeight = panel.scrollHeight;
+
+    if (isOpen) {
+      panel.style.height = `${measuredHeight}px`;
+    } else {
+      if (panel.style.height === "" || panel.style.height === "auto") {
+        panel.style.height = `${measuredHeight}px`;
+      }
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        if (!panelRef.current) {
+          return;
+        }
+
+        panelRef.current.style.height = "0px";
+      });
+    }
+
+    return () => {
+      panel.removeEventListener("transitionend", handleTransitionEnd);
+
+      if (animationFrameId !== undefined) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const panel = panelRef.current;
+    if (!panel || typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      if (!panelRef.current) {
+        return;
+      }
+
+      panelRef.current.style.height = "auto";
+    });
+
+    observer.observe(panel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isOpen]);
+
+  return panelRef;
 }
