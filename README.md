@@ -17,8 +17,15 @@
 ## 技術棧
 - [Next.js 16 App Router](https://nextjs.org/docs/app)（React 19）
 - TypeScript（嚴格型別設定）
-- [Tailwind CSS](https://tailwindcss.com/)
+- [Tailwind CSS 4](https://tailwindcss.com/)（以 `@tailwindcss/postcss` 插件整合 PostCSS）
 - 原生 fetch API 串接外部資料源
+
+## 主要依賴版本
+- Next.js：16.0.5
+- React / React DOM：19.2.0
+- TypeScript：5.9.3
+- Tailwind CSS：4.1.x（採用 `@import "tailwindcss";` 入口）
+- ESLint：9.39.x（含 `eslint-config-next`）
 
 ## 專案結構重點
 ```
