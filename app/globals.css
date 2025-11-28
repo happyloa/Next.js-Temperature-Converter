@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -272,6 +270,7 @@
     @apply flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold transition;
     background: var(--button-primary-bg);
     color: var(--button-primary-text);
+    cursor: pointer;
   }
 
   .theme-primary-button:hover {
@@ -289,6 +288,7 @@
     color: var(--outline-text);
     border-color: var(--outline-border);
     background-color: transparent;
+    cursor: pointer;
   }
 
   .theme-outline-button:hover {

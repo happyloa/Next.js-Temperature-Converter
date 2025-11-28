@@ -130,7 +130,7 @@ export default function TemperatureStudio() {
       <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
         <HeroSection presets={TEMPERATURE_PRESETS} onPresetSelect={handlePresetClick} />
 
-        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)]">
           <div className="min-w-0 space-y-8">
             <TemperatureInputCard
               scale={scale}
