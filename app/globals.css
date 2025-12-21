@@ -65,60 +65,60 @@
   :root[data-theme="light"] {
     color-scheme: light;
     --body-background:
-      radial-gradient(circle at 15% -20%, rgba(255, 94, 91, 0.22), transparent 45%),
-      radial-gradient(circle at 80% 0%, rgba(0, 206, 203, 0.25), transparent 45%),
-      linear-gradient(160deg, #fffdea 0%, #ffed66 40%, #d8d8d8 100%);
+      radial-gradient(circle at 12% -15%, rgba(59, 130, 246, 0.18), transparent 45%),
+      radial-gradient(circle at 85% 5%, rgba(168, 85, 247, 0.16), transparent 40%),
+      linear-gradient(160deg, #f8fafc 0%, #e2e8f0 45%, #e5e7eb 100%);
     --text-strong: #1f2937;
     --text-medium: #334155;
     --text-medium-soft: rgba(51, 65, 85, 0.8);
     --text-muted: #475569;
     --text-subtle: #64748b;
-    --surface-strong: rgba(255, 255, 234, 0.94);
-    --surface-medium: rgba(255, 255, 234, 0.88);
-    --surface-soft: rgba(255, 255, 234, 0.78);
-    --surface-light: rgba(255, 255, 234, 0.65);
-    --surface-deep: rgba(255, 237, 102, 0.68);
-    --solid-muted: rgba(0, 206, 203, 0.45);
-    --border-subtle: rgba(216, 216, 216, 0.85);
-    --border-strong: rgba(255, 94, 91, 0.65);
-    --shadow-color: rgba(255, 94, 91, 0.25);
-    --scroll-track: rgba(255, 253, 234, 0.85);
-    --scroll-thumb: linear-gradient(180deg, rgba(0, 206, 203, 0.7), rgba(255, 94, 91, 0.7));
-    --accent-primary: #ff5e5b;
-    --accent-primary-soft: rgba(255, 94, 91, 0.16);
-    --accent-primary-strong: rgba(255, 94, 91, 0.75);
-    --accent-secondary: #00cecb;
-    --accent-secondary-soft: rgba(0, 206, 203, 0.18);
-    --accent-tertiary: #ffed66;
-    --accent-tertiary-soft: rgba(255, 237, 102, 0.3);
+    --surface-strong: rgba(248, 250, 252, 0.95);
+    --surface-medium: rgba(248, 250, 252, 0.9);
+    --surface-soft: rgba(241, 245, 249, 0.82);
+    --surface-light: rgba(241, 245, 249, 0.65);
+    --surface-deep: rgba(226, 232, 240, 0.7);
+    --solid-muted: rgba(59, 130, 246, 0.15);
+    --border-subtle: rgba(148, 163, 184, 0.45);
+    --border-strong: rgba(59, 130, 246, 0.45);
+    --shadow-color: rgba(30, 41, 59, 0.15);
+    --scroll-track: rgba(226, 232, 240, 0.8);
+    --scroll-thumb: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(168, 85, 247, 0.6));
+    --accent-primary: #3b82f6;
+    --accent-primary-soft: rgba(59, 130, 246, 0.18);
+    --accent-primary-strong: rgba(59, 130, 246, 0.75);
+    --accent-secondary: #a855f7;
+    --accent-secondary-soft: rgba(168, 85, 247, 0.18);
+    --accent-tertiary: #f97316;
+    --accent-tertiary-soft: rgba(249, 115, 22, 0.2);
     --chip-text: #1f2937;
-    --chip-bg: rgba(216, 216, 216, 0.35);
-    --chip-border: rgba(216, 216, 216, 0.8);
-    --chip-border-hover: rgba(255, 94, 91, 0.55);
+    --chip-bg: rgba(226, 232, 240, 0.55);
+    --chip-border: rgba(148, 163, 184, 0.5);
+    --chip-border-hover: rgba(59, 130, 246, 0.45);
     --chip-active-text: #1f2937;
-    --chip-active-bg: rgba(0, 206, 203, 0.18);
-    --chip-active-border: rgba(0, 206, 203, 0.65);
-    --chip-active-shadow: 0 12px 30px -18px rgba(0, 0, 0, 0.2);
-    --button-primary-bg: linear-gradient(135deg, #ff5e5b 0%, #ffed66 100%);
-    --button-primary-hover-bg: linear-gradient(135deg, #ff746f 0%, #fff176 100%);
-    --button-primary-text: #1f2937;
-    --button-primary-disabled-bg: rgba(216, 216, 216, 0.65);
-    --button-primary-disabled-text: rgba(71, 85, 105, 0.7);
+    --chip-active-bg: rgba(59, 130, 246, 0.18);
+    --chip-active-border: rgba(59, 130, 246, 0.6);
+    --chip-active-shadow: 0 12px 30px -18px rgba(59, 130, 246, 0.35);
+    --button-primary-bg: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    --button-primary-hover-bg: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    --button-primary-text: #0f172a;
+    --button-primary-disabled-bg: rgba(226, 232, 240, 0.8);
+    --button-primary-disabled-text: rgba(100, 116, 139, 0.8);
     --outline-text: #1f2937;
-    --outline-border: rgba(216, 216, 216, 0.9);
-    --outline-hover-border: rgba(0, 206, 203, 0.6);
-    --outline-hover-bg: rgba(0, 206, 203, 0.12);
-    --outline-disabled-border: rgba(216, 216, 216, 0.6);
+    --outline-border: rgba(148, 163, 184, 0.55);
+    --outline-hover-border: rgba(59, 130, 246, 0.55);
+    --outline-hover-bg: rgba(59, 130, 246, 0.12);
+    --outline-disabled-border: rgba(148, 163, 184, 0.4);
     --outline-disabled-text: rgba(148, 163, 184, 0.7);
-    --tag-bg: rgba(255, 237, 102, 0.25);
-    --tag-border: rgba(255, 237, 102, 0.55);
-    --tag-border-hover: rgba(255, 94, 91, 0.55);
-    --tag-text: #ff5e5b;
-    --badge-bg: rgba(0, 206, 203, 0.12);
-    --badge-border: rgba(0, 206, 203, 0.55);
-    --badge-text: #0f172a;
-    --success-bg: rgba(0, 206, 203, 0.18);
-    --success-border: rgba(0, 206, 203, 0.55);
+    --tag-bg: rgba(248, 250, 252, 0.7);
+    --tag-border: rgba(59, 130, 246, 0.4);
+    --tag-border-hover: rgba(168, 85, 247, 0.5);
+    --tag-text: #3b82f6;
+    --badge-bg: rgba(59, 130, 246, 0.12);
+    --badge-border: rgba(59, 130, 246, 0.35);
+    --badge-text: #1e293b;
+    --success-bg: rgba(16, 185, 129, 0.18);
+    --success-border: rgba(16, 185, 129, 0.45);
     --success-text: #0f172a;
   }
 
@@ -139,6 +139,14 @@
 
   a {
     @apply text-inherit no-underline;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+
+  button:disabled {
+    @apply cursor-not-allowed;
   }
 }
 
