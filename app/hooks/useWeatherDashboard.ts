@@ -30,6 +30,14 @@ export function useWeatherDashboard(defaultQuery: string) {
       }
 
       const data = record.data as Partial<WeatherData>;
+      const optionalNumberFields: Array<keyof WeatherData> = [
+        "pressure",
+        "dailyHigh",
+        "dailyLow",
+      ];
+      const hasValidOptionalNumbers = optionalNumberFields.every((field) =>
+        typeof data[field] === "number" || data[field] === null
+      );
       const hasValidCoordinates =
         data.coordinates === null ||
         (data.coordinates !== undefined &&
@@ -51,7 +59,6 @@ export function useWeatherDashboard(defaultQuery: string) {
         typeof data.humidityUnit !== "string" ||
         typeof data.windSpeed !== "number" ||
         typeof data.windSpeedUnit !== "string" ||
-        typeof data.pressure !== "number" ||
         typeof data.pressureUnit !== "string" ||
         typeof data.precipitation !== "number" ||
         typeof data.precipitationUnit !== "string" ||
@@ -59,8 +66,7 @@ export function useWeatherDashboard(defaultQuery: string) {
         typeof data.uvIndexUnit !== "string" ||
         typeof data.weatherCode !== "number" ||
         typeof data.isDay !== "boolean" ||
-        typeof data.dailyHigh !== "number" ||
-        typeof data.dailyLow !== "number" ||
+        !hasValidOptionalNumbers ||
         typeof data.dailyTemperatureUnit !== "string" ||
         !hasValidCoordinates
       ) {
@@ -71,6 +77,14 @@ export function useWeatherDashboard(defaultQuery: string) {
         query: record.query,
         data: {
           ...data,
+          pressure:
+            typeof data.pressure === "number"
+              ? data.pressure
+              : Number.NaN,
+          dailyHigh:
+            typeof data.dailyHigh === "number" ? data.dailyHigh : Number.NaN,
+          dailyLow:
+            typeof data.dailyLow === "number" ? data.dailyLow : Number.NaN,
           airQuality: data.airQuality ?? null,
           localTime: data.localTime ?? null,
           utcOffset: data.utcOffset ?? null,
