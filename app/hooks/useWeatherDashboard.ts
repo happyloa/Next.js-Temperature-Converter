@@ -5,6 +5,8 @@ import type { FormEvent } from "react";
 
 import type { WeatherData } from "../types/weather";
 
+const WEATHER_STORAGE_KEY = "weather-dashboard-state";
+
 /**
  * 整合地理、天氣、空氣品質與時間 API 的 hook，提供統一的查詢介面。
  */
@@ -13,7 +15,115 @@ export function useWeatherDashboard(defaultQuery: string) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const storageRef = useRef<"local" | "session">("local");
+  const initialFetchRef = useRef(false);
+
+  const parseWeatherPayload = useCallback(
+    (value: unknown): { query: string; data: WeatherData } | null => {
+      if (!value || typeof value !== "object") return null;
+
+      const record = value as { query?: unknown; data?: unknown };
+      if (typeof record.query !== "string" || !record.data || typeof record.data !== "object") {
+        return null;
+      }
+
+      const data = record.data as Partial<WeatherData>;
+      const hasValidCoordinates =
+        data.coordinates === null ||
+        (data.coordinates !== undefined &&
+          typeof data.coordinates === "object" &&
+          typeof data.coordinates.latitude === "number" &&
+          typeof data.coordinates.longitude === "number");
+
+      if (
+        typeof data.location !== "string" ||
+        !Array.isArray(data.administrative) ||
+        typeof data.timezone !== "string" ||
+        typeof data.timezoneAbbreviation !== "string" ||
+        typeof data.observationTime !== "string" ||
+        typeof data.temperature !== "number" ||
+        typeof data.temperatureUnit !== "string" ||
+        typeof data.apparentTemperature !== "number" ||
+        typeof data.apparentTemperatureUnit !== "string" ||
+        typeof data.humidity !== "number" ||
+        typeof data.humidityUnit !== "string" ||
+        typeof data.windSpeed !== "number" ||
+        typeof data.windSpeedUnit !== "string" ||
+        typeof data.pressure !== "number" ||
+        typeof data.pressureUnit !== "string" ||
+        typeof data.precipitation !== "number" ||
+        typeof data.precipitationUnit !== "string" ||
+        typeof data.uvIndex !== "number" ||
+        typeof data.uvIndexUnit !== "string" ||
+        typeof data.weatherCode !== "number" ||
+        typeof data.isDay !== "boolean" ||
+        typeof data.dailyHigh !== "number" ||
+        typeof data.dailyLow !== "number" ||
+        typeof data.dailyTemperatureUnit !== "string" ||
+        !hasValidCoordinates
+      ) {
+        return null;
+      }
+
+      return {
+        query: record.query,
+        data: {
+          ...data,
+          airQuality: data.airQuality ?? null,
+          localTime: data.localTime ?? null,
+          utcOffset: data.utcOffset ?? null,
+          dayOfWeek: data.dayOfWeek ?? null,
+        } as WeatherData,
+      };
+    },
+    []
+  );
+
+  const isQuotaExceeded = (error: unknown): boolean => {
+    if (!error) return false;
+    if (error instanceof DOMException) {
+      return (
+        error.name === "QuotaExceededError" ||
+        error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+        error.code === 22 ||
+        error.code === 1014
+      );
+    }
+    return false;
+  };
+
+  const persistWeather = useCallback((payload: { query: string; data: WeatherData }) => {
+    if (typeof window === "undefined") return;
+
+    const storages: Array<{ name: "local" | "session"; storage: Storage }> =
+      storageRef.current === "session"
+        ? [
+            { name: "session", storage: window.sessionStorage },
+            { name: "local", storage: window.localStorage },
+          ]
+        : [
+            { name: "local", storage: window.localStorage },
+            { name: "session", storage: window.sessionStorage },
+          ];
+
+    const serialized = JSON.stringify(payload);
+
+    for (const { name, storage } of storages) {
+      try {
+        storage.setItem(WEATHER_STORAGE_KEY, serialized);
+        storageRef.current = name;
+        return;
+      } catch (error) {
+        if (isQuotaExceeded(error)) {
+          continue;
+        }
+        console.error("Failed to persist weather payload", error);
+        return;
+      }
+    }
+  }, []);
 
   type GeoApiLocation = {
     name: string;
@@ -175,7 +285,8 @@ export function useWeatherDashboard(defaultQuery: string) {
         const resolvedTimezone =
           location.timezone ?? timePayload?.timezone ?? forecast.timezone ?? "UTC";
 
-        setWeatherData({
+        const normalizedQuery = trimmed;
+        const nextData: WeatherData = {
           location: `${location.name}${location.country ? ` · ${location.country}` : ""}`,
           administrative: [
             location.admin1,
@@ -232,7 +343,11 @@ export function useWeatherDashboard(defaultQuery: string) {
           dayOfWeek: Number.isFinite(timePayload?.day_of_week)
             ? (timePayload?.day_of_week as number)
             : null,
-        });
+        };
+
+        setWeatherQuery(normalizedQuery);
+        setWeatherData(nextData);
+        persistWeather({ query: normalizedQuery, data: nextData });
       } catch (error) {
         if (signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
           return;
@@ -250,15 +365,53 @@ export function useWeatherDashboard(defaultQuery: string) {
         setWeatherLoading(false);
       }
     },
-    []
+    [persistWeather]
   );
 
   useEffect(() => {
-    fetchWeather(defaultQuery);
+    if (typeof window === "undefined") return;
+
+    const storages: Array<{ name: "local" | "session"; storage: Storage }> = [
+      { name: "local", storage: window.localStorage },
+      { name: "session", storage: window.sessionStorage },
+    ];
+
+    for (const { name, storage } of storages) {
+      try {
+        const raw = storage.getItem(WEATHER_STORAGE_KEY);
+        if (!raw) {
+          continue;
+        }
+
+        const parsed = parseWeatherPayload(JSON.parse(raw) as unknown);
+        if (parsed) {
+          setWeatherQuery(parsed.query);
+          setWeatherData(parsed.data);
+          storageRef.current = name;
+          break;
+        }
+      } catch (error) {
+        console.error("Failed to restore weather payload", error);
+      }
+    }
+
+    setHydrated(true);
+  }, [parseWeatherPayload]);
+
+  useEffect(() => {
+    if (!hydrated || initialFetchRef.current) {
+      return;
+    }
+
+    initialFetchRef.current = true;
+    fetchWeather(weatherQuery);
+  }, [fetchWeather, hydrated, weatherQuery]);
+
+  useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, [defaultQuery, fetchWeather]);
+  }, []);
 
   const handleWeatherSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
