@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 import type { WeatherData } from "../types/weather";
@@ -13,6 +13,7 @@ export function useWeatherDashboard(defaultQuery: string) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   type GeoApiLocation = {
     name: string;
@@ -89,6 +90,11 @@ export function useWeatherDashboard(defaultQuery: string) {
 
   const fetchWeather = useCallback(
     async (query: string) => {
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      const signal = controller.signal;
+
       const trimmed = query.trim();
       if (!trimmed) {
         setWeatherError("請輸入地點名稱");
@@ -104,7 +110,8 @@ export function useWeatherDashboard(defaultQuery: string) {
         const geoResponse = await fetch(
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
             trimmed
-          )}&count=1&language=zh&format=json`
+          )}&count=1&language=zh&format=json`,
+          { signal }
         );
 
         if (!geoResponse.ok) {
@@ -123,15 +130,18 @@ export function useWeatherDashboard(defaultQuery: string) {
           fetch(
             `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=${encodeURIComponent(
               location.timezone ?? "auto"
-            )}`
+            )}`,
+            { signal }
           ),
           fetch(
-            `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,pm2_5,pm10`
+            `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,pm2_5,pm10`,
+            { signal }
           ),
           fetch(
             `https://worldtimeapi.org/api/timezone/${encodeURIComponent(
               location.timezone ?? "Etc/UTC"
-            )}`
+            )}`,
+            { signal }
           ),
         ]);
 
@@ -224,12 +234,19 @@ export function useWeatherDashboard(defaultQuery: string) {
             : null,
         });
       } catch (error) {
+        if (signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
+          return;
+        }
+
         console.error("fetchWeather", error);
         setWeatherData(null);
         const message =
           error instanceof Error ? error.message : "無法取得天氣資訊，請稍後再試。";
         setWeatherError(message);
       } finally {
+        if (signal.aborted) {
+          return;
+        }
         setWeatherLoading(false);
       }
     },
@@ -238,6 +255,9 @@ export function useWeatherDashboard(defaultQuery: string) {
 
   useEffect(() => {
     fetchWeather(defaultQuery);
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, [defaultQuery, fetchWeather]);
 
   const handleWeatherSubmit = useCallback(
