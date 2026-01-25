@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type VoiceInputState = "idle" | "listening" | "processing" | "error";
 
@@ -31,12 +31,16 @@ export function useVoiceInput(
   const [state, setState] = useState<VoiceInputState>("idle");
   const [transcript, setTranscript] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSupported, setIsSupported] = useState(false);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  const isSupported =
-    typeof window !== "undefined" &&
-    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  // Check support on client side only to avoid hydration mismatch
+  useEffect(() => {
+    const supported =
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+    setIsSupported(supported);
+  }, []);
 
   const startListening = useCallback(() => {
     if (!isSupported) {
