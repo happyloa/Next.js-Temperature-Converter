@@ -6,6 +6,7 @@ import type {
   TemperatureScaleCode,
   ThermalMood,
 } from "../types/temperature";
+import { ShareButton } from "./ShareButton";
 import { VoiceInputButton } from "./VoiceInputButton";
 
 /**
@@ -65,12 +66,20 @@ export function TemperatureInputCard({
   formatTemperature,
   onVoiceInput,
 }: TemperatureInputCardProps) {
+  // Generate share text from conversions
+  const shareText = conversions.length > 0
+    ? conversions
+      .map((c) => `${c.label}: ${formatTemperature(c.result)} ${c.symbol}`)
+      .join("\n")
+    : undefined;
+
   return (
     <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
       <TemperatureCardHeader
         onReset={onReset}
         onAddHistory={onAddHistory}
         canAddHistory={canAddHistory}
+        shareText={shareText}
       />
 
       <TemperatureScaleSelector
@@ -116,6 +125,7 @@ type TemperatureCardHeaderProps = {
   onReset: MouseEventHandler<HTMLButtonElement>;
   onAddHistory: MouseEventHandler<HTMLButtonElement>;
   canAddHistory: boolean;
+  shareText?: string;
 };
 
 /**
@@ -125,6 +135,7 @@ function TemperatureCardHeader({
   onReset,
   onAddHistory,
   canAddHistory,
+  shareText,
 }: TemperatureCardHeaderProps) {
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:[&>*]:min-w-0">
@@ -135,6 +146,10 @@ function TemperatureCardHeader({
         </p>
       </div>
       <div className="flex flex-wrap justify-end gap-3">
+        <ShareButton
+          title="溫度工作室 - 轉換結果"
+          text={shareText || "使用溫度工作室進行溫度轉換"}
+        />
         <button type="button" onClick={onReset} className="theme-outline-button">
           🔄 重設
         </button>
