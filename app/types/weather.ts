@@ -12,6 +12,15 @@ export type WeatherAirQuality = {
 };
 
 /**
+ * 單日預報資料。
+ */
+export type DailyForecast = {
+  date: string;
+  high: number;
+  low: number;
+};
+
+/**
  * 整合 Open-Meteo 與 World Time API 後得到的天氣儀表板資料結構。
  */
 export type WeatherData = {
@@ -47,4 +56,5 @@ export type WeatherData = {
   localTime: string | null;
   utcOffset: string | null;
   dayOfWeek: number | null;
+  dailyForecast: DailyForecast[];
 };

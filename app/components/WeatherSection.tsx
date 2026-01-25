@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 
 import type { WeatherData } from "../types/weather";
+import { WeatherChart } from "./WeatherChart";
 
 /**
  * 小工具：動態組合 Tailwind class。
@@ -364,6 +365,16 @@ export function WeatherSection({
                 )}
               </div>
             </div>
+
+            {/* Weather Chart */}
+            {data.dailyForecast.length > 0 && (
+              <div className="rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
+                <WeatherChart
+                  data={data.dailyForecast}
+                  unit={data.dailyTemperatureUnit}
+                />
+              </div>
+            )}
 
             <p className="text-xs text-slate-500">
               若需更精細的自動化流程，可將這些 API 串接至監控儀表板或報表系統中。

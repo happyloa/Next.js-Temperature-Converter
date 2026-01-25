@@ -184,6 +184,7 @@ export function useWeatherDashboard(defaultQuery: string) {
       uv_index?: string;
     };
     daily?: {
+      time?: string[];
       temperature_2m_max?: number[];
       temperature_2m_min?: number[];
     };
@@ -258,7 +259,7 @@ export function useWeatherDashboard(defaultQuery: string) {
         const [forecastResult, airQualityResult, timeResult] =
           await Promise.allSettled([
             fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=${encodeURIComponent(
+              `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=time,temperature_2m_max,temperature_2m_min&forecast_days=7&timezone=${encodeURIComponent(
                 location.timezone ?? "auto",
               )}`,
               { signal },
@@ -378,6 +379,11 @@ export function useWeatherDashboard(defaultQuery: string) {
           dayOfWeek: Number.isFinite(timePayload?.day_of_week)
             ? (timePayload?.day_of_week as number)
             : null,
+          dailyForecast: (forecast.daily?.time ?? []).map((date, index) => ({
+            date,
+            high: forecast.daily?.temperature_2m_max?.[index] ?? 0,
+            low: forecast.daily?.temperature_2m_min?.[index] ?? 0,
+          })),
         };
 
         setWeatherQuery(normalizedQuery);
