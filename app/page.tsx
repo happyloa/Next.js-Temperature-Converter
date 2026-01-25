@@ -7,10 +7,12 @@ import { FactsSection } from "./components/FactsSection";
 import { HeroSection } from "./components/HeroSection";
 import { HistorySection } from "./components/HistorySection";
 import { InsightsSection } from "./components/InsightsSection";
+import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import { TemperatureInputCard } from "./components/TemperatureInputCard";
 import { ThemeToggleButton } from "./components/ThemeToggleButton";
 import { WeatherSection } from "./components/WeatherSection";
 import { useHistoryStore } from "./hooks/useHistoryStore";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useTemperatureConversion } from "./hooks/useTemperatureConversion";
 import { useWeatherDashboard } from "./hooks/useWeatherDashboard";
 import {
@@ -67,6 +69,8 @@ export default function TemperatureStudio() {
     handleWeatherSubmit,
     handleWeatherPreset,
   } = useWeatherDashboard("高雄");
+
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
 
   const [copiedScale, setCopiedScale] = useState<TemperatureScaleCode | null>(null);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -144,6 +148,40 @@ export default function TemperatureStudio() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   }, []);
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: "r",
+        ctrl: true,
+        action: handleReset,
+        description: "重設溫度輸入",
+      },
+      {
+        key: "h",
+        ctrl: true,
+        action: clearHistory,
+        description: "清除歷史紀錄",
+      },
+      {
+        key: "t",
+        ctrl: true,
+        action: toggleTheme,
+        description: "切換主題",
+      },
+      {
+        key: "?",
+        action: () => setShowShortcutsHelp((prev) => !prev),
+        description: "顯示快捷鍵說明",
+      },
+      {
+        key: "Escape",
+        action: () => setShowShortcutsHelp(false),
+        description: "關閉彈窗",
+      },
+    ],
+  });
+
   return (
     <main className="w-full max-w-full py-12 pb-24">
       <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
@@ -208,6 +246,18 @@ export default function TemperatureStudio() {
       </div>
 
       <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
+
+      {showShortcutsHelp && (
+        <KeyboardShortcutsHelp
+          shortcuts={[
+            { keys: "Ctrl+R", description: "重設溫度輸入" },
+            { keys: "Ctrl+H", description: "清除歷史紀錄" },
+            { keys: "Ctrl+T", description: "切換深淺色主題" },
+            { keys: "?", description: "顯示/隱藏快捷鍵說明" },
+            { keys: "Esc", description: "關閉彈窗" },
+          ]}
+        />
+      )}
     </main>
   );
 }
