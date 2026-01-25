@@ -3,13 +3,13 @@
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 
-import { FactsSection } from "./components/FactsSection";
 import { HeroSection } from "./components/HeroSection";
 import { HistorySection } from "./components/HistorySection";
 import { InsightsSection } from "./components/InsightsSection";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import { TemperatureInputCard } from "./components/TemperatureInputCard";
 import { ThemeToggleButton } from "./components/ThemeToggleButton";
+import { WeatherChart } from "./components/WeatherChart";
 import { WeatherSection } from "./components/WeatherSection";
 import { useHistoryStore } from "./hooks/useHistoryStore";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -184,10 +184,7 @@ export default function TemperatureStudio() {
     ],
   });
 
-  // Placeholder for shareText, as it's not defined in the provided context
-  // and the instruction requires it to be passed to TemperatureInputCard.
-  // In a real application, this would be derived from the current temperature/conversion state.
-  const shareText = "Check out this temperature conversion!";
+
 
   return (
     <main className="w-full max-w-full py-12 pb-24">
@@ -253,7 +250,14 @@ export default function TemperatureStudio() {
 
             <InsightsSection insights={insights} />
 
-            <FactsSection facts={PRODUCT_FACTS} />
+            {weatherData?.dailyForecast && weatherData.dailyForecast.length > 0 && (
+              <div className="rounded-3xl border border-slate-700/40 bg-slate-900/60 p-6 shadow-glass backdrop-blur">
+                <WeatherChart
+                  data={weatherData.dailyForecast}
+                  unit={weatherData.dailyTemperatureUnit}
+                />
+              </div>
+            )}
           </aside>
         </div>
       </div>
