@@ -11,7 +11,8 @@ interface ShareButtonProps {
 }
 
 /**
- * Share button using Web Share API with fallback to clipboard.
+ * 分享按鈕組件。
+ * 使用 Web Share API，若不支援則降級使用剪貼簿複製。
  */
 export const ShareButton: FC<ShareButtonProps> = ({
     title,

@@ -17,8 +17,8 @@ interface UseKeyboardShortcutsOptions {
 }
 
 /**
- * Hook for handling keyboard shortcuts.
- * Supports Ctrl, Shift, Alt modifiers.
+ * 處理鍵盤快捷鍵的 Hook。
+ * 支援 Ctrl、Shift、Alt 修飾鍵。
  */
 export function useKeyboardShortcuts({
   shortcuts,
@@ -28,7 +28,7 @@ export function useKeyboardShortcuts({
     (event: KeyboardEvent) => {
       if (!enabled) return;
 
-      // Ignore shortcuts when typing in input fields
+      // 在輸入框輸入時忽略快捷鍵
       const target = event.target as HTMLElement;
       const isInputField =
         target.tagName === "INPUT" ||
@@ -42,7 +42,7 @@ export function useKeyboardShortcuts({
         const altMatch = !!shortcut.alt === event.altKey;
 
         if (keyMatch && ctrlMatch && shiftMatch && altMatch) {
-          // Allow Escape to work even in input fields
+          // 允許 Escape 鍵即使在輸入框中也能運作（例如關閉彈窗）
           if (shortcut.key.toLowerCase() === "escape" || !isInputField) {
             event.preventDefault();
             shortcut.action();
@@ -65,13 +65,13 @@ export function useKeyboardShortcuts({
 }
 
 /**
- * Get formatted shortcut key display string.
+ * 取得格式化後的快捷鍵顯示字串。
  */
 export function formatShortcut(shortcut: KeyboardShortcut): string {
   const parts: string[] = [];
 
   if (shortcut.ctrl) {
-    // Use ⌘ on Mac, Ctrl on Windows
+    // Mac 使用 ⌘，Windows 使用 Ctrl
     const isMac =
       typeof navigator !== "undefined" &&
       navigator.platform.toLowerCase().includes("mac");
@@ -81,7 +81,7 @@ export function formatShortcut(shortcut: KeyboardShortcut): string {
   if (shortcut.shift) parts.push("Shift");
   if (shortcut.alt) parts.push("Alt");
 
-  // Format special keys
+  // 格式化特殊按鍵
   const keyDisplay =
     shortcut.key === "Escape" ? "Esc" : shortcut.key.toUpperCase();
   parts.push(keyDisplay);

@@ -20,8 +20,8 @@ interface UseVoiceInputReturn {
 }
 
 /**
- * Hook for voice input using Web Speech API.
- * Supports Chinese and English speech recognition.
+ * 使用 Web Speech API 進行語音輸入的 Hook。
+ * 支援中文與英文語音辨識。
  */
 export function useVoiceInput(
   options: UseVoiceInputOptions = {},
@@ -35,7 +35,7 @@ export function useVoiceInput(
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // Check support on client side only to avoid hydration mismatch
+  // 僅在客戶端檢查支援度以避免 Hydration 不匹配
   useEffect(() => {
     const supported =
       "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
@@ -51,7 +51,7 @@ export function useVoiceInput(
       return;
     }
 
-    // Stop any existing recognition
+    // 停止任何現有的辨識
     if (recognitionRef.current) {
       recognitionRef.current.abort();
     }
@@ -80,7 +80,7 @@ export function useVoiceInput(
 
       if (lastResult.isFinal) {
         setState("processing");
-        // Extract number from transcript
+        // 從語音文字中提取數字
         const extracted = extractTemperature(transcriptText);
         if (extracted !== null) {
           onResult?.(extracted);
@@ -108,7 +108,7 @@ export function useVoiceInput(
           errorMsg = "網路錯誤，請檢查網路連線";
           break;
         case "aborted":
-          // User aborted, not an error
+          // 用戶取消，不視為錯誤
           setState("idle");
           return;
       }
@@ -154,12 +154,12 @@ export function useVoiceInput(
 }
 
 /**
- * Extract temperature value from speech transcript.
- * Handles patterns like "25度", "攝氏25度", "25 degrees", "negative 10", etc.
+ * 從語音轉錄文字中提取溫度數值。
+ * 處理如 "25度"、"攝氏25度"、"二十五度" 等格式。
  */
 function extractTemperature(text: string): string | null {
-  // Normalize text
-  const normalized = text
+  // 正規化文字
+  let normalized = text
     .replace(/負/g, "-")
     .replace(/零下/g, "-")
     .replace(/minus\s*/gi, "-")
@@ -175,34 +175,52 @@ function extractTemperature(text: string): string | null {
     .replace(/華氏/g, "")
     .trim();
 
-  // Match number patterns
-  const numberMatch = normalized.match(/-?\d+\.?\d*/);
+  // 簡單處理常見中文數字 "二十五" -> "25"
+  // 若包含 '十' 且前後有數字字元，則進行簡單轉換
+  // 這裡做一個非常簡單的轉換邏輯，只處理 0-99 的口語
+  const cnMap: Record<string, number> = {
+    零: 0,
+    一: 1,
+    二: 2,
+    两: 2,
+    兩: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+    七: 7,
+    八: 8,
+    九: 9,
+    十: 10,
+  };
 
+  // 嘗試將中文數字轉換為阿拉伯數字
+  // 例如 "二十五" -> 2*10 + 5 = 25
+  // "十三" -> 10 + 3 = 13
+  // "五十" -> 5*10 = 50
+  if (/^[零一二兩三四五六七八九十]+$/.test(normalized)) {
+    let val = 0;
+    if (normalized.startsWith("十")) {
+      val += 10;
+      if (normalized.length > 1) {
+        val += cnMap[normalized[1]] || 0;
+      }
+    } else if (normalized.includes("十")) {
+      const parts = normalized.split("十");
+      if (parts[0]) val += (cnMap[parts[0]] || 0) * 10;
+      if (parts[1]) val += cnMap[parts[1]] || 0;
+    } else {
+      // 單個數字
+      val = cnMap[normalized] || 0;
+    }
+    return val.toString();
+  }
+
+  // 原有的阿拉伯數字匹配
+  const numberMatch = normalized.match(/-?\d+\.?\d*/);
   if (numberMatch) {
     return numberMatch[0];
   }
 
-  // Try to convert Chinese numbers
-  const chineseNumbers: Record<string, string> = {
-    零: "0",
-    一: "1",
-    二: "2",
-    三: "3",
-    四: "4",
-    五: "5",
-    六: "6",
-    七: "7",
-    八: "8",
-    九: "9",
-    十: "10",
-    百: "100",
-  };
-
-  let convertedText = normalized;
-  for (const [chinese, digit] of Object.entries(chineseNumbers)) {
-    convertedText = convertedText.replace(new RegExp(chinese, "g"), digit);
-  }
-
-  const convertedMatch = convertedText.match(/-?\d+\.?\d*/);
-  return convertedMatch ? convertedMatch[0] : null;
+  return null;
 }

@@ -9,7 +9,6 @@ import { InsightsSection } from "./components/InsightsSection";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import { TemperatureInputCard } from "./components/TemperatureInputCard";
 import { ThemeToggleButton } from "./components/ThemeToggleButton";
-import { WeatherChart } from "./components/WeatherChart";
 import { WeatherSection } from "./components/WeatherSection";
 import { useHistoryStore } from "./hooks/useHistoryStore";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -155,19 +154,19 @@ export default function TemperatureStudio() {
     shortcuts: [
       {
         key: "r",
-        ctrl: true,
+        alt: true,
         action: handleReset,
         description: "重設溫度輸入",
       },
       {
         key: "h",
-        ctrl: true,
+        alt: true,
         action: clearHistory,
         description: "清除歷史紀錄",
       },
       {
         key: "t",
-        ctrl: true,
+        alt: true,
         action: toggleTheme,
         description: "切換主題",
       },
@@ -250,14 +249,7 @@ export default function TemperatureStudio() {
 
             <InsightsSection insights={insights} />
 
-            {weatherData?.dailyForecast && weatherData.dailyForecast.length > 0 && (
-              <div className="rounded-3xl border border-slate-700/40 bg-slate-900/60 p-6 shadow-glass backdrop-blur">
-                <WeatherChart
-                  data={weatherData.dailyForecast}
-                  unit={weatherData.dailyTemperatureUnit}
-                />
-              </div>
-            )}
+
           </aside>
         </div>
       </div>
@@ -267,9 +259,9 @@ export default function TemperatureStudio() {
       {showShortcutsHelp && (
         <KeyboardShortcutsHelp
           shortcuts={[
-            { keys: "Ctrl+R", description: "重設溫度輸入" },
-            { keys: "Ctrl+H", description: "清除歷史紀錄" },
-            { keys: "Ctrl+T", description: "切換深淺色主題" },
+            { keys: "Alt+R", description: "重設溫度輸入" },
+            { keys: "Alt+H", description: "清除歷史紀錄" },
+            { keys: "Alt+T", description: "切換深淺色主題" },
             { keys: "?", description: "顯示/隱藏快捷鍵說明" },
             { keys: "Esc", description: "關閉彈窗" },
           ]}
