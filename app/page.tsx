@@ -68,6 +68,8 @@ export default function TemperatureStudio() {
     weatherError,
     handleWeatherSubmit,
     handleWeatherPreset,
+    handleGeolocate,
+    geolocating,
   } = useWeatherDashboard("高雄");
 
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
@@ -238,6 +240,8 @@ export default function TemperatureStudio() {
               formatUtcOffset={formatUtcOffset}
               formatCoordinate={formatCoordinate}
               formatWeekday={formatWeekday}
+              onGeolocate={handleGeolocate}
+              geolocating={geolocating}
             />
           </aside>
         </div>

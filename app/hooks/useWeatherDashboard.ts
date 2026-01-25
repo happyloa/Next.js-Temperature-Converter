@@ -25,7 +25,11 @@ export function useWeatherDashboard(defaultQuery: string) {
       if (!value || typeof value !== "object") return null;
 
       const record = value as { query?: unknown; data?: unknown };
-      if (typeof record.query !== "string" || !record.data || typeof record.data !== "object") {
+      if (
+        typeof record.query !== "string" ||
+        !record.data ||
+        typeof record.data !== "object"
+      ) {
         return null;
       }
 
@@ -35,8 +39,8 @@ export function useWeatherDashboard(defaultQuery: string) {
         "dailyHigh",
         "dailyLow",
       ];
-      const hasValidOptionalNumbers = optionalNumberFields.every((field) =>
-        typeof data[field] === "number" || data[field] === null
+      const hasValidOptionalNumbers = optionalNumberFields.every(
+        (field) => typeof data[field] === "number" || data[field] === null,
       );
       const hasValidCoordinates =
         data.coordinates === null ||
@@ -78,9 +82,7 @@ export function useWeatherDashboard(defaultQuery: string) {
         data: {
           ...data,
           pressure:
-            typeof data.pressure === "number"
-              ? data.pressure
-              : Number.NaN,
+            typeof data.pressure === "number" ? data.pressure : Number.NaN,
           dailyHigh:
             typeof data.dailyHigh === "number" ? data.dailyHigh : Number.NaN,
           dailyLow:
@@ -92,7 +94,7 @@ export function useWeatherDashboard(defaultQuery: string) {
         } as WeatherData,
       };
     },
-    []
+    [],
   );
 
   const isQuotaExceeded = (error: unknown): boolean => {
@@ -108,36 +110,39 @@ export function useWeatherDashboard(defaultQuery: string) {
     return false;
   };
 
-  const persistWeather = useCallback((payload: { query: string; data: WeatherData }) => {
-    if (typeof window === "undefined") return;
+  const persistWeather = useCallback(
+    (payload: { query: string; data: WeatherData }) => {
+      if (typeof window === "undefined") return;
 
-    const storages: Array<{ name: "local" | "session"; storage: Storage }> =
-      storageRef.current === "session"
-        ? [
-            { name: "session", storage: window.sessionStorage },
-            { name: "local", storage: window.localStorage },
-          ]
-        : [
-            { name: "local", storage: window.localStorage },
-            { name: "session", storage: window.sessionStorage },
-          ];
+      const storages: Array<{ name: "local" | "session"; storage: Storage }> =
+        storageRef.current === "session"
+          ? [
+              { name: "session", storage: window.sessionStorage },
+              { name: "local", storage: window.localStorage },
+            ]
+          : [
+              { name: "local", storage: window.localStorage },
+              { name: "session", storage: window.sessionStorage },
+            ];
 
-    const serialized = JSON.stringify(payload);
+      const serialized = JSON.stringify(payload);
 
-    for (const { name, storage } of storages) {
-      try {
-        storage.setItem(WEATHER_STORAGE_KEY, serialized);
-        storageRef.current = name;
-        return;
-      } catch (error) {
-        if (isQuotaExceeded(error)) {
-          continue;
+      for (const { name, storage } of storages) {
+        try {
+          storage.setItem(WEATHER_STORAGE_KEY, serialized);
+          storageRef.current = name;
+          return;
+        } catch (error) {
+          if (isQuotaExceeded(error)) {
+            continue;
+          }
+          console.error("Failed to persist weather payload", error);
+          return;
         }
-        console.error("Failed to persist weather payload", error);
-        return;
       }
-    }
-  }, []);
+    },
+    [],
+  );
 
   type GeoApiLocation = {
     name: string;
@@ -233,9 +238,9 @@ export function useWeatherDashboard(defaultQuery: string) {
       try {
         const geoResponse = await fetch(
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-            trimmed
+            trimmed,
           )}&count=1&language=zh&format=json`,
-          { signal }
+          { signal },
         );
 
         if (!geoResponse.ok) {
@@ -250,36 +255,46 @@ export function useWeatherDashboard(defaultQuery: string) {
 
         const [location] = geoData.results;
 
-        const [forecastResult, airQualityResult, timeResult] = await Promise.allSettled([
-          fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=${encodeURIComponent(
-              location.timezone ?? "auto"
-            )}`,
-            { signal }
-          ),
-          fetch(
-            `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,pm2_5,pm10`,
-            { signal }
-          ),
-          fetch(
-            `https://worldtimeapi.org/api/timezone/${encodeURIComponent(
-              location.timezone ?? "Etc/UTC"
-            )}`,
-            { signal }
-          ),
-        ]);
+        const [forecastResult, airQualityResult, timeResult] =
+          await Promise.allSettled([
+            fetch(
+              `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=${encodeURIComponent(
+                location.timezone ?? "auto",
+              )}`,
+              { signal },
+            ),
+            fetch(
+              `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,pm2_5,pm10`,
+              { signal },
+            ),
+            fetch(
+              `https://worldtimeapi.org/api/timezone/${encodeURIComponent(
+                location.timezone ?? "Etc/UTC",
+              )}`,
+              { signal },
+            ),
+          ]);
 
-        if (forecastResult.status !== "fulfilled" || !forecastResult.value?.ok) {
+        if (
+          forecastResult.status !== "fulfilled" ||
+          !forecastResult.value?.ok
+        ) {
           throw new Error("無法取得天氣資訊，請稍後再試。");
         }
 
-        const forecast = (await forecastResult.value.json()) as ForecastApiResponse;
+        const forecast =
+          (await forecastResult.value.json()) as ForecastApiResponse;
 
         let airQualityPayload: AirQualityApiResponse["current"] | null = null;
-        let airQualityUnits: AirQualityApiResponse["current_units"] | null = null;
-        if (airQualityResult.status === "fulfilled" && airQualityResult.value?.ok) {
+        let airQualityUnits: AirQualityApiResponse["current_units"] | null =
+          null;
+        if (
+          airQualityResult.status === "fulfilled" &&
+          airQualityResult.value?.ok
+        ) {
           try {
-            const parsed = (await airQualityResult.value.json()) as AirQualityApiResponse;
+            const parsed =
+              (await airQualityResult.value.json()) as AirQualityApiResponse;
             airQualityPayload = parsed.current ?? null;
             airQualityUnits = parsed.current_units ?? null;
           } catch (error) {
@@ -297,7 +312,10 @@ export function useWeatherDashboard(defaultQuery: string) {
         }
 
         const resolvedTimezone =
-          location.timezone ?? timePayload?.timezone ?? forecast.timezone ?? "UTC";
+          location.timezone ??
+          timePayload?.timezone ??
+          forecast.timezone ??
+          "UTC";
 
         const normalizedQuery = trimmed;
         const nextData: WeatherData = {
@@ -313,7 +331,9 @@ export function useWeatherDashboard(defaultQuery: string) {
           },
           timezone: resolvedTimezone,
           timezoneAbbreviation:
-            timePayload?.abbreviation ?? forecast.timezone_abbreviation ?? resolvedTimezone,
+            timePayload?.abbreviation ??
+            forecast.timezone_abbreviation ??
+            resolvedTimezone,
           observationTime: forecast.current.time,
           temperature: forecast.current.temperature_2m,
           temperatureUnit: forecast.current_units?.temperature_2m ?? "°C",
@@ -340,7 +360,8 @@ export function useWeatherDashboard(defaultQuery: string) {
           isDay: forecast.current.is_day === 1,
           dailyHigh: forecast.daily?.temperature_2m_max?.[0] ?? Number.NaN,
           dailyLow: forecast.daily?.temperature_2m_min?.[0] ?? Number.NaN,
-          dailyTemperatureUnit: forecast.daily_units?.temperature_2m_max ?? "°C",
+          dailyTemperatureUnit:
+            forecast.daily_units?.temperature_2m_max ?? "°C",
           airQuality: airQualityPayload
             ? {
                 aqi: airQualityPayload.european_aqi,
@@ -363,14 +384,19 @@ export function useWeatherDashboard(defaultQuery: string) {
         setWeatherData(nextData);
         persistWeather({ query: normalizedQuery, data: nextData });
       } catch (error) {
-        if (signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
+        if (
+          signal.aborted ||
+          (error instanceof DOMException && error.name === "AbortError")
+        ) {
           return;
         }
 
         console.error("fetchWeather", error);
         setWeatherData(null);
         const message =
-          error instanceof Error ? error.message : "無法取得天氣資訊，請稍後再試。";
+          error instanceof Error
+            ? error.message
+            : "無法取得天氣資訊，請稍後再試。";
         setWeatherError(message);
       } finally {
         if (signal.aborted) {
@@ -379,7 +405,7 @@ export function useWeatherDashboard(defaultQuery: string) {
         setWeatherLoading(false);
       }
     },
-    [persistWeather]
+    [persistWeather],
   );
 
   useEffect(() => {
@@ -432,7 +458,7 @@ export function useWeatherDashboard(defaultQuery: string) {
       event.preventDefault();
       fetchWeather(weatherQuery);
     },
-    [fetchWeather, weatherQuery]
+    [fetchWeather, weatherQuery],
   );
 
   const handleWeatherPreset = useCallback(
@@ -440,8 +466,71 @@ export function useWeatherDashboard(defaultQuery: string) {
       setWeatherQuery(preset);
       fetchWeather(preset);
     },
-    [fetchWeather]
+    [fetchWeather],
   );
+
+  const [geolocating, setGeolocating] = useState(false);
+
+  const handleGeolocate = useCallback(async () => {
+    if (!("geolocation" in navigator)) {
+      setWeatherError("您的瀏覽器不支援地理位置功能");
+      return;
+    }
+
+    setGeolocating(true);
+    setWeatherError(null);
+
+    try {
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000, // 5 minutes cache
+          });
+        },
+      );
+
+      const { latitude, longitude } = position.coords;
+
+      // Reverse geocode to get location name
+      const reverseGeoResponse = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&count=1&language=zh&format=json`,
+      );
+
+      let locationName = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+
+      if (reverseGeoResponse.ok) {
+        const reverseGeoData = await reverseGeoResponse.json();
+        if (reverseGeoData?.results?.[0]?.name) {
+          locationName = reverseGeoData.results[0].name;
+        }
+      }
+
+      setWeatherQuery(locationName);
+      await fetchWeather(locationName);
+    } catch (error) {
+      if (error instanceof GeolocationPositionError) {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setWeatherError("位置存取權限被拒絕，請在瀏覽器設定中允許");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setWeatherError("無法取得位置資訊");
+            break;
+          case error.TIMEOUT:
+            setWeatherError("取得位置逾時，請再試一次");
+            break;
+          default:
+            setWeatherError("取得位置時發生錯誤");
+        }
+      } else {
+        setWeatherError("取得位置時發生錯誤");
+      }
+    } finally {
+      setGeolocating(false);
+    }
+  }, [fetchWeather]);
 
   return {
     weatherQuery,
@@ -452,5 +541,7 @@ export function useWeatherDashboard(defaultQuery: string) {
     fetchWeather,
     handleWeatherSubmit,
     handleWeatherPreset,
+    handleGeolocate,
+    geolocating,
   };
 }

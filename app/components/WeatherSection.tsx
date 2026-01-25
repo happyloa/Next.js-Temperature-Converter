@@ -29,6 +29,8 @@ type WeatherSectionProps = {
   formatUtcOffset: (value: string | null) => string;
   formatCoordinate: (value: number | null) => string;
   formatWeekday: (index: number | null) => string;
+  onGeolocate?: () => void;
+  geolocating?: boolean;
 };
 
 /**
@@ -50,6 +52,8 @@ export function WeatherSection({
   formatUtcOffset,
   formatCoordinate,
   formatWeekday,
+  onGeolocate,
+  geolocating = false,
 }: WeatherSectionProps) {
   const toCardinalCoordinate = (
     value: number | null,
@@ -63,70 +67,70 @@ export function WeatherSection({
 
   const climateHighlights = data
     ? (
-        [
-          {
-            label: "體感溫度",
-            value: data.apparentTemperature,
-            unit: data.apparentTemperatureUnit ?? "°C",
-          },
-          {
-            label: "日最高",
-            value: data.dailyHigh,
-            unit: data.dailyTemperatureUnit ?? "°C",
-          },
-          {
-            label: "日最低",
-            value: data.dailyLow,
-            unit: data.dailyTemperatureUnit ?? "°C",
-          },
-        ] satisfies Array<{ label: string; value: number; unit: string }>
-      ).filter((item) => Number.isFinite(item.value))
+      [
+        {
+          label: "體感溫度",
+          value: data.apparentTemperature,
+          unit: data.apparentTemperatureUnit ?? "°C",
+        },
+        {
+          label: "日最高",
+          value: data.dailyHigh,
+          unit: data.dailyTemperatureUnit ?? "°C",
+        },
+        {
+          label: "日最低",
+          value: data.dailyLow,
+          unit: data.dailyTemperatureUnit ?? "°C",
+        },
+      ] satisfies Array<{ label: string; value: number; unit: string }>
+    ).filter((item) => Number.isFinite(item.value))
     : [];
 
   const environmentMetrics = data
     ? (
-        [
-          {
-            label: "相對濕度",
-            value: data.humidity,
-            unit: data.humidityUnit ?? "%",
-          },
-          {
-            label: "風速",
-            value: data.windSpeed,
-            unit: data.windSpeedUnit ? ` ${data.windSpeedUnit}` : " m/s",
-          },
-          {
-            label: "氣壓",
-            value: data.pressure,
-            unit: data.pressureUnit ? ` ${data.pressureUnit}` : " hPa",
-          },
-          {
-            label: "降水量",
-            value: data.precipitation,
-            unit: data.precipitationUnit ? ` ${data.precipitationUnit}` : " mm",
-          },
-          {
-            label: "紫外線指數",
-            value: data.uvIndex,
-            unit: data.uvIndexUnit ?? "",
-          },
-        ] satisfies Array<{ label: string; value: number; unit: string }>
-      ).filter((item) => Number.isFinite(item.value))
+      [
+        {
+          label: "相對濕度",
+          value: data.humidity,
+          unit: data.humidityUnit ?? "%",
+        },
+        {
+          label: "風速",
+          value: data.windSpeed,
+          unit: data.windSpeedUnit ? ` ${data.windSpeedUnit}` : " m/s",
+        },
+        {
+          label: "氣壓",
+          value: data.pressure,
+          unit: data.pressureUnit ? ` ${data.pressureUnit}` : " hPa",
+        },
+        {
+          label: "降水量",
+          value: data.precipitation,
+          unit: data.precipitationUnit ? ` ${data.precipitationUnit}` : " mm",
+        },
+        {
+          label: "紫外線指數",
+          value: data.uvIndex,
+          unit: data.uvIndexUnit ?? "",
+        },
+      ] satisfies Array<{ label: string; value: number; unit: string }>
+    ).filter((item) => Number.isFinite(item.value))
     : [];
 
   const coordinatesText = data?.coordinates
     ? `${toCardinalCoordinate(
-        data.coordinates.latitude,
-        "N",
-        "S"
-      )} · ${toCardinalCoordinate(data.coordinates.longitude, "E", "W")}`
+      data.coordinates.latitude,
+      "N",
+      "S"
+    )} · ${toCardinalCoordinate(data.coordinates.longitude, "E", "W")}`
     : null;
 
   const airQualityTime = data?.airQuality?.time
     ? formatLocalClock(data.airQuality.time, data.timezone, {
-        withSeconds: false,
-      })
+      withSeconds: false,
+    })
     : "--";
 
   return (
@@ -142,7 +146,7 @@ export function WeatherSection({
       </div>
 
       <form onSubmit={onSubmit} className="space-y-5">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3">
+        <div className="flex items-center gap-2 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3">
           <span className="text-lg">📍</span>
           <input
             type="text"
@@ -151,6 +155,24 @@ export function WeatherSection({
             placeholder="輸入城市名稱"
             className="flex-1 bg-transparent text-sm font-semibold text-slate-100 outline-none"
           />
+          {onGeolocate && (
+            <button
+              type="button"
+              onClick={onGeolocate}
+              disabled={geolocating || loading}
+              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+              title="使用目前位置"
+              aria-label="定位"
+            >
+              {geolocating ? (
+                <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-slate-300/50 border-t-transparent" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:gap-2">
           {presets.map((preset) => (
