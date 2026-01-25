@@ -6,6 +6,7 @@ import type {
   TemperatureScaleCode,
   ThermalMood,
 } from "../types/temperature";
+import { VoiceInputButton } from "./VoiceInputButton";
 
 /**
  * 小工具：將條件拼接為 className 字串。
@@ -35,6 +36,7 @@ type TemperatureInputCardProps = {
   relativeSolarProgress: number;
   showSolarProgress: boolean;
   formatTemperature: (value: number) => string;
+  onVoiceInput?: (value: string) => void;
 };
 
 /**
@@ -61,6 +63,7 @@ export function TemperatureInputCard({
   relativeSolarProgress,
   showSolarProgress,
   formatTemperature,
+  onVoiceInput,
 }: TemperatureInputCardProps) {
   return (
     <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
@@ -81,6 +84,7 @@ export function TemperatureInputCard({
           rawInput={rawInput}
           onInputChange={onInputChange}
           activeSymbol={activeSymbol}
+          onVoiceInput={onVoiceInput}
         />
         <TemperatureSliderControl
           sliderRange={sliderRange}
@@ -184,6 +188,7 @@ type TemperatureValueFieldProps = {
   rawInput: string;
   onInputChange: ChangeEventHandler<HTMLInputElement>;
   activeSymbol?: string;
+  onVoiceInput?: (value: string) => void;
 };
 
 /**
@@ -193,6 +198,7 @@ function TemperatureValueField({
   rawInput,
   onInputChange,
   activeSymbol,
+  onVoiceInput,
 }: TemperatureValueFieldProps) {
   return (
     <label className="flex flex-col gap-2 text-left">
@@ -208,6 +214,7 @@ function TemperatureValueField({
           className="flex-1 bg-transparent text-base font-semibold outline-none sm:text-lg"
         />
         <span className="text-sm font-semibold text-slate-400">{activeSymbol ?? ""}</span>
+        {onVoiceInput && <VoiceInputButton onResult={onVoiceInput} />}
       </div>
     </label>
   );
