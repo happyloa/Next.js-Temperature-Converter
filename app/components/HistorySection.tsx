@@ -6,6 +6,7 @@ import type {
   HistoryEntry,
   TemperatureConversionSummary,
 } from "../types/history";
+import { ExportButton } from "./ExportButton";
 
 /**
  * 歷史紀錄區塊，使用手風琴呈現最新八筆轉換內容。
@@ -69,14 +70,20 @@ export function HistorySection({
             ? `共 ${history.length} 筆，依時間由新到舊排序`
             : "尚未加入紀錄"}
         </span>
-        <button
-          type="button"
-          onClick={onClearHistory}
-          disabled={history.length === 0}
-          className="theme-outline-button theme-outline-button--small"
-        >
-          清除紀錄
-        </button>
+        <div className="flex gap-2">
+          <ExportButton
+            history={history}
+            formatTemperature={formatTemperature}
+          />
+          <button
+            type="button"
+            onClick={onClearHistory}
+            disabled={history.length === 0}
+            className="theme-outline-button theme-outline-button--small"
+          >
+            清除紀錄
+          </button>
+        </div>
       </div>
       <div className="space-y-4">
         {history.map((entry) => {
@@ -140,9 +147,8 @@ function HistoryAccordionItem({
           {entry.scaleLabel}
           <span
             aria-hidden="true"
-            className={`transition-transform duration-400 ease-out ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
+            className={`transition-transform duration-400 ease-out ${isOpen ? "rotate-180" : "rotate-0"
+              }`}
           >
             ▼
           </span>
@@ -152,14 +158,12 @@ function HistoryAccordionItem({
         id={contentId}
         ref={panelRef}
         aria-hidden={!isOpen}
-        className={`overflow-hidden border-t border-slate-700/40 transition-[height,opacity] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`overflow-hidden border-t border-slate-700/40 transition-[height,opacity] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
       >
         <div
-          className={`px-4 pb-4 pt-3 transition-[opacity,transform] duration-300 ease-out ${
-            isOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
-          }`}
+          className={`px-4 pb-4 pt-3 transition-[opacity,transform] duration-300 ease-out ${isOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
+            }`}
         >
           <div className="grid gap-2">
             {entry.conversions.map((item) => (
