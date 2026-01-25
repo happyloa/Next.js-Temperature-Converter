@@ -255,7 +255,8 @@ export function WeatherSection({
               </div>
             </div>
 
-            <div className="grid gap-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Left Column: Temperature & Highlights */}
               <div className="min-w-0 space-y-5">
                 <div className="space-y-3">
                   <p className="text-4xl font-bold text-slate-50">
@@ -288,81 +289,82 @@ export function WeatherSection({
                 )}
               </div>
 
-              {environmentMetrics.length ? (
-                <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
-                  <span className="text-xs uppercase tracking-wide text-slate-400">
-                    環境指標
-                  </span>
-                  <div className="grid gap-3">
-                    {environmentMetrics.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex items-center justify-between text-sm text-slate-200"
-                      >
-                        <span>{item.label}</span>
-                        <span className="font-semibold">
-                          {formatOptionalMetric(item.value, item.unit)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="min-w-0 space-y-2 rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 p-5 text-sm text-slate-400">
-                  <span className="text-xs uppercase tracking-wide text-slate-500">
-                    環境指標
-                  </span>
-                  <p>目前沒有可用的環境指標資料。</p>
-                </div>
-              )}
-            </div>
-
-            <div className="grid gap-6">
-              <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span className="uppercase tracking-wide text-slate-300">
-                    空氣品質
-                  </span>
-                  <span>更新 {airQualityTime}</span>
-                </div>
-                {data.airQuality ? (
-                  <div className="space-y-4">
-                    <p className="text-3xl font-bold text-slate-50">
-                      {formatOptionalMetric(data.airQuality.aqi, data.airQuality.aqiUnit ?? "")}
-                    </p>
-                    <div className="grid gap-3 text-sm text-slate-200">
-                      <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
-                        <span className="text-xs uppercase tracking-wide text-slate-400">
-                          PM2.5
-                        </span>
-                        <p className="font-semibold">
-                          {formatOptionalMetric(
-                            data.airQuality.pm25,
-                            data.airQuality.pm25Unit ? ` ${data.airQuality.pm25Unit}` : ""
-                          )}
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
-                        <span className="text-xs uppercase tracking-wide text-slate-400">
-                          PM10
-                        </span>
-                        <p className="font-semibold">
-                          {formatOptionalMetric(
-                            data.airQuality.pm10,
-                            data.airQuality.pm10Unit ? ` ${data.airQuality.pm10Unit}` : ""
-                          )}
-                        </p>
-                      </div>
+              {/* Right Column: Metrics & Air Quality */}
+              <div className="space-y-6">
+                {environmentMetrics.length ? (
+                  <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
+                    <span className="text-xs uppercase tracking-wide text-slate-400">
+                      環境指標
+                    </span>
+                    <div className="grid gap-3">
+                      {environmentMetrics.map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-center justify-between text-sm text-slate-200"
+                        >
+                          <span>{item.label}</span>
+                          <span className="font-semibold">
+                            {formatOptionalMetric(item.value, item.unit)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-xs text-slate-500">
-                      數據來源：Open-Meteo Air Quality API
-                    </p>
                   </div>
                 ) : (
-                  <p className="rounded-xl border border-dashed border-slate-700/40 bg-slate-950/40 px-3 py-4 text-xs text-slate-400">
-                    此地點暫無空氣品質資訊。
-                  </p>
+                  <div className="min-w-0 space-y-2 rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 p-5 text-sm text-slate-400">
+                    <span className="text-xs uppercase tracking-wide text-slate-500">
+                      環境指標
+                    </span>
+                    <p>目前沒有可用的環境指標資料。</p>
+                  </div>
                 )}
+
+                <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
+                  <div className="flex items-center justify-between text-xs text-slate-400">
+                    <span className="uppercase tracking-wide text-slate-300">
+                      空氣品質
+                    </span>
+                    <span>更新 {airQualityTime}</span>
+                  </div>
+                  {data.airQuality ? (
+                    <div className="space-y-4">
+                      <p className="text-3xl font-bold text-slate-50">
+                        {formatOptionalMetric(data.airQuality.aqi, data.airQuality.aqiUnit ?? "")}
+                      </p>
+                      <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
+                        <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
+                          <span className="text-xs uppercase tracking-wide text-slate-400">
+                            PM2.5
+                          </span>
+                          <p className="font-semibold">
+                            {formatOptionalMetric(
+                              data.airQuality.pm25,
+                              data.airQuality.pm25Unit ? ` ${data.airQuality.pm25Unit}` : ""
+                            )}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
+                          <span className="text-xs uppercase tracking-wide text-slate-400">
+                            PM10
+                          </span>
+                          <p className="font-semibold">
+                            {formatOptionalMetric(
+                              data.airQuality.pm10,
+                              data.airQuality.pm10Unit ? ` ${data.airQuality.pm10Unit}` : ""
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        數據來源：Open-Meteo Air Quality API
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="rounded-xl border border-dashed border-slate-700/40 bg-slate-950/40 px-3 py-4 text-xs text-slate-400">
+                      此地點暫無空氣品質資訊。
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 

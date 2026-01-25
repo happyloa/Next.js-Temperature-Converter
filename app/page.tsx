@@ -184,13 +184,19 @@ export default function TemperatureStudio() {
     ],
   });
 
+  // Placeholder for shareText, as it's not defined in the provided context
+  // and the instruction requires it to be passed to TemperatureInputCard.
+  // In a real application, this would be derived from the current temperature/conversion state.
+  const shareText = "Check out this temperature conversion!";
+
   return (
     <main className="w-full max-w-full py-12 pb-24">
-      <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-12 px-4 sm:px-6 lg:px-10">
+      <div className="mx-auto flex w-full min-w-0 max-w-[1600px] flex-col gap-10 px-4 sm:px-6 lg:px-10">
         <HeroSection presets={TEMPERATURE_PRESETS} onPresetSelect={handlePresetClick} />
 
-        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)]">
-          <div className="min-w-0 space-y-8">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-12 lg:gap-10">
+          {/* Main Content Area - Wider (8/12) */}
+          <div className="flex min-w-0 flex-col gap-8 lg:col-span-8">
             <TemperatureInputCard
               scale={scale}
               scales={TEMPERATURE_SCALES}
@@ -214,16 +220,7 @@ export default function TemperatureStudio() {
               formatTemperature={formatTemperature}
               onVoiceInput={handleRawInputChange}
             />
-            <InsightsSection insights={insights} />
-          </div>
 
-          <aside className="min-w-0 space-y-8">
-            <HistorySection
-              history={history}
-              onClearHistory={handleClearHistory}
-              formatTemperature={formatTemperature}
-              formatTime={(date) => timeFormatter.format(date)}
-            />
             <WeatherSection
               query={weatherQuery}
               onQueryChange={setWeatherQuery}
@@ -243,10 +240,22 @@ export default function TemperatureStudio() {
               onGeolocate={handleGeolocate}
               geolocating={geolocating}
             />
+          </div>
+
+          {/* Sidebar Area - Narrower (4/12) */}
+          <aside className="flex min-w-0 flex-col gap-8 lg:col-span-4">
+            <HistorySection
+              history={history}
+              onClearHistory={handleClearHistory}
+              formatTemperature={formatTemperature}
+              formatTime={(date) => timeFormatter.format(date)}
+            />
+
+            <InsightsSection insights={insights} />
+
+            <FactsSection facts={PRODUCT_FACTS} />
           </aside>
         </div>
-
-        <FactsSection facts={PRODUCT_FACTS} />
       </div>
 
       <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
