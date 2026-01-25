@@ -2,7 +2,9 @@ import withPWA from "@ducanh2912/next-pwa";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Use webpack for PWA support
+  // Add empty turbopack config to silence warning in dev mode
+  // PWA build still uses webpack via --webpack flag
+  turbopack: {},
   webpack: (config) => config,
 };
 
