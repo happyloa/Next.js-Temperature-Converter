@@ -494,21 +494,33 @@ export function useWeatherDashboard(defaultQuery: string) {
 
   const handleGeolocate = useCallback(async () => {
     if (!("geolocation" in navigator)) {
+      console.error("Geolocation not supported");
       setWeatherError("您的瀏覽器不支援地理位置功能");
       return;
     }
 
+    console.log("Starting geolocation...");
     setGeolocating(true);
     setWeatherError(null);
 
     try {
       const position = await new Promise<GeolocationPosition>(
         (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 300000, // 5 minutes cache
-          });
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              console.log("Got position", pos);
+              resolve(pos);
+            },
+            (err) => {
+              console.error("Position error", err);
+              reject(err);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 300000, // 5 minutes cache
+            },
+          );
         },
       );
 
