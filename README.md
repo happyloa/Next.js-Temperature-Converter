@@ -1,93 +1,112 @@
-# Next.js 16 溫度工作室（TypeScript 版）
+# Temperature Studio - 溫度工作室
 
-以 Next.js App Router 打造的互動式「溫度工作室」，提供六種溫標的即時轉換、快速情境洞察與轉換紀錄，並整合全球天氣、空氣品質與時區資訊。程式碼全面升級為 TypeScript，搭配 Tailwind CSS 打造玻璃擬態的儀表板體驗，無論桌面或行動裝置都能維持舒適的閱讀與操作流程。
+基於 Next.js 16 App Router 打造的現代化溫度轉換與環境監測平台。結合六種溫標即時運算、全球天氣資料視覺化與 PWA 離線支援，提供專業且直覺的操作體驗。
 
 線上 Demo：[點這裡](https://next-js-temperature-convert.vercel.app/)
 
 ---
 
-## 功能亮點
-- **六種溫標一次掌握**：支援攝氏、華氏、絕對溫標、蘭氏、列氏與牛頓氏，輸入任一溫度即可同步換算所有單位。
-- **雙模式輸入體驗**：自由切換滑桿與文字輸入，並提供自動格式化與字級縮放，避免極端數值破壞版面。
-- **情境化洞察**：依據攝氏值動態提供安全提醒、冰點/沸點距離與情境描述，快速判斷環境風險。
-- **常用情境預設**：內建多種生活與科學溫度範例，一鍵帶入計算。
-- **轉換歷史與複製**：保留最近的換算結果，支援快速複製或清除，以利對照記錄。
-- **全球環境儀表板**：串接 Open-Meteo 與 World Time API，顯示所在城市的溫度極值、氣象指標與空氣品質。
+## ✨ 核心功能
 
-## 技術棧
-- [Next.js 16 App Router](https://nextjs.org/docs/app)（React 19）
-- TypeScript（嚴格型別設定）
-- [Tailwind CSS 4](https://tailwindcss.com/)（以 `@tailwindcss/postcss` 插件整合 PostCSS）
-- 原生 fetch API 串接外部資料源
+### 🌡️ 智慧溫度轉換
 
-## 主要依賴版本
-- Next.js：16.0.5
-- React / React DOM：19.2.0
-- TypeScript：5.9.3
-- Tailwind CSS：4.1.x（採用 `@import "tailwindcss";` 入口）
-- ESLint：9.39.x（含 `eslint-config-next`）
+- **多尺度支援**：即時轉換攝氏 (°C)、華氏 (°F)、絕對溫標 (K)、蘭氏 (°R)、列氏 (°Re) 與牛頓氏 (°N)。
+- **雙向互動**：支援滑桿拖曳與精準數值輸入，即時連動所有單位。
+- **情境洞察**：自動計算冰點/沸點距離，並提供「人體感受」與「安全警示」等情境化建議。
 
-## 專案結構重點
+### 🌍 全球環境儀表板
+
+- **即時天氣**：整合 Open-Meteo API，顯示所在地或指定城市的溫度、濕度、風速與降雨機率。
+- **空氣品質**：即時 AQI、PM2.5 與 PM10 監測數據。
+- **趨勢圖表**：內建 7 日溫度變化折線圖 (Recharts)，視覺化掌握天氣脈動。
+- **多城市切換**：內建全球主要城市預設值，並支援地理定位 (Geolocation) 自動偵測。
+
+### 🛠️ 實用工具
+
+- **轉換紀錄**：自動保存最近 8 筆轉換結果，支援一鍵回填。
+- **分享與匯出**：支援 Web Share API 分享，或將紀錄匯出為 CSV / PDF 報表。
+- **快捷鍵支援**：提供鍵盤快捷鍵 (如 Alt+R 重設、Alt+H 清除紀錄) 提升操作效率。
+
+### 🎨 極致體驗
+
+- **全站主題**：支援深色 (Dark) / 淺色 (Light) 模式切換，並自動記憶使用者偏好 (LocalStorage)。
+- **PWA 支援**：符合 Progressive Web App 標準，可安裝至桌面或手機，並支援離線瀏覽。
+- **正體中文**：全站介面與程式碼註解皆採用正體中文，友善在地開發者。
+
+---
+
+## 🏗️ 技術棧
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: TypeScript 5
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (CSS-first configuration)
+- **Visualization**: Recharts
+- **PWA**: @ducanh2912/next-pwa
+- **Data Source**: Open-Meteo API, World Time API
+
+---
+
+## 📂 專案結構
+
 ```
 app/
-├─ layout.tsx          # 全域佈局與字體設定
-├─ page.tsx            # 溫度工作室主頁與互動邏輯（TypeScript）
-├─ globals.css         # 全域背景、排版與實用工具類
-├─ components/
-│  ├─ FactsSection.tsx          # 作品亮點卡片
-│  ├─ HeroSection.tsx           # 首屏預設按鈕與標語
-│  ├─ HistorySection.tsx        # 轉換紀錄手風琴
-│  ├─ InsightsSection.tsx       # 安全洞察卡片
-│  ├─ TemperatureInputCard.tsx  # 輸入與轉換主卡片（拆分子元件）
-│  ├─ ThemeToggleButton.tsx     # 固定位置的深淺色切換
-│  └─ WeatherSection.tsx        # 全球環境儀表板
-├─ hooks/
-│  ├─ useHistoryStore.ts        # local/sessionStorage 自動 fallback
-│  ├─ useTemperatureConversion.ts # 輸入/轉換邏輯封裝
-│  └─ useWeatherDashboard.ts    # 天氣、時區與空污 API 整合
-├─ lib/
-│  ├─ format.ts                 # 格式化工具與共用函式
-│  ├─ history.ts                # 歷史紀錄序列化/反序列化
-│  ├─ temperature.ts            # 溫標常數、預設值與情境判斷
-│  └─ weather.ts                # 天氣代碼與預設城市
-└─ types/
-   ├─ fact.ts
-   ├─ history.ts
-   ├─ insight.ts
-   ├─ temperature.ts
-   └─ weather.ts
+├── components/          # UI 元件 (原子化設計)
+│   ├── HeroSection.tsx
+│   ├── HistorySection.tsx
+│   ├── TemperatureInputCard.tsx
+│   ├── WeatherChart.tsx    # 天氣趨勢圖表
+│   └── ThemeProvider.tsx   # 全域主題 Context
+├── hooks/               # 自定義 Hooks (邏輯與 UI 分離)
+│   ├── useTemperatureConversion.ts
+│   ├── useWeatherDashboard.ts
+│   └── useHistoryStore.ts
+├── lib/                 # 工具函式與常數
+│   └── temperature.ts   # 物理常數與轉換公式
+├── types/               # TypeScript 型別定義
+├── globals.css          # Tailwind v4 全域樣式 (@theme)
+├── layout.tsx           # 應用程式佈局 (含 ThemeProvider)
+└── page.tsx             # 主頁面邏輯
 ```
 
-## 開發環境需求
-- Node.js 18.18+ 或 20+（符合 Next.js 16 要求）
-- npm 9 以上版本（或使用相容的套件管理工具）
+---
 
-## 快速開始
+## 🚀 快速開始
+
+### 環境需求
+
+- Node.js 18.18+
+- npm 9+
+
+### 安裝與執行
+
+1.  **複製專案**
+
+    ```bash
+    git clone https://github.com/happyloa/Next.js-Temperature-Converter.git
+    cd Next.js-Temperature-Converter
+    ```
+
+2.  **安裝依賴**
+
+    ```bash
+    npm install
+    ```
+
+3.  **啟動開發伺服器**
+    ```bash
+    npm run dev
+    ```
+    開啟瀏覽器訪問 [http://localhost:3000](http://localhost:3000)。
+
+### 建構正式版
+
 ```bash
-# 安裝依賴
-npm install
-
-# 啟動開發伺服器（預設 http://localhost:3000）
-npm run dev
+npm run build
+npm start
 ```
 
-### 其他常用指令
-```bash
-npm run build   # 建構正式版產出
-npm run start   # 以正式模式啟動（需先 build）
-npm run lint    # 執行 Next.js 內建 ESLint 與 TypeScript 檢查
-```
+---
 
-## 部署建議
-- 本專案採用 Next.js 16 App Router，支援 Vercel、Netlify、Node.js 伺服器與 Docker 等常見部署模式。
-- 若使用 Vercel，只需匯入專案並沿用預設 `npm run build` / `npm run start` 指令即可部署。
-- 若部署於其他平台，請確認環境具備 Node.js 18.18+，並允許呼叫 Open-Meteo 與 World Time API。
+## 🤝 貢獻
 
-## TypeScript 筆記
-- 專案使用 `tsconfig.json` 啟用嚴格型別，並提供 `@/*` 的路徑別名。
-- 共用型別集中於 `app/types/`，搭配 `import type` 使用，避免產生額外的 JavaScript 負擔。
-- 關鍵邏輯拆分為 hooks 與 lib 模組，利於撰寫單元測試或在其他頁面重用。
-- 建議在開發時搭配 IDE 的 TypeScript 支援與 `npm run lint`，確保型別與語法一致性。
-
-## 貢獻與回饋
-歡迎提出 Issue 或 Pull Request，若在安裝或部署過程遇到問題，也可以開啟討論讓我們一起改善這份作品。
+歡迎提交 Issue 或 Pull Request。本專案以 Clean Code 為目標，請確保提交的程式碼包含完整的正體中文註解。
