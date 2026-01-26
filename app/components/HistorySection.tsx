@@ -85,7 +85,7 @@ export function HistorySection({
           </button>
         </div>
       </div>
-      <div className="space-y-4">
+      <ol className="space-y-4 list-none m-0 p-0">
         {history.map((entry) => {
           const isOpen = openEntryId === entry.id;
           const contentId = `${entry.id}-content`;
@@ -103,11 +103,13 @@ export function HistorySection({
           );
         })}
         {history.length === 0 && (
-          <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-300 transition-colors">
-            加入紀錄後，系統會保留最近八筆轉換，方便在不同實驗之間快速比對。
-          </p>
+          <li className="list-none">
+            <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/60 p-4 text-sm text-slate-300 transition-colors">
+              加入紀錄後，系統會保留最近八筆轉換，方便在不同實驗之間快速比對。
+            </p>
+          </li>
         )}
-      </div>
+      </ol>
     </section>
   );
 }
@@ -132,7 +134,7 @@ function HistoryAccordionItem({
   const panelRef = useAccordionPanel(isOpen);
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-900/80 shadow-sm transition-colors">
+    <li className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-900/80 shadow-sm transition-colors list-none">
       <button
         type="button"
         aria-expanded={isOpen}
@@ -180,7 +182,7 @@ function HistoryAccordionItem({
           </div>
         </div>
       </div>
-    </div>
+    </li>
   );
 }
 

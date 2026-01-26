@@ -134,7 +134,7 @@ function TemperatureCardHeader({
   shareText,
 }: TemperatureCardHeaderProps) {
   return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:[&>*]:min-w-0">
+    <header className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:[&>*]:min-w-0">
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-slate-50">輸入溫度</h2>
         <p className="max-w-xl text-sm leading-relaxed text-slate-300">
@@ -158,7 +158,7 @@ function TemperatureCardHeader({
           📝 加入紀錄
         </button>
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -283,21 +283,22 @@ function ConversionResultGrid({
   formatTemperature,
 }: ConversionResultGridProps) {
   return (
-    <div className="space-y-4">
+    <section className="space-y-4">
       <h3 className="text-lg font-semibold text-slate-100">即時轉換結果</h3>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <ul className="grid gap-4 sm:grid-cols-2 list-none m-0 p-0">
         {conversions.map((item) => (
-          <ConversionResultCard
-            key={item.code}
-            conversion={item}
-            copiedScale={copiedScale}
-            onCopy={onCopy}
-            mood={mood}
-            formatTemperature={formatTemperature}
-          />
+          <li key={item.code} className="list-none">
+            <ConversionResultCard
+              conversion={item}
+              copiedScale={copiedScale}
+              onCopy={onCopy}
+              mood={mood}
+              formatTemperature={formatTemperature}
+            />
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 }
 
