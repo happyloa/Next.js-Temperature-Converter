@@ -34,7 +34,7 @@ export default function WeatherPage() {
         forecastDays,
         setForecastDays,
         forecastLoading,
-    } = useWeatherDashboard("台北");
+    } = useWeatherDashboard("Taipei");
 
     const [activeTab, setActiveTab] = useState<"overview" | "details">("overview");
 
