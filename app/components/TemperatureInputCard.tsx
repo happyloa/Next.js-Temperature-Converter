@@ -71,7 +71,7 @@ export function TemperatureInputCard({
     : undefined;
 
   return (
-    <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-200 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/70 p-5 shadow-sm dark:shadow-glass backdrop-blur sm:p-6 md:p-8 transition-colors duration-300">
+    <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
       <TemperatureCardHeader
         onReset={onReset}
         onAddHistory={onAddHistory}
@@ -136,8 +136,8 @@ function TemperatureCardHeader({
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:[&>*]:min-w-0">
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">輸入溫度</h2>
-        <p className="max-w-xl text-sm leading-relaxed text-slate-500 dark:text-slate-300">
+        <h2 className="text-2xl font-semibold text-slate-50">輸入溫度</h2>
+        <p className="max-w-xl text-sm leading-relaxed text-slate-300">
           選擇想要輸入的溫標後填入數值，系統會即時計算其他尺度並提供安全洞察與轉換紀錄。
         </p>
       </div>
@@ -211,8 +211,8 @@ function TemperatureValueField({
 }: TemperatureValueFieldProps) {
   return (
     <label className="flex flex-col gap-2 text-left">
-      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">輸入數值</span>
-      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900/70 px-4 py-3 text-lg font-semibold text-slate-900 dark:text-slate-100 focus-within:border-[#FF5E5B] focus-within:ring-2 focus-within:ring-[#FF5E5B]/40 transition-colors">
+      <span className="text-sm font-semibold text-slate-200">輸入數值</span>
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3 text-lg font-semibold text-slate-100 focus-within:border-[#FF5E5B] focus-within:ring-2 focus-within:ring-[#FF5E5B]/40">
         <span className="text-xl">🌡️</span>
         <input
           type="text"
@@ -220,9 +220,9 @@ function TemperatureValueField({
           value={rawInput}
           onChange={onInputChange}
           placeholder="輸入溫度值"
-          className="flex-1 bg-transparent text-base font-semibold outline-none sm:text-lg placeholder:text-slate-400 dark:placeholder:text-slate-600"
+          className="flex-1 bg-transparent text-base font-semibold outline-none sm:text-lg"
         />
-        <span className="text-sm font-semibold text-slate-400 dark:text-slate-500">{activeSymbol ?? ""}</span>
+        <span className="text-sm font-semibold text-slate-400">{activeSymbol ?? ""}</span>
       </div>
     </label>
   );
@@ -248,7 +248,7 @@ function TemperatureSliderControl({
 }: TemperatureSliderControlProps) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+      <span className="text-sm font-semibold text-slate-200">
         範圍滑桿（{formatTemperature(sliderRange.min)} ~ {formatTemperature(sliderRange.max)}）
       </span>
       <input
@@ -258,7 +258,7 @@ function TemperatureSliderControl({
         step={sliderStep}
         value={sliderValue}
         onChange={onSliderChange}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 dark:bg-slate-800 accent-[#FF5E5B]"
+        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-[#FF5E5B]"
       />
     </label>
   );
@@ -284,7 +284,7 @@ function ConversionResultGrid({
 }: ConversionResultGridProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">即時轉換結果</h3>
+      <h3 className="text-lg font-semibold text-slate-100">即時轉換結果</h3>
       <div className="grid gap-4 sm:grid-cols-2">
         {conversions.map((item) => (
           <ConversionResultCard
@@ -319,17 +319,17 @@ function ConversionResultCard({
   return (
     <div
       className={classNames(
-        "relative min-w-0 overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700/40 bg-slate-50 dark:bg-slate-900/80 p-5 transition-all hover:bg-white dark:hover:bg-slate-900 hover:shadow-md dark:hover:shadow-none hover:border-slate-300 dark:hover:border-slate-600",
+        "relative min-w-0 overflow-hidden rounded-3xl border border-slate-600/30 bg-slate-900/60 p-5",
         "bg-gradient-to-br",
         conversion.accent
       )}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
-          <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-200/80">
+          <span className="text-xs uppercase tracking-wide text-slate-200/80">
             {conversion.label}
           </span>
-          <p className="text-2xl font-bold text-slate-800 dark:text-slate-50 sm:text-3xl">
+          <p className="text-2xl font-bold text-slate-50 sm:text-3xl">
             {formatTemperature(conversion.result)} {conversion.symbol}
           </p>
         </div>
@@ -345,7 +345,7 @@ function ConversionResultCard({
         </button>
       </div>
       {conversion.code === "celsius" && mood ? (
-        <p className="mt-3 text-sm text-slate-600 dark:text-slate-200/80">{mood.title}</p>
+        <p className="mt-3 text-sm text-slate-200/80">{mood.title}</p>
       ) : null}
     </div>
   );
@@ -367,17 +367,17 @@ function SolarProgressPanel({
 }: SolarProgressPanelProps) {
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3 text-slate-700 dark:text-slate-200">
+      <div className="flex flex-wrap items-center gap-3 text-slate-200">
         <span className="text-xl">📈</span>
         <h3 className="text-base font-semibold sm:text-lg">相對於太陽表面的能量比例</h3>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full border border-slate-200 dark:border-slate-700/60 bg-slate-100 dark:bg-slate-800/80">
+      <div className="h-2 w-full overflow-hidden rounded-full border border-slate-700/60 bg-slate-800/80">
         <div
           className="h-full bg-gradient-to-r from-[#00CECB] via-[#FFED66] to-[#FF5E5B]"
           style={{ width: `${relativeSolarProgress}%` }}
         />
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-slate-400">
         {showSolarProgress
           ? `目前為太陽表面溫度的 ${formatTemperature(relativeSolarProgress)}%`
           : "輸入溫度以分析熱能比例"}
