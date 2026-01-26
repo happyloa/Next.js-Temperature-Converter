@@ -60,7 +60,7 @@ export default function TemperatureStudio() {
 
   const [copiedScale, setCopiedScale] = useState<TemperatureScaleCode | null>(null);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
-    // Lazy initialization - runs only on client
+    // 延遲初始化 - 僅在客戶端執行
     if (typeof window !== "undefined") {
       return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
@@ -111,7 +111,7 @@ export default function TemperatureStudio() {
     []
   );
 
-  // Listen for system theme changes
+  // 監聽系統主題變更
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -134,7 +134,7 @@ export default function TemperatureStudio() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   }, []);
 
-  // Keyboard shortcuts
+  // 鍵盤快捷鍵設定
   useKeyboardShortcuts({
     shortcuts: [
       {

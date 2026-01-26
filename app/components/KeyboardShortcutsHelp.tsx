@@ -13,7 +13,7 @@ interface KeyboardShortcutsHelpProps {
 }
 
 /**
- * Keyboard shortcuts help panel that shows on ? key press.
+ * 鍵盤快捷鍵說明面板，按下 ? 鍵時顯示。
  */
 export const KeyboardShortcutsHelp: FC<KeyboardShortcutsHelpProps> = ({ shortcuts }) => {
     const [isOpen, setIsOpen] = useState(false);

@@ -37,7 +37,7 @@ export const ShareButton: FC<ShareButtonProps> = ({
             if (isShareSupported) {
                 await navigator.share(shareData);
             } else {
-                // Fallback to clipboard
+                // 若不支援 Web Share API，則降級使用剪貼簿複製
                 const shareText = `${title}\n\n${text}\n\n${shareUrl}`;
                 await navigator.clipboard?.writeText(shareText);
                 setCopied(true);
@@ -45,12 +45,12 @@ export const ShareButton: FC<ShareButtonProps> = ({
             }
             setError(null);
         } catch (err) {
-            // User cancelled share - not an error
+            // 使用者取消分享不視為錯誤
             if (err instanceof Error && err.name === "AbortError") {
                 return;
             }
 
-            // Try clipboard as fallback
+            // 再次嘗試降級使用剪貼簿
             try {
                 const shareText = `${title}\n\n${text}\n\n${shareUrl}`;
                 await navigator.clipboard?.writeText(shareText);
