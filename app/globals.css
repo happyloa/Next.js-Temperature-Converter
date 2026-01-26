@@ -5,8 +5,16 @@
     color-scheme: dark;
     scroll-behavior: smooth;
     --body-background:
-      radial-gradient(circle at 20% -10%, rgba(59, 130, 246, 0.25), transparent 45%),
-      radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.22), transparent 40%),
+      radial-gradient(
+        circle at 20% -10%,
+        rgba(59, 130, 246, 0.25),
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 80% 0%,
+        rgba(236, 72, 153, 0.22),
+        transparent 40%
+      ),
       linear-gradient(160deg, #020617 0%, #0f172a 45%, #111827 100%);
     --text-strong: #f8fafc;
     --text-medium: #e2e8f0;
@@ -23,7 +31,11 @@
     --border-strong: rgba(148, 163, 184, 0.65);
     --shadow-color: rgba(2, 6, 23, 0.5);
     --scroll-track: rgba(15, 23, 42, 0.8);
-    --scroll-thumb: linear-gradient(180deg, rgba(56, 189, 248, 0.8), rgba(236, 72, 153, 0.8));
+    --scroll-thumb: linear-gradient(
+      180deg,
+      rgba(56, 189, 248, 0.8),
+      rgba(236, 72, 153, 0.8)
+    );
     --accent-primary: #38bdf8;
     --accent-primary-soft: rgba(56, 189, 248, 0.2);
     --accent-primary-strong: rgba(56, 189, 248, 0.65);
@@ -39,8 +51,16 @@
     --chip-active-bg: rgba(248, 250, 252, 0.9);
     --chip-active-border: rgba(248, 250, 252, 0.95);
     --chip-active-shadow: 0 10px 30px -18px rgba(15, 23, 42, 0.9);
-    --button-primary-bg: linear-gradient(135deg, rgba(56, 189, 248, 0.95) 0%, rgba(236, 72, 153, 0.9) 100%);
-    --button-primary-hover-bg: linear-gradient(135deg, rgba(56, 189, 248, 1) 0%, rgba(236, 72, 153, 0.95) 100%);
+    --button-primary-bg: linear-gradient(
+      135deg,
+      rgba(56, 189, 248, 0.95) 0%,
+      rgba(236, 72, 153, 0.9) 100%
+    );
+    --button-primary-hover-bg: linear-gradient(
+      135deg,
+      rgba(56, 189, 248, 1) 0%,
+      rgba(236, 72, 153, 0.95) 100%
+    );
     --button-primary-text: #0b1120;
     --button-primary-disabled-bg: rgba(51, 65, 85, 0.7);
     --button-primary-disabled-text: rgba(148, 163, 184, 0.8);
@@ -65,8 +85,16 @@
   :root[data-theme="light"] {
     color-scheme: light;
     --body-background:
-      radial-gradient(circle at 12% -15%, rgba(59, 130, 246, 0.18), transparent 45%),
-      radial-gradient(circle at 85% 5%, rgba(168, 85, 247, 0.16), transparent 40%),
+      radial-gradient(
+        circle at 12% -15%,
+        rgba(59, 130, 246, 0.18),
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 85% 5%,
+        rgba(168, 85, 247, 0.16),
+        transparent 40%
+      ),
       linear-gradient(160deg, #f8fafc 0%, #e2e8f0 45%, #e5e7eb 100%);
     --text-strong: #1f2937;
     --text-medium: #334155;
@@ -83,7 +111,11 @@
     --border-strong: rgba(59, 130, 246, 0.45);
     --shadow-color: rgba(30, 41, 59, 0.15);
     --scroll-track: rgba(226, 232, 240, 0.8);
-    --scroll-thumb: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(168, 85, 247, 0.6));
+    --scroll-thumb: linear-gradient(
+      180deg,
+      rgba(59, 130, 246, 0.6),
+      rgba(168, 85, 247, 0.6)
+    );
     --accent-primary: #3b82f6;
     --accent-primary-soft: rgba(59, 130, 246, 0.18);
     --accent-primary-strong: rgba(59, 130, 246, 0.75);
@@ -100,7 +132,11 @@
     --chip-active-border: rgba(59, 130, 246, 0.6);
     --chip-active-shadow: 0 12px 30px -18px rgba(59, 130, 246, 0.35);
     --button-primary-bg: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
-    --button-primary-hover-bg: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    --button-primary-hover-bg: linear-gradient(
+      135deg,
+      #3b82f6 0%,
+      #8b5cf6 100%
+    );
     --button-primary-text: #0f172a;
     --button-primary-disabled-bg: rgba(226, 232, 240, 0.8);
     --button-primary-disabled-text: rgba(100, 116, 139, 0.8);
@@ -134,7 +170,9 @@
     @apply min-h-screen w-full max-w-full overflow-x-hidden antialiased transition-colors duration-500 ease-out;
     background-image: var(--body-background);
     color: var(--text-strong);
-    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+    font-family:
+      "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Segoe UI",
+      sans-serif;
   }
 
   a {
@@ -197,7 +235,6 @@
 .bg-slate-950\/40 {
   background-color: var(--surface-light) !important;
 }
-
 
 .shadow-glass {
   box-shadow: 0 25px 50px -12px var(--shadow-color);
@@ -330,7 +367,7 @@
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
