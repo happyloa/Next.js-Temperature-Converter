@@ -196,6 +196,7 @@ export function useWeatherDashboard(defaultQuery: string) {
     };
     timezone?: string;
     timezone_abbreviation?: string;
+    utc_offset_seconds?: number;
   };
 
   type AirQualityApiResponse = {
@@ -210,14 +211,6 @@ export function useWeatherDashboard(defaultQuery: string) {
       pm2_5?: string;
       pm10?: string;
     };
-  };
-
-  type TimeApiResponse = {
-    timezone?: string;
-    abbreviation?: string;
-    datetime?: string;
-    utc_offset?: string;
-    day_of_week?: number | null;
   };
 
   const [forecastDays, setForecastDays] = useState<7 | 14>(7);
@@ -268,25 +261,18 @@ export function useWeatherDashboard(defaultQuery: string) {
 
         const [location] = geoData.results;
 
-        const [forecastResult, airQualityResult, timeResult] =
-          await Promise.allSettled([
-            fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=temperature_2m_max,temperature_2m_min&forecast_days=${days}&timezone=${encodeURIComponent(
-                location.timezone ?? "auto",
-              )}`,
-              { signal },
-            ),
-            fetch(
-              `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,pm2_5,pm10`,
-              { signal },
-            ),
-            fetch(
-              `https://worldtimeapi.org/api/timezone/${encodeURIComponent(
-                location.timezone ?? "Etc/UTC",
-              )}`,
-              { signal },
-            ),
-          ]);
+        const [forecastResult, airQualityResult] = await Promise.allSettled([
+          fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure,pressure_msl,precipitation,uv_index,is_day&daily=temperature_2m_max,temperature_2m_min&forecast_days=${days}&timezone=${encodeURIComponent(
+              location.timezone ?? "auto",
+            )}`,
+            { signal },
+          ),
+          fetch(
+            `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,pm2_5,pm10`,
+            { signal },
+          ),
+        ]);
 
         if (
           forecastResult.status !== "fulfilled" ||
@@ -315,20 +301,23 @@ export function useWeatherDashboard(defaultQuery: string) {
           }
         }
 
-        let timePayload: TimeApiResponse | null = null;
-        if (timeResult.status === "fulfilled" && timeResult.value?.ok) {
-          try {
-            timePayload = (await timeResult.value.json()) as TimeApiResponse;
-          } catch (error) {
-            console.error("timePayload", error);
-          }
-        }
-
         const resolvedTimezone =
-          location.timezone ??
-          timePayload?.timezone ??
-          forecast.timezone ??
-          "UTC";
+          location.timezone ?? forecast.timezone ?? "UTC";
+
+        // Calculate UTC Offset locally from seconds
+        const offsetSeconds = forecast.utc_offset_seconds ?? 0;
+        const offsetSign = offsetSeconds >= 0 ? "+" : "-";
+        const offsetAbs = Math.abs(offsetSeconds);
+        const offsetHours = Math.floor(offsetAbs / 3600);
+        const offsetMinutes = Math.floor((offsetAbs % 3600) / 60);
+        const utcOffsetString = `${offsetSign}${String(offsetHours).padStart(2, "0")}:${String(offsetMinutes).padStart(2, "0")}`;
+
+        // Get current time in ISO (absolute)
+        const now = new Date();
+        const infoDate = new Date(
+          now.toLocaleString("en-US", { timeZone: resolvedTimezone }),
+        );
+        const dayOfWeekIndex = infoDate.getDay(); // 0-6 relative to local time
 
         const normalizedQuery = trimmed;
         const nextData: WeatherData = {
@@ -344,9 +333,7 @@ export function useWeatherDashboard(defaultQuery: string) {
           },
           timezone: resolvedTimezone,
           timezoneAbbreviation:
-            timePayload?.abbreviation ??
-            forecast.timezone_abbreviation ??
-            resolvedTimezone,
+            forecast.timezone_abbreviation ?? resolvedTimezone,
           observationTime: forecast.current.time,
           temperature: forecast.current.temperature_2m,
           temperatureUnit: forecast.current_units?.temperature_2m ?? "°C",
@@ -386,11 +373,9 @@ export function useWeatherDashboard(defaultQuery: string) {
                 time: airQualityPayload.time,
               }
             : null,
-          localTime: timePayload?.datetime ?? null,
-          utcOffset: timePayload?.utc_offset ?? null,
-          dayOfWeek: Number.isFinite(timePayload?.day_of_week)
-            ? (timePayload?.day_of_week as number)
-            : null,
+          localTime: now.toISOString(),
+          utcOffset: utcOffsetString,
+          dayOfWeek: dayOfWeekIndex,
           dailyForecast: (forecast.daily?.time ?? []).map((date, index) => ({
             date,
             high: forecast.daily?.temperature_2m_max?.[index] ?? 0,
