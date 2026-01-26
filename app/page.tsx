@@ -8,11 +8,11 @@ import { HistorySection } from "./components/HistorySection";
 import { InsightsSection } from "./components/InsightsSection";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import { TemperatureInputCard } from "./components/TemperatureInputCard";
-import { ThemeToggleButton } from "./components/ThemeToggleButton";
 import Link from "next/link";
 import { useHistoryStore } from "./hooks/useHistoryStore";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useTemperatureConversion } from "./hooks/useTemperatureConversion";
+import { useTheme } from "./components/ThemeProvider";
 import {
   TEMPERATURE_PRESETS,
   TEMPERATURE_SCALES,
@@ -55,17 +55,11 @@ export default function TemperatureStudio() {
   } = useTemperatureConversion();
 
   const { history, addHistoryEntry, clearHistory } = useHistoryStore();
+  const { toggleTheme } = useTheme();
 
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
 
   const [copiedScale, setCopiedScale] = useState<TemperatureScaleCode | null>(null);
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    // 延遲初始化 - 僅在客戶端執行
-    if (typeof window !== "undefined") {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
-    return "dark";
-  });
 
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -111,28 +105,7 @@ export default function TemperatureStudio() {
     []
   );
 
-  // 監聽系統主題變更
-  useEffect(() => {
-    if (typeof window === "undefined") return;
 
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      setTheme(e.matches ? "dark" : "light");
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  useEffect(() => {
-    if (typeof document !== "undefined") {
-      document.documentElement.dataset.theme = theme;
-    }
-  }, [theme]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  }, []);
 
   // 鍵盤快捷鍵設定
   useKeyboardShortcuts({
@@ -237,7 +210,7 @@ export default function TemperatureStudio() {
 
       </div>
 
-      <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
+
 
       {showShortcutsHelp && (
         <KeyboardShortcutsHelp

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { ThemeToggleButton } from "./components/ThemeToggleButton";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://temperature-studio.vercel.app";
 
@@ -99,7 +101,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="canonical" href={siteUrl} />
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <ThemeProvider>
+          {children}
+          <ThemeToggleButton />
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
