@@ -51,21 +51,33 @@
 ```
 app/
 ├── components/          # UI 元件 (原子化設計)
+│   ├── ExportButton.tsx    # 匯出功能 (CSV/PDF)
 │   ├── HeroSection.tsx
 │   ├── HistorySection.tsx
+│   ├── InsightsSection.tsx
+│   ├── KeyboardShortcutsHelp.tsx
+│   ├── ShareButton.tsx     # Web Share API
 │   ├── TemperatureInputCard.tsx
-│   ├── WeatherChart.tsx    # 天氣趨勢圖表
-│   └── ThemeProvider.tsx   # 全域主題 Context
+│   ├── ThemeProvider.tsx   # 全域主題 Context
+│   ├── ThemeToggleButton.tsx
+│   └── WeatherChart.tsx    # 天氣趨勢圖表
 ├── hooks/               # 自定義 Hooks (邏輯與 UI 分離)
+│   ├── useHistoryStore.ts
+│   ├── useKeyboardShortcuts.ts
 │   ├── useTemperatureConversion.ts
-│   ├── useWeatherDashboard.ts
-│   └── useHistoryStore.ts
+│   └── useWeatherDashboard.ts
 ├── lib/                 # 工具函式與常數
-│   └── temperature.ts   # 物理常數與轉換公式
+│   ├── format.ts        # 格式化工具
+│   ├── temperature.ts   # 溫度換算邏輯
+│   └── weather.ts       # 天氣代碼對照
+├── weather/             # 全球環境儀表板路由
+│   └── page.tsx
 ├── types/               # TypeScript 型別定義
 ├── globals.css          # Tailwind v4 全域樣式 (@theme)
 ├── layout.tsx           # 應用程式佈局 (含 ThemeProvider)
-└── page.tsx             # 主頁面邏輯
+├── page.tsx             # 首頁
+├── robots.ts            # SEO 爬蟲規則
+└── sitemap.ts           # SEO 網站地圖
 ```
 
 ---
