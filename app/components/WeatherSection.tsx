@@ -32,6 +32,8 @@ type WeatherSectionProps = {
   formatWeekday: (index: number | null) => string;
   onGeolocate?: () => void;
   geolocating?: boolean;
+  forecastDays?: 7 | 14;
+  onForecastDaysChange?: (days: 7 | 14) => void;
 };
 
 /**
@@ -55,6 +57,8 @@ export function WeatherSection({
   formatWeekday,
   onGeolocate,
   geolocating = false,
+  forecastDays = 7,
+  onForecastDaysChange,
 }: WeatherSectionProps) {
   const toCardinalCoordinate = (
     value: number | null,
@@ -135,76 +139,72 @@ export function WeatherSection({
     : "--";
 
   return (
-    <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur sm:p-7">
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-3 text-slate-200">
-          <span className="text-xl">☁️</span>
-          <h2 className="text-xl font-semibold">全球環境儀表板</h2>
+    <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-6 shadow-glass backdrop-blur sm:p-8">
+      {/* Header Area with Integrated Search */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-3 lg:max-w-md">
+          <div className="flex items-center gap-3 text-slate-200">
+            <span className="text-xl">☁️</span>
+            <h2 className="text-xl font-semibold">全球環境儀表板</h2>
+          </div>
+          <p className="text-sm text-slate-300">
+            串接 Open-Meteo 天氣與 World Time API，讓溫度轉換具備完整的情境背景。
+          </p>
         </div>
-        <p className="text-sm text-slate-300">
-          串接 Open-Meteo 天氣與 World Time API，讓溫度轉換具備完整的情境背景。
-        </p>
-      </div>
 
-      <form onSubmit={onSubmit} className="space-y-5">
-        <div className="flex items-center gap-2 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3">
-          <span className="text-lg">📍</span>
-          <input
-            type="text"
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="輸入城市名稱"
-            className="flex-1 bg-transparent text-sm font-semibold text-slate-100 outline-none"
-          />
-          {onGeolocate && (
+        <form onSubmit={onSubmit} className="w-full space-y-4 lg:w-auto lg:min-w-[400px]">
+          <div className="flex items-center gap-2 rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3">
+            <span className="text-lg">📍</span>
+            <input
+              type="text"
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="輸入城市名稱"
+              className="flex-1 bg-transparent text-sm font-semibold text-slate-100 outline-none"
+            />
+            {onGeolocate && (
+              <button
+                type="button"
+                onClick={onGeolocate}
+                disabled={geolocating || loading}
+                className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                title="使用目前位置"
+                aria-label="定位"
+              >
+                {geolocating ? (
+                  <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-slate-300/50 border-t-transparent" />
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+            )}
             <button
-              type="button"
-              onClick={onGeolocate}
-              disabled={geolocating || loading}
-              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
-              title="使用目前位置"
-              aria-label="定位"
+              type="submit"
+              disabled={loading}
+              className="ml-2 rounded-lg bg-[#00CECB]/10 px-3 py-1.5 text-xs font-semibold text-[#00CECB] hover:bg-[#00CECB]/20 disabled:opacity-50"
             >
-              {geolocating ? (
-                <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-slate-300/50 border-t-transparent" />
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                </svg>
-              )}
+              查詢
             </button>
-          )}
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:gap-2">
-          {presets.map((preset) => (
-            <button
-              key={preset}
-              type="button"
-              onClick={() => onPresetSelect(preset)}
-              className={classNames(
-                "theme-chip w-full md:w-auto",
-                query === preset ? "theme-chip--active" : ""
-              )}
-            >
-              {preset}
-            </button>
-          ))}
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="theme-primary-button w-full"
-        >
-          {loading ? (
-            <>
-              <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-[#00CECB]/70 border-t-transparent" />
-              取得資料中...
-            </>
-          ) : (
-            "取得即時環境資料"
-          )}
-        </button>
-      </form>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {presets.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => onPresetSelect(preset)}
+                className={classNames(
+                  "rounded-full border border-slate-700/40 bg-slate-900/40 px-3 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors",
+                  query === preset ? "bg-[#00CECB]/10 text-[#00CECB] border-[#00CECB]/30" : ""
+                )}
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+        </form>
+      </div>
 
       <div>
         {error ? (
@@ -212,70 +212,53 @@ export function WeatherSection({
             {error}
           </p>
         ) : loading ? (
-          <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-6 text-sm text-slate-300">
+          <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-6 text-sm text-slate-300">
             <span className="inline-flex h-10 w-10 animate-spin rounded-full border-2 border-[#00CECB]/70 border-t-transparent" />
             正在取得環境資訊...
           </div>
         ) : data ? (
-          <div className="min-w-0 space-y-7 rounded-3xl border border-slate-700/40 bg-slate-950/60 p-6">
-            <div className="space-y-4 text-sm text-slate-300">
-              <div className="flex flex-col gap-1 text-slate-200">
-                <p className="text-base font-semibold text-slate-100">
-                  {data.location}
-                </p>
-                {data.administrative.length ? (
-                  <p className="text-xs text-slate-400">
-                    {data.administrative.join(" · ")}
-                  </p>
-                ) : null}
-                <p className="text-xs text-slate-400">
-                  {getWeatherDescription(data.weatherCode)} · 觀測時間 {formatWeatherTime(data.observationTime)}
-                  {data.timezoneAbbreviation ? `（${data.timezoneAbbreviation}）` : ""}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                {data.localTime ? (
-                  <span className="theme-badge">
-                    🕑 當地 {formatLocalClock(data.localTime, data.timezone, {
-                      withSeconds: true,
-                    })}
-                  </span>
-                ) : null}
-                {data.utcOffset ? (
-                  <span className="theme-badge">
-                    ⏱️ {formatUtcOffset(data.utcOffset)}
-                    {Number.isFinite(data.dayOfWeek)
-                      ? `· ${formatWeekday(data.dayOfWeek)}`
-                      : ""}
-                  </span>
-                ) : null}
-                {coordinatesText ? (
-                  <span className="theme-badge">📡 {coordinatesText}</span>
-                ) : null}
-              </div>
-            </div>
+          <div className="min-w-0 space-y-8">
+            {/* Main Data Grid - 4 Columns */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Left Column: Temperature & Highlights */}
-              <div className="min-w-0 space-y-5">
-                <div className="space-y-3">
-                  <p className="text-4xl font-bold text-slate-50">
+              {/* Col 1: Location & Current Status */}
+              <div className="rounded-3xl border border-slate-700/40 bg-slate-950/60 p-6 flex flex-col justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-lg font-bold text-slate-100">{data.location}</p>
+                      <p className="text-xs text-slate-400">{data.administrative.join(", ")}</p>
+                    </div>
+                    <span className="text-3xl">{getWeatherDescription(data.weatherCode).includes("晴") ? "☀️" : "☁️"}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                    <span className="theme-badge">
+                      {formatLocalClock(data.localTime, data.timezone, { withSeconds: false })}
+                    </span>
+                    {coordinatesText && <span className="theme-badge">{coordinatesText}</span>}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-5xl font-bold text-slate-50 tracking-tight">
                     {formatOptionalMetric(data.temperature, data.temperatureUnit ?? "°C")}
                   </p>
-                  <p className="text-sm text-slate-300">
-                    將即時環境條件與溫度轉換結合，減少外部誤差與判斷成本。
+                  <p className="mt-2 text-sm text-slate-400 font-medium">
+                    {getWeatherDescription(data.weatherCode)}
                   </p>
                 </div>
+              </div>
+
+              {/* Col 2: Highlights */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 ml-1">氣溫極值</h3>
                 {climateHighlights.length ? (
-                  <div className="grid gap-3">
+                  <div className="grid h-full gap-3">
                     {climateHighlights.map((item) => (
                       <div
                         key={item.label}
-                        className="min-w-0 space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3"
+                        className="flex items-center justify-between rounded-2xl border border-slate-700/40 bg-slate-900/60 px-5 py-4"
                       >
-                        <span className="text-xs uppercase tracking-wide text-slate-400">
-                          {item.label}
-                        </span>
+                        <span className="text-sm text-slate-400">{item.label}</span>
                         <p className="text-lg font-semibold text-slate-100">
                           {formatOptionalMetric(item.value, item.unit)}
                         </p>
@@ -283,27 +266,25 @@ export function WeatherSection({
                     ))}
                   </div>
                 ) : (
-                  <p className="rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 p-3 text-xs text-slate-400">
-                    目前無可用的溫度極值資料。
-                  </p>
+                  <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 p-4 text-xs text-slate-500">
+                    無資料
+                  </div>
                 )}
               </div>
 
-              {/* Right Column: Metrics & Air Quality */}
-              <div className="space-y-6">
+              {/* Col 3: Metrics */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 ml-1">環境指標</h3>
                 {environmentMetrics.length ? (
-                  <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
-                    <span className="text-xs uppercase tracking-wide text-slate-400">
-                      環境指標
-                    </span>
-                    <div className="grid gap-3">
+                  <div className="rounded-3xl border border-slate-700/40 bg-slate-900/60 p-5 h-full">
+                    <div className="grid gap-4">
                       {environmentMetrics.map((item) => (
                         <div
                           key={item.label}
                           className="flex items-center justify-between text-sm text-slate-200"
                         >
-                          <span>{item.label}</span>
-                          <span className="font-semibold">
+                          <span className="text-slate-400">{item.label}</span>
+                          <span className="font-semibold font-mono">
                             {formatOptionalMetric(item.value, item.unit)}
                           </span>
                         </div>
@@ -311,70 +292,76 @@ export function WeatherSection({
                     </div>
                   </div>
                 ) : (
-                  <div className="min-w-0 space-y-2 rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 p-5 text-sm text-slate-400">
-                    <span className="text-xs uppercase tracking-wide text-slate-500">
-                      環境指標
-                    </span>
-                    <p>目前沒有可用的環境指標資料。</p>
+                  <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 p-4 text-xs text-slate-500">
+                    無資料
                   </div>
                 )}
+              </div>
 
-                <div className="min-w-0 space-y-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="uppercase tracking-wide text-slate-300">
-                      空氣品質
-                    </span>
-                    <span>更新 {airQualityTime}</span>
-                  </div>
+              {/* Col 4: Air Quality */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between ml-1">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">空氣品質</h3>
+                  <span className="text-[10px] text-slate-500">{airQualityTime}</span>
+                </div>
+                <div className="rounded-3xl border border-slate-700/40 bg-slate-900/60 p-5 h-full flex flex-col justify-between">
                   {data.airQuality ? (
-                    <div className="space-y-4">
-                      <p className="text-3xl font-bold text-slate-50">
-                        {formatOptionalMetric(data.airQuality.aqi, data.airQuality.aqiUnit ?? "")}
-                      </p>
-                      <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
-                        <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
-                          <span className="text-xs uppercase tracking-wide text-slate-400">
-                            PM2.5
-                          </span>
-                          <p className="font-semibold">
-                            {formatOptionalMetric(
-                              data.airQuality.pm25,
-                              data.airQuality.pm25Unit ? ` ${data.airQuality.pm25Unit}` : ""
-                            )}
-                          </p>
+                    <>
+                      <div className="text-center py-2">
+                        <p className="text-4xl font-bold text-slate-50">
+                          {formatOptionalMetric(data.airQuality.aqi, "")}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">AQI 指數</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm border-b border-slate-700/50 pb-2">
+                          <span className="text-slate-400">PM2.5</span>
+                          <span className="font-mono text-slate-200">{formatOptionalMetric(data.airQuality.pm25, "")}</span>
                         </div>
-                        <div className="rounded-xl border border-slate-700/40 bg-slate-950/60 px-3 py-3">
-                          <span className="text-xs uppercase tracking-wide text-slate-400">
-                            PM10
-                          </span>
-                          <p className="font-semibold">
-                            {formatOptionalMetric(
-                              data.airQuality.pm10,
-                              data.airQuality.pm10Unit ? ` ${data.airQuality.pm10Unit}` : ""
-                            )}
-                          </p>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-400">PM10</span>
+                          <span className="font-mono text-slate-200">{formatOptionalMetric(data.airQuality.pm10, "")}</span>
                         </div>
                       </div>
-                      <p className="text-xs text-slate-500">
-                        數據來源：Open-Meteo Air Quality API
-                      </p>
-                    </div>
+                    </>
                   ) : (
-                    <p className="rounded-xl border border-dashed border-slate-700/40 bg-slate-950/40 px-3 py-4 text-xs text-slate-400">
-                      此地點暫無空氣品質資訊。
-                    </p>
+                    <div className="flex h-full items-center justify-center text-xs text-slate-500">
+                      暫無資料
+                    </div>
                   )}
                 </div>
               </div>
+
             </div>
 
             {/* 7-Day Trend Chart */}
             {data.dailyForecast.length > 0 && (
-              <div className="rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
-                <WeatherChart
-                  data={data.dailyForecast}
-                  unit={data.dailyTemperatureUnit}
-                />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-1">
+                  {onForecastDaysChange && (
+                    <div className="flex items-center gap-2 bg-slate-900/50 p-1 rounded-lg border border-slate-700/40">
+                      <button
+                        onClick={() => onForecastDaysChange(7)}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${forecastDays === 7 ? 'bg-[#00CECB]/20 text-[#00CECB] shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                      >
+                        7 天
+                      </button>
+                      <button
+                        onClick={() => onForecastDaysChange(14)}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${forecastDays === 14 ? 'bg-[#00CECB]/20 text-[#00CECB] shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                      >
+                        14 天
+                      </button>
+                    </div>
+                  )}
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">溫度趨勢</h3>
+                </div>
+                <div className="rounded-2xl border border-slate-700/40 bg-slate-900/60 p-5">
+                  <WeatherChart
+                    data={data.dailyForecast}
+                    unit={data.dailyTemperatureUnit}
+                  />
+                </div>
               </div>
             )}
 
