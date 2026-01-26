@@ -74,6 +74,7 @@ export function useWeatherDashboard(defaultQuery: string) {
         typeof data.isDay !== "boolean" ||
         !hasValidOptionalNumbers ||
         typeof data.dailyTemperatureUnit !== "string" ||
+        !Array.isArray(data.dailyForecast) ||
         !hasValidCoordinates
       ) {
         return null;
