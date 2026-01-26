@@ -41,7 +41,7 @@ export const WeatherChart: FC<WeatherChartProps> = ({ data, unit = "°C" }) => {
 
     return (
         <div className="space-y-3">
-            <h4 className="text-sm font-medium text-slate-300">7 日溫度趨勢</h4>
+            <h4 className="text-sm font-medium text-slate-300">{data.length} 日溫度趨勢</h4>
             <div className="h-48 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart

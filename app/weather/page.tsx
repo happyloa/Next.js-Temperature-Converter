@@ -177,7 +177,7 @@ export default function WeatherPage() {
                         <p className="mt-2 text-sm opacity-70">請檢查城市名稱或網路連線</p>
                     </div>
                 ) : weatherLoading ? (
-                    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-white/5 bg-white/5 py-20">
+                    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-white/5 bg-slate-800/50 py-20">
                         <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#00CECB]/30 border-t-[#00CECB]"></div>
                         <p className="mt-4 animate-pulse text-sm text-slate-400">衛星連線中...</p>
                     </div>

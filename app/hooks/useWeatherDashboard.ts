@@ -447,13 +447,13 @@ export function useWeatherDashboard(defaultQuery: string) {
   }, [parseWeatherPayload]);
 
   useEffect(() => {
-    if (!hydrated || initialFetchRef.current) {
+    if (!hydrated) {
       return;
     }
 
-    initialFetchRef.current = true;
+    // Initial fetch or when query/days changes
     fetchWeather(weatherQuery);
-  }, [fetchWeather, hydrated, weatherQuery]);
+  }, [fetchWeather, hydrated, weatherQuery, forecastDays]);
 
   useEffect(() => {
     return () => {
