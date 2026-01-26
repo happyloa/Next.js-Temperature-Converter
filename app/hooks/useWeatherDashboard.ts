@@ -518,7 +518,7 @@ export function useWeatherDashboard(defaultQuery: string) {
             {
               enableHighAccuracy: true,
               timeout: 10000,
-              maximumAge: 300000, // 5 minutes cache
+              maximumAge: 300000, // 快取 5 分鐘
             },
           );
         },
@@ -526,7 +526,7 @@ export function useWeatherDashboard(defaultQuery: string) {
 
       const { latitude, longitude } = position.coords;
 
-      // Reverse geocode to get location name
+      // 反向地理編碼以取得地點名稱
       const reverseGeoResponse = await fetch(
         `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&count=1&language=zh&format=json`,
       );

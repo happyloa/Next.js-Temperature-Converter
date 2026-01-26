@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "現代化的溫度轉換工作室，支援攝氏、華氏、絕對溫標與進階單位並提供情境洞察與歷史紀錄。即時天氣資訊與 7 日預報，讓溫度轉換更具情境背景。",
   manifest: "/manifest.json",
 
-  // Open Graph
+  // Open Graph 設定
   openGraph: {
     type: "website",
     locale: "zh_TW",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     ],
   },
 
-  // Twitter Card
+  // Twitter 卡片設定
   twitter: {
     card: "summary_large_image",
     title: "溫度工作室 | 多尺度智慧轉換",
@@ -42,20 +42,20 @@ export const metadata: Metadata = {
     creator: "@TemperatureStudio",
   },
 
-  // Apple Web App
+  // Apple PWA 設定
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "溫度工作室",
   },
 
-  // Basic SEO
+  // 基礎 SEO 設定
   applicationName: "溫度工作室",
   authors: [{ name: "Temperature Studio" }],
   creator: "Temperature Studio",
   publisher: "Temperature Studio",
 
-  // Robots
+  // 搜尋引擎爬蟲設定
   robots: {
     index: true,
     follow: true,
@@ -68,12 +68,12 @@ export const metadata: Metadata = {
     },
   },
 
-  // Verification (for search console)
+  // 網站驗證 (例如 Search Console)
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
   },
 
-  // Other
+  // 其他設定
   formatDetection: {
     telephone: false,
   },

@@ -14,7 +14,6 @@ import { useHistoryStore } from "./hooks/useHistoryStore";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useTemperatureConversion } from "./hooks/useTemperatureConversion";
 import {
-  PRODUCT_FACTS,
   TEMPERATURE_PRESETS,
   TEMPERATURE_SCALES,
 } from "./lib/temperature";

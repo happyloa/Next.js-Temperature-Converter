@@ -1,4 +1,3 @@
-import type { Fact } from "../types/fact";
 import type {
   TemperatureConversion,
   TemperaturePreset,
@@ -97,30 +96,6 @@ export const TEMPERATURE_PRESETS: TemperaturePreset[] = [
 ];
 
 /**
- * 亮點區塊內容設定，描述專案整體賣點。
- */
-export const PRODUCT_FACTS: Fact[] = [
-  {
-    icon: "🌍",
-    title: "全球環境整合",
-    description:
-      "結合 Open-Meteo 天氣與 World Time API 時區資訊，瞬間掌握外部環境。",
-  },
-  {
-    icon: "🧪",
-    title: "六種溫標一次掌握",
-    description:
-      "攝氏、華氏、絕對溫標、蘭氏、列氏與牛頓氏一次整合，跨領域作業不再需要手動換算。",
-  },
-  {
-    icon: "🗂️",
-    title: "儀表板級的操作體驗",
-    description:
-      "輸入、滑桿、歷史紀錄與環境數據集中呈現，成為可直接對外展示的溫度管理產品。",
-  },
-] as const;
-
-/**
  * 允許輸入欄位使用的十進位格式，限制字元以避免 NaN。
  */
 export const decimalPattern = /^-?\d*(\.\d*)?$/;
@@ -128,7 +103,9 @@ export const decimalPattern = /^-?\d*(\.\d*)?$/;
 /**
  * 取得指定代碼的溫標設定。
  */
-export const getScale = (code: TemperatureScaleCode): TemperatureScale | undefined =>
+export const getScale = (
+  code: TemperatureScaleCode,
+): TemperatureScale | undefined =>
   TEMPERATURE_SCALES.find((item) => item.code === code);
 
 /**
@@ -203,7 +180,7 @@ export const getThermalMood = (celsiusValue: number): ThermalMood => {
  */
 export const createConversions = (
   scale: TemperatureScale,
-  value: number
+  value: number,
 ): TemperatureConversion[] => {
   if (!Number.isFinite(value)) return [];
   const kelvin = scale.toKelvin(value);
