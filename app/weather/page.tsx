@@ -250,37 +250,38 @@ export default function WeatherPage() {
                         {/* 2.2 Metrics Grid */}
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                             {/* Air Quality */}
-                            <div className="col-span-1 md:col-span-2 rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-6 shadow-sm dark:shadow-none">
-                                <div className="mb-6 flex items-center justify-between">
-                                    <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-slate-500">
-                                        <span className="text-lg">🍃</span> 空氣品質
+                            {/* Air Quality */}
+                            <div className="rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-6 shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-white/20 transition-colors">
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                        <span className="text-base">🍃</span> 空氣品質
                                     </h3>
                                     {weatherData.airQuality && (
-                                        <span className={`px-2 py-1 text-xs font-bold rounded bg-emerald-500/20 text-emerald-400`}>
+                                        <span className={`px-2 py-0.5 text-[0.65rem] font-bold rounded bg-emerald-500/20 text-emerald-400`}>
                                             良好
                                         </span>
                                     )}
                                 </div>
 
                                 {weatherData.airQuality ? (
-                                    <div className="flex items-center justify-between gap-8">
-                                        <div className="text-center">
-                                            <div className="text-5xl font-bold text-slate-900 dark:text-slate-100">{weatherData.airQuality.aqi}</div>
-                                            <div className="mt-2 text-xs text-slate-500">AQI 指數</div>
+                                    <div className="flex flex-col gap-4">
+                                        <div>
+                                            <div className="text-4xl font-bold text-slate-900 dark:text-slate-100">{weatherData.airQuality.aqi}</div>
+                                            <div className="mt-1 text-xs text-slate-500">AQI 指數</div>
                                         </div>
-                                        <div className="flex-1 space-y-3">
-                                            <div className="flex justify-between border-b border-slate-200 dark:border-white/5 pb-2">
-                                                <span className="text-sm text-slate-500 dark:text-slate-400">PM2.5</span>
+                                        <div className="space-y-2 border-t border-slate-200 dark:border-white/5 pt-3">
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-slate-500 dark:text-slate-400">PM2.5</span>
                                                 <span className="font-mono text-slate-900 dark:text-slate-200">{formatOptionalMetric(weatherData.airQuality.pm25, weatherData.airQuality.pm25Unit)}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-slate-500 dark:text-slate-400">PM10</span>
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-slate-500 dark:text-slate-400">PM10</span>
                                                 <span className="font-mono text-slate-900 dark:text-slate-200">{formatOptionalMetric(weatherData.airQuality.pm10, weatherData.airQuality.pm10Unit)}</span>
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="flex h-32 items-center justify-center text-sm text-slate-500">暫無資料</div>
+                                    <div className="flex h-24 items-center justify-center text-xs text-slate-500">暫無資料</div>
                                 )}
                             </div>
 
