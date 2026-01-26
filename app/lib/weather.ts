@@ -35,7 +35,26 @@ export const WEATHER_CODE_MAP: Record<number, string> = {
 /**
  * 預設城市清單，方便快速體驗。
  */
-export const WEATHER_PRESETS: string[] = ["高雄", "東京", "紐約", "倫敦"];
+export const WEATHER_PRESETS: string[] = [
+  "台北",
+  "台中",
+  "高雄",
+  "台南",
+  "東京",
+  "大阪",
+  "首爾",
+  "新加坡",
+  "曼谷",
+  "紐約",
+  "倫敦",
+  "巴黎",
+  "柏林",
+  "雪梨",
+  "羅馬",
+  "杜拜",
+  "多倫多",
+  "溫哥華",
+];
 
 export const getWeatherDescription = (code: number): string =>
   WEATHER_CODE_MAP[code] ?? "天氣狀況不明，請再試一次。";
