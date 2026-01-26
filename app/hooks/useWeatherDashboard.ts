@@ -14,11 +14,12 @@ export function useWeatherDashboard(defaultQuery: string) {
   const [weatherQuery, setWeatherQuery] = useState<string>(defaultQuery);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const [forecastLoading, setForecastLoading] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const storageRef = useRef<"local" | "session">("local");
-  const initialFetchRef = useRef(false);
+  const previousQueryRef = useRef<string>(defaultQuery);
 
   const parseWeatherPayload = useCallback(
     (value: unknown): { query: string; data: WeatherData } | null => {
@@ -235,7 +236,14 @@ export function useWeatherDashboard(defaultQuery: string) {
         return;
       }
 
-      setWeatherLoading(true);
+      const isSameQuery = weatherData && query === previousQueryRef.current;
+      previousQueryRef.current = query;
+
+      if (isSameQuery) {
+        setForecastLoading(true);
+      } else {
+        setWeatherLoading(true);
+      }
       setWeatherError(null);
 
       try {
@@ -411,9 +419,10 @@ export function useWeatherDashboard(defaultQuery: string) {
           return;
         }
         setWeatherLoading(false);
+        setForecastLoading(false);
       }
     },
-    [persistWeather, forecastDays],
+    [persistWeather, forecastDays, weatherData],
   );
 
   useEffect(() => {
@@ -546,6 +555,7 @@ export function useWeatherDashboard(defaultQuery: string) {
     weatherData,
     weatherLoading,
     weatherError,
+    forecastLoading,
     fetchWeather,
     handleWeatherSubmit,
     handleWeatherPreset,

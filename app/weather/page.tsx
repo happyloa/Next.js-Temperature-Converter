@@ -33,6 +33,7 @@ export default function WeatherPage() {
         geolocating,
         forecastDays,
         setForecastDays,
+        forecastLoading,
     } = useWeatherDashboard("高雄");
 
     const [activeTab, setActiveTab] = useState<"overview" | "details">("overview");
@@ -296,43 +297,50 @@ export default function WeatherPage() {
                         </div>
 
                         {/* 2.3 Forecast Chart */}
-                        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-8 shadow-sm dark:shadow-none">
-                            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">溫度趨勢預報</h3>
-                                    <p className="text-sm text-slate-500">未來 {forecastDays} 天的高低溫變化趨勢</p>
-                                </div>
-
-                                <div className="flex items-center rounded-xl bg-slate-100 dark:bg-white/5 p-1">
-                                    <button
-                                        onClick={() => setForecastDays(7)}
-                                        className={cn(
-                                            "px-4 py-1.5 text-xs font-medium rounded-lg transition-all",
-                                            forecastDays === 7 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                                        )}
-                                    >
-                                        7 天
-                                    </button>
-                                    <button
-                                        onClick={() => setForecastDays(14)}
-                                        className={cn(
-                                            "px-4 py-1.5 text-xs font-medium rounded-lg transition-all",
-                                            forecastDays === 14 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                                        )}
-                                    >
-                                        14 天
-                                    </button>
-                                </div>
-                            </div>
-
-                            {weatherData.dailyForecast.length > 0 && (
-                                <div className="h-[400px] w-full">
-                                    <WeatherChart
-                                        data={weatherData.dailyForecast}
-                                        unit={weatherData.dailyTemperatureUnit}
-                                    />
+                        <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-8 shadow-sm dark:shadow-none transition-all">
+                            {forecastLoading && (
+                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50 backdrop-blur-[1px] transition-all duration-300">
+                                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#00CECB] border-t-transparent shadow-lg" />
                                 </div>
                             )}
+                            <div className={cn("transition-opacity duration-300", forecastLoading ? "opacity-30 blur-[1px]" : "opacity-100")}>
+                                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">溫度趨勢預報</h3>
+                                        <p className="text-sm text-slate-500">未來 {forecastDays} 天的高低溫變化趨勢</p>
+                                    </div>
+
+                                    <div className="flex items-center rounded-xl bg-slate-100 dark:bg-white/5 p-1">
+                                        <button
+                                            onClick={() => setForecastDays(7)}
+                                            className={cn(
+                                                "px-4 py-1.5 text-xs font-medium rounded-lg transition-all",
+                                                forecastDays === 7 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                                            )}
+                                        >
+                                            7 天
+                                        </button>
+                                        <button
+                                            onClick={() => setForecastDays(14)}
+                                            className={cn(
+                                                "px-4 py-1.5 text-xs font-medium rounded-lg transition-all",
+                                                forecastDays === 14 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                                            )}
+                                        >
+                                            14 天
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {weatherData.dailyForecast.length > 0 && (
+                                    <div className="h-[400px] w-full">
+                                        <WeatherChart
+                                            data={weatherData.dailyForecast}
+                                            unit={weatherData.dailyTemperatureUnit}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                     </div>
