@@ -34,7 +34,7 @@ export default function WeatherPage() {
         forecastDays,
         setForecastDays,
         forecastLoading,
-    } = useWeatherDashboard("高雄");
+    } = useWeatherDashboard("台北");
 
     const [activeTab, setActiveTab] = useState<"overview" | "details">("overview");
 
@@ -158,16 +158,16 @@ export default function WeatherPage() {
                 <div className="mb-8 flex flex-wrap gap-2">
                     {WEATHER_PRESETS.map((preset) => (
                         <button
-                            key={preset}
-                            onClick={() => handleWeatherPreset(preset)}
+                            key={preset.query}
+                            onClick={() => handleWeatherPreset(preset.query)}
                             className={cn(
                                 "rounded-full px-4 py-1.5 text-xs font-medium transition-all border",
-                                weatherQuery === preset
+                                weatherQuery === preset.query || weatherQuery === preset.label
                                     ? "bg-[#00CECB]/10 text-[#00CECB] border-[#00CECB]/30"
                                     : "bg-white dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-slate-200 shadow-sm dark:shadow-none"
                             )}
                         >
-                            {preset}
+                            {preset.label}
                         </button>
                     ))}
                 </div>
