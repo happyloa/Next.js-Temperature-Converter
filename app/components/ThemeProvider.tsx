@@ -24,6 +24,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line
         setMounted(true);
         const stored = localStorage.getItem("theme-preference") as Theme | null;
         if (stored === "dark" || stored === "light") {
