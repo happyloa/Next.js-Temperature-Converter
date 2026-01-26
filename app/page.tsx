@@ -200,7 +200,6 @@ export default function TemperatureStudio() {
               relativeSolarProgress={relativeSolarProgress}
               showSolarProgress={showSolarProgress}
               formatTemperature={formatTemperature}
-              onVoiceInput={handleRawInputChange}
             />
 
 
