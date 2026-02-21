@@ -68,6 +68,7 @@ app/
 │   └── useWeatherDashboard.ts
 ├── lib/                 # 工具函式與常數
 │   ├── format.ts        # 格式化工具
+│   ├── history.ts       # 歷史紀錄與儲存鍵值
 │   ├── temperature.ts   # 溫度換算邏輯
 │   └── weather.ts       # 天氣代碼對照
 ├── weather/             # 全球環境儀表板路由
