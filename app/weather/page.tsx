@@ -177,13 +177,16 @@ export default function WeatherPage() {
                         <p className="text-lg font-medium">{weatherError}</p>
                         <p className="mt-2 text-sm opacity-70">請檢查城市名稱或網路連線</p>
                     </div>
-                ) : weatherLoading ? (
+                ) : !weatherData && weatherLoading ? (
                     <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-slate-200 dark:border-transparent py-20">
                         <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#00CECB]/30 border-t-[#00CECB]"></div>
                         <p className="mt-4 animate-pulse text-sm text-slate-500 dark:text-slate-400">衛星連線中...</p>
                     </div>
                 ) : weatherData ? (
-                    <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
+                    <div className={cn(
+                        "space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4 transition-all",
+                        weatherLoading && "opacity-50 blur-sm pointer-events-none"
+                    )}>
 
                         {/* 2.1 Hero Section: Big Data Display */}
                         <div className="grid gap-6 lg:grid-cols-3">
