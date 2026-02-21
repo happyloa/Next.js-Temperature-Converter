@@ -8,12 +8,9 @@ import { WeatherChart } from "../components/WeatherChart";
 import { useWeatherDashboard } from "../hooks/useWeatherDashboard";
 import { getWeatherDescription, WEATHER_PRESETS } from "../lib/weather";
 import {
-    formatCoordinate,
     formatLocalClock,
     formatOptionalMetric,
     formatUtcOffset,
-    formatWeatherTime,
-    formatWeekday,
 } from "../lib/format";
 
 function cn(...inputs: ClassValue[]) {
@@ -36,7 +33,6 @@ export default function WeatherPage() {
         forecastLoading,
     } = useWeatherDashboard("Taipei");
 
-    const [activeTab, setActiveTab] = useState<"overview" | "details">("overview");
 
     const climateHighlights = useMemo(() => {
         if (!weatherData) return [];
@@ -233,7 +229,7 @@ export default function WeatherPage() {
 
                             {/* Right: Summary Cards (Span 1) */}
                             <div className="grid gap-4 grid-rows-3 h-full">
-                                {climateHighlights.map((item, i) => (
+                                {climateHighlights.map((item) => (
                                     <div key={item.label} className="flex items-center justify-between rounded-3xl border border-slate-200 dark:border-white/5 bg-white/80 dark:bg-white/5 px-6 py-4 hover:bg-white dark:hover:bg-white/10 transition-colors shadow-sm dark:shadow-none">
                                         <div className="flex items-center gap-4">
                                             <span className="text-2xl">{item.icon}</span>

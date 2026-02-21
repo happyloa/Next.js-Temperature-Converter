@@ -18,13 +18,7 @@ import {
   TEMPERATURE_SCALES,
 } from "./lib/temperature";
 import {
-  formatCoordinate,
-  formatLocalClock,
-  formatOptionalMetric,
   formatTemperature,
-  formatUtcOffset,
-  formatWeatherTime,
-  formatWeekday,
   timeFormatter,
 } from "./lib/format";
 import type { TemperaturePreset, TemperatureScaleCode } from "./types/temperature";

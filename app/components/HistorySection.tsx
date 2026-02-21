@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 
 import type {
   HistoryEntry,
-  TemperatureConversionSummary,
 } from "../types/history";
 import { ExportButton } from "./ExportButton";
 
