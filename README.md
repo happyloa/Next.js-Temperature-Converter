@@ -24,7 +24,7 @@
 ### 🛠️ 實用工具
 
 - **轉換紀錄**：自動保存最近 8 筆轉換結果，支援一鍵回填。
-- **分享與匯出**：支援 Web Share API 分享，或將紀錄匯出為 CSV / PDF 報表。
+- **分享與匯出**：支援 Web Share API 分享，或將紀錄匯出為 CSV / JSON 報表。
 - **快捷鍵支援**：提供鍵盤快捷鍵 (如 Alt+R 重設、Alt+H 清除紀錄) 提升操作效率。
 
 ### 🎨 極致體驗
@@ -38,10 +38,10 @@
 ## 🏗️ 技術棧
 
 - **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
-- **Language**: TypeScript 5
+- **Language**: TypeScript 6
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (CSS-first configuration)
 - **Visualization**: Recharts
-- **PWA**: @ducanh2912/next-pwa
+- **PWA**: 原生支援 (Web App Manifest + Metadata)
 - **Data Source**: Open-Meteo API, World Time API
 
 ---
@@ -51,7 +51,7 @@
 ```
 app/
 ├── components/          # UI 元件 (原子化設計)
-│   ├── ExportButton.tsx    # 匯出功能 (CSV/PDF)
+│   ├── ExportButton.tsx    # 匯出功能 (CSV/JSON)
 │   ├── HeroSection.tsx
 │   ├── HistorySection.tsx
 │   ├── InsightsSection.tsx
@@ -70,6 +70,7 @@ app/
 │   ├── format.ts        # 格式化工具
 │   ├── history.ts       # 歷史紀錄與儲存鍵值
 │   ├── temperature.ts   # 溫度換算邏輯
+│   ├── utils.ts         # 通用工具函式 (cn)
 │   └── weather.ts       # 天氣代碼對照
 ├── weather/             # 全球環境儀表板路由
 │   └── page.tsx
