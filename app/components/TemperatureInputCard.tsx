@@ -6,14 +6,8 @@ import type {
   TemperatureScaleCode,
   ThermalMood,
 } from "../types/temperature";
+import { cn } from "../lib/utils";
 import { ShareButton } from "./ShareButton";
-
-/**
- * 小工具：將條件拼接為 className 字串。
- */
-const classNames = (
-  ...values: Array<string | false | null | undefined>
-): string => values.filter(Boolean).join(" ");
 
 type TemperatureInputCardProps = {
   scale: TemperatureScaleCode;
@@ -183,7 +177,7 @@ function TemperatureScaleSelector({
           key={item.code}
           type="button"
           onClick={() => onScaleChange(item.code)}
-          className={classNames(
+          className={cn(
             "theme-segment",
             activeScale === item.code ? "theme-segment--active" : ""
           )}
@@ -319,7 +313,7 @@ function ConversionResultCard({
 }: ConversionResultCardProps) {
   return (
     <div
-      className={classNames(
+      className={cn(
         "relative min-w-0 overflow-hidden rounded-3xl border border-slate-600/30 bg-slate-900/60 p-5",
         "bg-gradient-to-br",
         conversion.accent
@@ -337,7 +331,7 @@ function ConversionResultCard({
         <button
           type="button"
           onClick={() => onCopy(`${formatTemperature(conversion.result)}`, conversion.code)}
-          className={classNames(
+          className={cn(
             "theme-outline-button theme-outline-button--small",
             copiedScale === conversion.code ? "theme-outline-button--success" : ""
           )}

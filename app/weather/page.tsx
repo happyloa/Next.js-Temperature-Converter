@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "../lib/utils";
 import { WeatherChart } from "../components/WeatherChart";
 import { useWeatherDashboard } from "../hooks/useWeatherDashboard";
 import { getWeatherDescription, WEATHER_PRESETS } from "../lib/weather";
@@ -13,9 +12,7 @@ import {
     formatUtcOffset,
 } from "../lib/format";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
+
 
 export default function WeatherPage() {
     const {

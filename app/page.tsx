@@ -69,12 +69,7 @@ export default function TemperatureStudio() {
     [updateSliderValue]
   );
 
-  const handlePresetClick = useCallback(
-    (preset: TemperaturePreset) => {
-      selectTemperaturePreset(preset);
-    },
-    [selectTemperaturePreset]
-  );
+  const handlePresetClick = selectTemperaturePreset;
 
   const handleAddHistory = useCallback(() => {
     const entry = createHistoryEntry();
