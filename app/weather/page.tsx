@@ -184,7 +184,7 @@ export default function WeatherPage() {
                         {/* 2.1 Hero Section: Big Data Display */}
                         <div className="grid gap-6 lg:grid-cols-3">
                             {/* Left: Main Status (Span 2) */}
-                            <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/50 dark:border-white/10 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-[#1A1C2E] p-8 lg:col-span-2 shadow-2xl dark:shadow-none">
+                            <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/50 dark:border-white/10 bg-white dark:bg-slate-900 p-8 lg:col-span-2 shadow-2xl dark:shadow-none">
                                 <div className="relative z-10 flex h-full flex-col justify-between gap-8">
                                     <div className="flex items-start justify-between">
                                         <div>
@@ -221,7 +221,7 @@ export default function WeatherPage() {
 
                                 {/* Background Decoration */}
                                 <div className="absolute -right-20 -top-20 h-96 w-96 rounded-full bg-[#00CECB]/5 blur-3xl"></div>
-                                <div className="absolute bottom-0 left-0 h-full w-full bg-gradient-to-t from-black/20 to-transparent"></div>
+                                {/* Remove gradient overlay for cleaner CSS */}
                             </div>
 
                             {/* Right: Summary Cards (Span 1) */}

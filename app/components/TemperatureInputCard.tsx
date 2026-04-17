@@ -312,13 +312,7 @@ function ConversionResultCard({
   formatTemperature,
 }: ConversionResultCardProps) {
   return (
-    <div
-      className={cn(
-        "relative min-w-0 overflow-hidden rounded-3xl border border-slate-600/30 bg-slate-900/60 p-5",
-        "bg-gradient-to-br",
-        conversion.accent
-      )}
-    >
+    <div className="relative min-w-0 overflow-hidden rounded-3xl border border-slate-600/30 bg-slate-900/60 p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <span className="text-xs uppercase tracking-wide text-slate-200/80">
@@ -368,7 +362,7 @@ function SolarProgressPanel({
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full border border-slate-700/60 bg-slate-800/80">
         <div
-          className="h-full bg-gradient-to-r from-[#00CECB] via-[#FFED66] to-[#FF5E5B]"
+          className="h-full bg-orange-500"
           style={{ width: `${relativeSolarProgress}%` }}
         />
       </div>

@@ -87,7 +87,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="zh-TW" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="zh-TW" suppressHydrationWarning>
       <head>
         <link rel="canonical" href={siteUrl} />
       </head>
