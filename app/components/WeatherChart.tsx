@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import type { FC } from "react";
 import {
     ResponsiveContainer,
@@ -26,10 +26,15 @@ interface WeatherChartProps {
  * Weather trend chart showing 7-day temperature forecast.
  */
 export const WeatherChart: FC<WeatherChartProps> = ({ data, unit = "°C" }) => {
-    if (data.length === 0) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+    if (!mounted || data.length === 0) {
         return (
             <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 text-sm text-slate-400">
-                暫無預報資料
+                {!mounted ? "載入圖表..." : "暫無預報資料"}
             </div>
         );
     }

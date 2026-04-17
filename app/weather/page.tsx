@@ -246,7 +246,6 @@ export default function WeatherPage() {
                         {/* 2.2 Metrics Grid */}
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                             {/* Air Quality */}
-                            {/* Air Quality */}
                             <div className="rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-6 shadow-sm dark:shadow-none hover:border-slate-300 dark:hover:border-white/20 transition-colors">
                                 <div className="mb-4 flex items-center justify-between">
                                     <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
