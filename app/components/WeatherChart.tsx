@@ -49,7 +49,7 @@ export const WeatherChart: FC<WeatherChartProps> = ({ data, unit = "°C" }) => {
         <div className="space-y-3">
             <h4 className="text-sm font-medium text-slate-300">{data.length} 日溫度趨勢</h4>
             <div className="h-48 w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <LineChart
                         data={data}
                         margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
