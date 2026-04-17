@@ -13,7 +13,6 @@ export const metadata: Metadata = {
   },
   description:
     "現代化的溫度轉換工作室，支援攝氏、華氏、絕對溫標與進階單位並提供情境洞察與歷史紀錄。即時天氣資訊與 7 日預報，讓溫度轉換更具情境背景。",
-  manifest: "/manifest.json",
 
   // Open Graph 設定
   openGraph: {
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "溫度工作室",
     title: "溫度工作室 | 多尺度智慧轉換",
     description:
-      "支援六種溫標即時轉換、全球天氣資訊、7 日趨勢圖表與環境儀表板。PWA 離線可用，語音輸入，快捷鍵操作。",
+      "支援六種溫標即時轉換、全球天氣資訊、7 日趨勢圖表與環境儀表板。支援語音輸入，快捷鍵操作。",
     images: [
       {
         url: `${siteUrl}/og-image.png`,
@@ -39,16 +38,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "溫度工作室 | 多尺度智慧轉換",
     description:
-      "六種溫標即時轉換、全球天氣資訊與環境儀表板。PWA 離線可用、語音輸入。",
+      "六種溫標即時轉換、全球天氣資訊與環境儀表板。支援語音輸入。",
     images: [`${siteUrl}/og-image.png`],
     creator: "@TemperatureStudio",
-  },
-
-  // Apple PWA 設定
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "溫度工作室",
   },
 
   // 基礎 SEO 設定
@@ -97,8 +89,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-TW" suppressHydrationWarning>
       <head>
-        <link rel="apple-touch-icon" href="/icon-192.svg" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="canonical" href={siteUrl} />
       </head>
       <body className="font-sans">
