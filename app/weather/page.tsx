@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { cn } from "../lib/utils";
 import { WeatherChart } from "../components/WeatherChart";
+import { WeatherSkeleton } from "../components/skeletons/WeatherSkeleton";
+import { BaseSkeleton } from "../components/skeletons/BaseSkeleton";
 import { useWeatherDashboard } from "../hooks/useWeatherDashboard";
 import { getWeatherDescription, WEATHER_PRESETS } from "../lib/weather";
 import {
@@ -170,16 +172,10 @@ export default function WeatherPage() {
                         <p className="text-lg font-medium">{weatherError}</p>
                         <p className="mt-2 text-sm opacity-70">請檢查城市名稱或網路連線</p>
                     </div>
-                ) : !weatherData && weatherLoading ? (
-                    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-slate-200 dark:border-transparent py-20">
-                        <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#00CECB]/30 border-t-[#00CECB]"></div>
-                        <p className="mt-4 animate-pulse text-sm text-slate-500 dark:text-slate-400">衛星連線中...</p>
-                    </div>
+                ) : weatherLoading ? (
+                    <WeatherSkeleton />
                 ) : weatherData ? (
-                    <div className={cn(
-                        "space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4 transition-all",
-                        weatherLoading && "opacity-50 blur-sm pointer-events-none"
-                    )}>
+                    <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4 transition-all">
 
                         {/* 2.1 Hero Section: Big Data Display */}
                         <div className="grid gap-6 lg:grid-cols-3">
@@ -292,14 +288,13 @@ export default function WeatherPage() {
                             ))}
                         </div>
 
-                        {/* 2.3 Forecast Chart */}
                         <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-8 shadow-sm dark:shadow-none transition-all">
                             {forecastLoading && (
-                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50 backdrop-blur-[1px] transition-all duration-300">
-                                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#00CECB] border-t-transparent shadow-lg" />
+                                <div className="absolute inset-0 z-10 p-8 pt-24 bg-white/40 dark:bg-black/40 backdrop-blur-[2px] animate-in fade-in">
+                                    <BaseSkeleton className="h-full w-full rounded-2xl" />
                                 </div>
                             )}
-                            <div className={cn("transition-opacity duration-300", forecastLoading ? "opacity-30 blur-[1px]" : "opacity-100")}>
+                            <div className={cn("transition-opacity duration-300", forecastLoading ? "opacity-20" : "opacity-100")}>
                                 <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">溫度趨勢預報</h3>
