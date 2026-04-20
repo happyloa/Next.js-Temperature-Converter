@@ -97,15 +97,15 @@ export default function WeatherPage() {
                     <div className="flex items-center gap-6">
                         <Link
                             href="/"
-                            className="group flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-white/5 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
+                            className="group flex items-center gap-2 rounded-xl bg-[#00CECB] px-4 py-2 text-sm font-bold text-white hover:bg-[#00CECB]/90 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#00CECB]/20 whitespace-nowrap"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 transition-transform group-hover:-translate-x-1">
                                 <path fillRule="evenodd" d="M11.03 3.97a.75.75 0 010 1.06l-6.22 6.22H21a.75.75 0 010 1.5H4.81l6.22 6.22a.75.75 0 11-1.06 1.06l-7.5-7.5a.75.75 0 010-1.06l7.5-7.5a.75.75 0 011.06 0z" clipRule="evenodd" />
                             </svg>
                             <span>返回轉換器</span>
                         </Link>
-                        <div className="h-6 w-px bg-slate-200 dark:bg-white/10 hidden sm:block"></div>
-                        <h1 className="text-xl font-bold tracking-tight hidden sm:block text-slate-900 dark:text-slate-100">
+                        <div className="h-6 w-px bg-slate-200 dark:bg-white/10 hidden lg:block"></div>
+                        <h1 className="text-xl font-bold tracking-tight hidden lg:block text-slate-900 dark:text-slate-100">
                             全球環境監測中心
                         </h1>
                     </div>
@@ -182,17 +182,23 @@ export default function WeatherPage() {
                             {/* Left: Main Status (Span 2) */}
                             <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/50 dark:border-white/10 bg-white dark:bg-slate-900 p-8 lg:col-span-2 shadow-2xl dark:shadow-none">
                                 <div className="relative z-10 flex h-full flex-col justify-between gap-8">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight sm:text-4xl">{weatherData.location}</h2>
-                                            <div className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                                <span>{weatherData.administrative.join(", ")}</span>
-                                                {coordinatesText && <span className="rounded-full bg-slate-200 dark:bg-white/5 px-2 py-0.5 text-xs font-mono">{coordinatesText}</span>}
+                                    <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
+                                        <div className="flex-1 min-w-0">
+                                            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight sm:text-4xl truncate">{weatherData.location}</h2>
+                                            <div className="mt-3 flex flex-wrap items-center gap-y-2 gap-x-3 text-sm text-slate-500 dark:text-slate-400">
+                                                <span className="leading-relaxed">{weatherData.administrative.join(", ")}</span>
+                                                {coordinatesText && (
+                                                    <span className="inline-flex rounded-full bg-slate-200 dark:bg-white/5 px-2.5 py-1 text-[0.7rem] font-mono whitespace-nowrap shadow-sm dark:shadow-none font-medium">
+                                                        {coordinatesText}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="block text-4xl">{getWeatherDescription(weatherData.weatherCode).includes("晴") ? "☀️" : "☁️"}</span>
-                                            <span className="mt-1 block text-sm font-medium text-[#00CECB]">{getWeatherDescription(weatherData.weatherCode)}</span>
+                                        <div className="flex flex-col items-end shrink-0">
+                                            <span className="text-5xl sm:text-4xl drop-shadow-sm">{getWeatherDescription(weatherData.weatherCode).includes("晴") ? "☀️" : "☁️"}</span>
+                                            <span className="mt-2 block text-sm font-bold text-cyan-600 dark:text-[#00CECB] tracking-wide whitespace-nowrap">
+                                                {getWeatherDescription(weatherData.weatherCode)}
+                                            </span>
                                         </div>
                                     </div>
 
