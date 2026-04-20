@@ -6,6 +6,7 @@ import { cn } from "../lib/utils";
 import { WeatherChart } from "../components/WeatherChart";
 import { WeatherSkeleton } from "../components/skeletons/WeatherSkeleton";
 import { BaseSkeleton } from "../components/skeletons/BaseSkeleton";
+import { ChartGraphicSkeleton } from "../components/skeletons/ChartSkeleton";
 import { useWeatherDashboard } from "../hooks/useWeatherDashboard";
 import { getWeatherDescription, WEATHER_PRESETS } from "../lib/weather";
 import {
@@ -296,8 +297,8 @@ export default function WeatherPage() {
 
                         <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-8 shadow-sm dark:shadow-none transition-all">
                             {forecastLoading && (
-                                <div className="absolute inset-0 z-10 p-8 pt-24 bg-white/40 dark:bg-black/40 backdrop-blur-[2px] animate-in fade-in">
-                                    <BaseSkeleton className="h-full w-full rounded-2xl" />
+                                <div className="absolute inset-0 z-10 p-8 pt-32 bg-white/40 dark:bg-black/40 backdrop-blur-[2px] animate-in fade-in flex flex-col justify-end pb-12">
+                                    <ChartGraphicSkeleton className="w-full" />
                                 </div>
                             )}
                             <div className={cn("transition-opacity duration-300", forecastLoading ? "opacity-20" : "opacity-100")}>
