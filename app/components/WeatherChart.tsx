@@ -34,7 +34,7 @@ export const WeatherChart: FC<WeatherChartProps> = ({ data, unit = "°C" }) => {
     }, []);
     if (!mounted || data.length === 0) {
         return (
-            <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 text-sm text-slate-400">
+            <div className="flex h-full min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-700/40 bg-slate-900/40 text-sm text-slate-400">
                 {!mounted ? "載入圖表..." : "暫無預報資料"}
             </div>
         );
@@ -46,9 +46,9 @@ export const WeatherChart: FC<WeatherChartProps> = ({ data, unit = "°C" }) => {
     };
 
     return (
-        <div className="space-y-3">
-            <h4 className="text-sm font-medium text-slate-300">{data.length} 日溫度趨勢</h4>
-            <div className="h-48 w-full">
+        <div className="flex h-full min-h-0 flex-col gap-3">
+            <h4 className="shrink-0 text-sm font-medium text-slate-300">{data.length} 日溫度趨勢</h4>
+            <div className="min-h-0 flex-1 w-full">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <LineChart
                         data={data}

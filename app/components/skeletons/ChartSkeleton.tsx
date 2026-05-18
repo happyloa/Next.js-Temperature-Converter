@@ -8,9 +8,9 @@ interface ChartGraphicSkeletonProps {
 
 export function ChartGraphicSkeleton({ className }: ChartGraphicSkeletonProps) {
     return (
-        <div className={`space-y-6 ${className}`}>
+        <div className={`flex h-full min-h-[320px] flex-col gap-6 ${className ?? ""}`} aria-hidden="true">
             {/* Axis and Labels mimic */}
-            <div className="relative h-[250px] w-full border-l border-b border-slate-200/20 dark:border-white/10">
+            <div className="relative min-h-0 flex-1 w-full border-l border-b border-slate-200/20 dark:border-white/10">
                 {/* Horizontal grid lines */}
                 <div className="absolute inset-0 flex flex-col justify-between py-2">
                     {[1, 2, 3, 4, 5].map((i) => (

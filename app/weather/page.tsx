@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { cn } from "../lib/utils";
 import { WeatherChart } from "../components/WeatherChart";
 import { WeatherSkeleton } from "../components/skeletons/WeatherSkeleton";
-import { BaseSkeleton } from "../components/skeletons/BaseSkeleton";
 import { ChartGraphicSkeleton } from "../components/skeletons/ChartSkeleton";
 import { useWeatherDashboard } from "../hooks/useWeatherDashboard";
 import { getWeatherDescription, WEATHER_PRESETS } from "../lib/weather";
@@ -295,48 +294,48 @@ export default function WeatherPage() {
                             ))}
                         </div>
 
-                        <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-8 shadow-sm dark:shadow-none transition-all">
-                            {forecastLoading && (
-                                <div className="absolute inset-0 z-10 p-8 pt-32 bg-white/40 dark:bg-black/40 backdrop-blur-[2px] animate-in fade-in flex flex-col justify-end pb-12">
+                        <div
+                            className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#121420] p-8 shadow-sm dark:shadow-none transition-all"
+                            aria-busy={forecastLoading}
+                        >
+                            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">溫度趨勢預報</h3>
+                                    <p className="text-sm text-slate-500">未來 {forecastDays} 天的高低溫變化趨勢</p>
+                                </div>
+
+                                <div className="flex items-center rounded-xl bg-slate-100 dark:bg-white/5 p-1">
+                                    <button
+                                        onClick={() => setForecastDays(7)}
+                                        disabled={forecastLoading}
+                                        className={cn(
+                                            "px-4 py-1.5 text-xs font-medium rounded-lg transition-all disabled:cursor-wait disabled:opacity-60",
+                                            forecastDays === 7 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                                        )}
+                                    >
+                                        7 天
+                                    </button>
+                                    <button
+                                        onClick={() => setForecastDays(14)}
+                                        disabled={forecastLoading}
+                                        className={cn(
+                                            "px-4 py-1.5 text-xs font-medium rounded-lg transition-all disabled:cursor-wait disabled:opacity-60",
+                                            forecastDays === 14 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                                        )}
+                                    >
+                                        14 天
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="h-[400px] w-full">
+                                {forecastLoading ? (
                                     <ChartGraphicSkeleton className="w-full" />
-                                </div>
-                            )}
-                            <div className={cn("transition-opacity duration-300", forecastLoading ? "opacity-20" : "opacity-100")}>
-                                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">溫度趨勢預報</h3>
-                                        <p className="text-sm text-slate-500">未來 {forecastDays} 天的高低溫變化趨勢</p>
-                                    </div>
-
-                                    <div className="flex items-center rounded-xl bg-slate-100 dark:bg-white/5 p-1">
-                                        <button
-                                            onClick={() => setForecastDays(7)}
-                                            className={cn(
-                                                "px-4 py-1.5 text-xs font-medium rounded-lg transition-all",
-                                                forecastDays === 7 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                                            )}
-                                        >
-                                            7 天
-                                        </button>
-                                        <button
-                                            onClick={() => setForecastDays(14)}
-                                            className={cn(
-                                                "px-4 py-1.5 text-xs font-medium rounded-lg transition-all",
-                                                forecastDays === 14 ? "bg-[#00CECB]/20 text-[#00CECB] shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                                            )}
-                                        >
-                                            14 天
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {weatherData.dailyForecast.length > 0 && (
-                                    <div className="h-[400px] w-full">
-                                        <WeatherChart
-                                            data={weatherData.dailyForecast}
-                                            unit={weatherData.dailyTemperatureUnit}
-                                        />
-                                    </div>
+                                ) : (
+                                    <WeatherChart
+                                        data={weatherData.dailyForecast}
+                                        unit={weatherData.dailyTemperatureUnit}
+                                    />
                                 )}
                             </div>
                         </div>
