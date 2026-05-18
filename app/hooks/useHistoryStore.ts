@@ -1,6 +1,12 @@
 "use client";
 
-import { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { HISTORY_STORAGE_KEY, parseHistoryPayload } from "../lib/history";
 import type { HistoryEntry } from "../types/history";

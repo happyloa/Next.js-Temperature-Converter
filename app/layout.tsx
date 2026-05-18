@@ -5,7 +5,8 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { ThemeToggleButton } from "./components/ThemeToggleButton";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://next-js-temperature-convert.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://next-js-temperature-convert.vercel.app";
 
 export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
@@ -39,8 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "溫度工作室 | 多尺度智慧轉換",
-    description:
-      "六種溫標即時轉換、全球天氣資訊與環境儀表板。支援語音輸入。",
+    description: "六種溫標即時轉換、全球天氣資訊與環境儀表板。支援語音輸入。",
     images: [`${siteUrl}/og-image.png`],
     creator: "@TemperatureStudio",
   },

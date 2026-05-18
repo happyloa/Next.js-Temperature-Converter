@@ -53,7 +53,15 @@ export const formatWeatherTime = (value: string | null): string => {
   return dateTimeFormatter.format(date);
 };
 
-const WEEKDAY_LABELS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"] as const;
+const WEEKDAY_LABELS = [
+  "週日",
+  "週一",
+  "週二",
+  "週三",
+  "週四",
+  "週五",
+  "週六",
+] as const;
 
 export const formatWeekday = (index: number | null): string => {
   if (!Number.isFinite(index)) return "--";
@@ -68,7 +76,7 @@ export const formatCoordinate = (value: number | null): string => {
 export const formatLocalClock = (
   value: string | null,
   timezone: string | null | undefined,
-  { withSeconds = false }: { withSeconds?: boolean } = {}
+  { withSeconds = false }: { withSeconds?: boolean } = {},
 ): string => {
   if (!value) return "--";
 

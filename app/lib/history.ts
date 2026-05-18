@@ -1,4 +1,7 @@
-import type { HistoryEntry, TemperatureConversionSummary } from "../types/history";
+import type {
+  HistoryEntry,
+  TemperatureConversionSummary,
+} from "../types/history";
 import { TEMPERATURE_SCALE_CODES } from "./temperature";
 
 /**
@@ -7,7 +10,7 @@ import { TEMPERATURE_SCALE_CODES } from "./temperature";
 export const HISTORY_STORAGE_KEY = "temperature-studio-history";
 
 const isTemperatureConversionSummary = (
-  value: unknown
+  value: unknown,
 ): value is TemperatureConversionSummary => {
   if (typeof value !== "object" || value === null) {
     return false;

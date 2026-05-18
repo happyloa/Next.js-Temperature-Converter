@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
 
 const baseUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://next-js-temperature-convert.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://next-js-temperature-convert.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

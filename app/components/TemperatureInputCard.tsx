@@ -58,11 +58,12 @@ export function TemperatureInputCard({
   formatTemperature,
 }: TemperatureInputCardProps) {
   // Generate share text from conversions
-  const shareText = conversions.length > 0
-    ? conversions
-      .map((c) => `${c.label}: ${formatTemperature(c.result)} ${c.symbol}`)
-      .join("\n")
-    : undefined;
+  const shareText =
+    conversions.length > 0
+      ? conversions
+          .map((c) => `${c.label}: ${formatTemperature(c.result)} ${c.symbol}`)
+          .join("\n")
+      : undefined;
 
   return (
     <section className="w-full min-w-0 space-y-8 rounded-3xl border border-slate-700/40 bg-slate-900/70 p-5 shadow-glass backdrop-blur sm:p-6 md:p-8">
@@ -140,7 +141,11 @@ function TemperatureCardHeader({
           title="溫度工作室 - 轉換結果"
           text={shareText || "使用溫度工作室進行溫度轉換"}
         />
-        <button type="button" onClick={onReset} className="theme-outline-button">
+        <button
+          type="button"
+          onClick={onReset}
+          className="theme-outline-button"
+        >
           🔄 重設
         </button>
         <button
@@ -179,7 +184,7 @@ function TemperatureScaleSelector({
           onClick={() => onScaleChange(item.code)}
           className={cn(
             "theme-segment",
-            activeScale === item.code ? "theme-segment--active" : ""
+            activeScale === item.code ? "theme-segment--active" : "",
           )}
         >
           {item.label}
@@ -216,7 +221,9 @@ function TemperatureValueField({
           placeholder="輸入溫度值"
           className="flex-1 bg-transparent text-base font-semibold outline-none sm:text-lg"
         />
-        <span className="text-sm font-semibold text-slate-400">{activeSymbol ?? ""}</span>
+        <span className="text-sm font-semibold text-slate-400">
+          {activeSymbol ?? ""}
+        </span>
       </div>
     </label>
   );
@@ -243,7 +250,8 @@ function TemperatureSliderControl({
   return (
     <label className="flex flex-col gap-2">
       <span className="text-sm font-semibold text-slate-200">
-        範圍滑桿（{formatTemperature(sliderRange.min)} ~ {formatTemperature(sliderRange.max)}）
+        範圍滑桿（{formatTemperature(sliderRange.min)} ~{" "}
+        {formatTemperature(sliderRange.max)}）
       </span>
       <input
         type="range"
@@ -324,10 +332,14 @@ function ConversionResultCard({
         </div>
         <button
           type="button"
-          onClick={() => onCopy(`${formatTemperature(conversion.result)}`, conversion.code)}
+          onClick={() =>
+            onCopy(`${formatTemperature(conversion.result)}`, conversion.code)
+          }
           className={cn(
             "theme-outline-button theme-outline-button--small",
-            copiedScale === conversion.code ? "theme-outline-button--success" : ""
+            copiedScale === conversion.code
+              ? "theme-outline-button--success"
+              : "",
           )}
         >
           {copiedScale === conversion.code ? "已複製" : "複製"}
@@ -358,7 +370,9 @@ function SolarProgressPanel({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3 text-slate-200">
         <span className="text-xl">📈</span>
-        <h3 className="text-base font-semibold sm:text-lg">相對於太陽表面的能量比例</h3>
+        <h3 className="text-base font-semibold sm:text-lg">
+          相對於太陽表面的能量比例
+        </h3>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full border border-slate-700/60 bg-slate-800/80">
         <div

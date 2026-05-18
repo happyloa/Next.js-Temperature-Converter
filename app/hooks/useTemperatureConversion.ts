@@ -10,11 +10,7 @@ import {
   getScale,
   getThermalMood,
 } from "../lib/temperature";
-import {
-  clamp,
-  formatTemperature,
-  toInputString,
-} from "../lib/format";
+import { clamp, formatTemperature, toInputString } from "../lib/format";
 import type { HistoryEntry } from "../types/history";
 import type { ThermalInsight } from "../types/insight";
 import type {
@@ -28,14 +24,16 @@ import type {
  * 負責處理輸入溫標、數值與轉換結果的自訂 hook。
  * 讓頁面元件專注在排版與資料串接，邏輯則被清楚封裝。
  */
-export function useTemperatureConversion(initialScale: TemperatureScaleCode = "celsius") {
+export function useTemperatureConversion(
+  initialScale: TemperatureScaleCode = "celsius",
+) {
   const [scale, setScale] = useState<TemperatureScaleCode>(initialScale);
   const [value, setValue] = useState<number>(25);
   const [rawInput, setRawInput] = useState<string>("25");
 
   const activeScale = useMemo<TemperatureScale | undefined>(
     () => getScale(scale),
-    [scale]
+    [scale],
   );
 
   const sliderRange = useMemo(() => {
@@ -126,7 +124,7 @@ export function useTemperatureConversion(initialScale: TemperatureScaleCode = "c
       setValue(converted);
       setRawInput(toInputString(converted));
     },
-    [activeScale, scale, value]
+    [activeScale, scale, value],
   );
 
   const handleRawInputChange = useCallback(
@@ -134,7 +132,12 @@ export function useTemperatureConversion(initialScale: TemperatureScaleCode = "c
       if (!decimalPattern.test(nextValue)) return;
       setRawInput(nextValue);
 
-      if (nextValue === "" || nextValue === "-" || nextValue === "-." || nextValue === ".") {
+      if (
+        nextValue === "" ||
+        nextValue === "-" ||
+        nextValue === "-." ||
+        nextValue === "."
+      ) {
         setValue(Number.NaN);
         return;
       }
@@ -148,7 +151,7 @@ export function useTemperatureConversion(initialScale: TemperatureScaleCode = "c
       const clamped = clamp(numeric, sliderRange.min, sliderRange.max);
       setValue(clamped);
     },
-    [sliderRange.max, sliderRange.min]
+    [sliderRange.max, sliderRange.min],
   );
 
   const handleSliderChange = useCallback((numeric: number) => {
@@ -163,14 +166,11 @@ export function useTemperatureConversion(initialScale: TemperatureScaleCode = "c
     setRawInput("25");
   }, []);
 
-  const handlePresetSelect = useCallback(
-    (preset: TemperaturePreset) => {
-      setScale(preset.scale);
-      setValue(preset.value);
-      setRawInput(toInputString(preset.value));
-    },
-    []
-  );
+  const handlePresetSelect = useCallback((preset: TemperaturePreset) => {
+    setScale(preset.scale);
+    setValue(preset.value);
+    setRawInput(toInputString(preset.value));
+  }, []);
 
   /**
    * 將當前轉換狀態封裝成歷史紀錄，供外部儲存。
@@ -214,7 +214,9 @@ export function useTemperatureConversion(initialScale: TemperatureScaleCode = "c
   const showSolarProgress = Number.isFinite(kelvinValue);
 
   const canAddHistory =
-    Number.isFinite(value) && Number.isFinite(celsiusValue) && conversions.length > 0;
+    Number.isFinite(value) &&
+    Number.isFinite(celsiusValue) &&
+    conversions.length > 0;
 
   return {
     scale,

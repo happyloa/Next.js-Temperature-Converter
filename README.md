@@ -113,10 +113,10 @@ npm audit --audit-level=moderate
 
 ## 環境變數
 
-| 變數 | 用途 |
-| --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | sitemap、robots、canonical 與 metadata 使用的公開站台 URL。 |
-| `NEXT_PUBLIC_GOOGLE_VERIFICATION` | Google Search Console 驗證碼，可選。 |
+| 變數                              | 用途                                                        |
+| --------------------------------- | ----------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`            | sitemap、robots、canonical 與 metadata 使用的公開站台 URL。 |
+| `NEXT_PUBLIC_GOOGLE_VERIFICATION` | Google Search Console 驗證碼，可選。                        |
 
 ## 安全與依賴
 
