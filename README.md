@@ -1,126 +1,145 @@
 # Temperature Studio - 溫度工作室
 
-基於 Next.js 16 App Router 打造的現代化溫度轉換與環境監測平台。結合六種溫標即時運算、全球天氣資料視覺化與 PWA 離線支援，提供專業且直覺的操作體驗。
+基於 Next.js 16 App Router 打造的溫度轉換與全球天氣儀表板。專案支援多種溫標即時換算、轉換紀錄、分享/匯出、深淺色主題，以及使用 Open-Meteo 的城市天氣、空氣品質與 7/14 日溫度趨勢圖表。
 
-線上 Demo：[點這裡](https://next-js-temperature-convert.vercel.app/)
+線上 Demo：[https://next-js-temperature-convert.vercel.app/](https://next-js-temperature-convert.vercel.app/)
 
----
+## 核心功能
 
-## ✨ 核心功能
+### 溫度轉換
 
-### 🌡️ 智慧溫度轉換
+- 支援攝氏、華氏、絕對溫標、蘭氏、列氏與牛頓氏。
+- 數值輸入與滑桿雙向連動，所有溫標即時更新。
+- 提供常用情境預設值，例如冰點、體溫、咖啡沖泡與太陽表面溫度。
+- 自動產生情境洞察，例如距離冰點/沸點的差距與溫度感受提示。
+- 最近 8 筆轉換紀錄會存到瀏覽器儲存空間，並具備 localStorage/sessionStorage fallback。
 
-- **多尺度支援**：即時轉換攝氏 (°C)、華氏 (°F)、絕對溫標 (K)、蘭氏 (°R)、列氏 (°Re) 與牛頓氏 (°N)。
-- **雙向互動**：支援滑桿拖曳與精準數值輸入，即時連動所有單位。
-- **情境洞察**：自動計算冰點/沸點距離，並提供「人體感受」與「安全警示」等情境化建議。
+### 城市天氣
 
-### 🌍 全球環境儀表板
+- 使用 Open-Meteo Geocoding API 搜尋城市。
+- 使用 Open-Meteo Forecast API 顯示即時溫度、體感溫度、濕度、風速、氣壓、降雨量與 UV 指數。
+- 使用 Open-Meteo Air Quality API 顯示 AQI、PM2.5、PM10。
+- 支援瀏覽器 Geolocation，允許後可用目前位置反查城市。
+- 提供 7 天與 14 天預報切換，並以 Recharts 顯示高低溫趨勢。
+- 圖表切換資料時會以固定高度 skeleton loading 取代舊圖表，避免畫面糊疊或高度跳動。
 
-- **即時天氣**：整合 Open-Meteo API，顯示所在地或指定城市的溫度、濕度、風速與降雨機率。
-- **空氣品質**：即時 AQI、PM2.5 與 PM10 監測數據。
-- **趨勢圖表**：內建 7 日溫度變化折線圖 (Recharts)，視覺化掌握天氣脈動。
-- **多城市切換**：內建全球主要城市預設值，並支援地理定位 (Geolocation) 自動偵測。
+### 使用者體驗
 
-### 🛠️ 實用工具
+- 支援深色/淺色主題並記住偏好。
+- 支援 Web Share API，瀏覽器不支援時會 fallback 到剪貼簿。
+- 支援 CSV/JSON 匯出。
+- 支援鍵盤快捷鍵說明。
+- 具備 SEO metadata、robots、sitemap 與 Web App Manifest。
 
-- **轉換紀錄**：自動保存最近 8 筆轉換結果，支援一鍵回填。
-- **分享與匯出**：支援 Web Share API 分享，或將紀錄匯出為 CSV / JSON 報表。
-- **快捷鍵支援**：提供鍵盤快捷鍵 (如 Alt+R 重設、Alt+H 清除紀錄) 提升操作效率。
+## 技術棧
 
-### 🎨 極致體驗
+- Framework：Next.js 16 App Router
+- Language：TypeScript 6
+- UI：React 19
+- Styling：Tailwind CSS 4
+- Chart：Recharts
+- Quality：ESLint 9 + eslint-config-next
+- Weather API：Open-Meteo
 
-- **全站主題**：支援深色 (Dark) / 淺色 (Light) 模式切換，並自動記憶使用者偏好 (LocalStorage)。
-- **PWA 支援**：符合 Progressive Web App 標準，可安裝至桌面或手機，並支援離線瀏覽。
-- **正體中文**：全站介面與程式碼註解皆採用正體中文，友善在地開發者。
+## 專案結構
 
----
-
-## 🏗️ 技術棧
-
-- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
-- **Language**: TypeScript 6
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (CSS-first configuration)
-- **Visualization**: Recharts
-- **PWA**: 原生支援 (Web App Manifest + Metadata)
-- **Data Source**: Open-Meteo API, World Time API
-
----
-
-## 📂 專案結構
-
-```
+```text
 app/
-├── components/          # UI 元件 (原子化設計)
-│   ├── ExportButton.tsx    # 匯出功能 (CSV/JSON)
-│   ├── HeroSection.tsx
+├── components/              # UI 元件
+│   ├── skeletons/           # Skeleton loading 元件
+│   ├── ExportButton.tsx
 │   ├── HistorySection.tsx
-│   ├── InsightsSection.tsx
-│   ├── KeyboardShortcutsHelp.tsx
-│   ├── ShareButton.tsx     # Web Share API
+│   ├── ShareButton.tsx
 │   ├── TemperatureInputCard.tsx
-│   ├── ThemeProvider.tsx   # 全域主題 Context
-│   ├── ThemeToggleButton.tsx
-│   └── WeatherChart.tsx    # 天氣趨勢圖表
-├── hooks/               # 自定義 Hooks (邏輯與 UI 分離)
+│   ├── ThemeProvider.tsx
+│   └── WeatherChart.tsx
+├── hooks/                   # 前端狀態與副作用
 │   ├── useHistoryStore.ts
 │   ├── useKeyboardShortcuts.ts
 │   ├── useTemperatureConversion.ts
 │   └── useWeatherDashboard.ts
-├── lib/                 # 工具函式與常數
-│   ├── format.ts        # 格式化工具
-│   ├── history.ts       # 歷史紀錄與儲存鍵值
-│   ├── temperature.ts   # 溫度換算邏輯
-│   ├── utils.ts         # 通用工具函式 (cn)
-│   └── weather.ts       # 天氣代碼對照
-├── weather/             # 全球環境儀表板路由
-│   └── page.tsx
-├── types/               # TypeScript 型別定義
-├── globals.css          # Tailwind v4 全域樣式 (@theme)
-├── layout.tsx           # 應用程式佈局 (含 ThemeProvider)
-├── page.tsx             # 首頁
-├── robots.ts            # SEO 爬蟲規則
-└── sitemap.ts           # SEO 網站地圖
+├── lib/                     # 純函式與資料定義
+│   ├── format.ts
+│   ├── history.ts
+│   ├── temperature.ts
+│   ├── utils.ts
+│   └── weather.ts
+├── types/                   # TypeScript 型別
+├── weather/page.tsx         # 城市天氣頁
+├── globals.css              # Tailwind v4 與主題 token
+├── layout.tsx               # 全站 metadata 與 Provider
+├── manifest.ts              # Web App Manifest
+├── page.tsx                 # 溫度轉換首頁
+├── robots.ts
+└── sitemap.ts
 ```
 
----
-
-## 🚀 快速開始
+## 安裝與開發
 
 ### 環境需求
 
-- Node.js 18.18+
-- npm 9+
+- Node.js 20.9+，符合 Next.js 16 的需求。
+- npm 9+。
 
-### 安裝與執行
+### 安裝
 
-1.  **複製專案**
+```bash
+npm install
+```
 
-    ```bash
-    git clone https://github.com/happyloa/Next.js-Temperature-Converter.git
-    cd Next.js-Temperature-Converter
-    ```
+### 開發模式
 
-2.  **安裝依賴**
+```bash
+npm run dev
+```
 
-    ```bash
-    npm install
-    ```
+預設會在 [http://localhost:3000](http://localhost:3000) 啟動。
 
-3.  **啟動開發伺服器**
-    ```bash
-    npm run dev
-    ```
-    開啟瀏覽器訪問 [http://localhost:3000](http://localhost:3000)。
-
-### 建構正式版
+### Production build
 
 ```bash
 npm run build
 npm start
 ```
 
----
+### 品質檢查
 
-## 🤝 貢獻
+```bash
+npm run lint
+npm audit --audit-level=moderate
+```
 
-歡迎提交 Issue 或 Pull Request。本專案以 Clean Code 為目標，請確保提交的程式碼包含完整的正體中文註解。
+目前保留 ESLint，因為它能提供 Next.js、React hooks 與基本可存取性檢查，而且只存在於開發依賴，不會進 production bundle。
+
+## 環境變數
+
+| 變數 | 用途 |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | sitemap、robots、canonical 與 metadata 使用的公開站台 URL。 |
+| `NEXT_PUBLIC_GOOGLE_VERIFICATION` | Google Search Console 驗證碼，可選。 |
+
+## 安全與依賴
+
+- 套件已更新到目前相容版本。
+- `postcss` 透過 `overrides` 固定到安全版本，避免 Next 內部相依帶入已知漏洞版本。
+- 已移除未使用的 `@typescript-eslint/*` 直接依賴與 `autoprefixer`。
+- 最新驗證結果：`npm audit --audit-level=moderate` 為 0 vulnerabilities。
+
+## 專案健康度
+
+目前不需要大型重構。專案已依照職責拆成 `components`、`hooks`、`lib`、`types`，整體結構清楚。較適合後續漸進改善的方向如下：
+
+- 將 `useWeatherDashboard` 再拆成 weather API client、payload parser 與 React hook，降低單一 hook 的責任。
+- 補上單元測試，優先涵蓋 `lib/temperature.ts`、`lib/format.ts` 與 weather payload validation。
+- 若要主打完整 PWA 離線能力，可再加入 service worker 與快取策略；目前已具備 Web App Manifest。
+- 補上 `/og-image.png`，讓 Open Graph/Twitter 分享圖完整。
+
+## 可串接的第三方服務
+
+- Analytics：Vercel Analytics、Plausible、Google Analytics 4。
+- Error monitoring：Sentry。
+- 地圖與地點：Mapbox、Google Maps Places、OpenStreetMap/Leaflet。
+- 天氣進階資料：OpenWeather、WeatherAPI、Tomorrow.io，適合補天氣警報、雷達或更細緻的預報。
+- 使用者資料與同步：Supabase、Firebase，適合跨裝置保存偏好與轉換紀錄。
+- 通知：Web Push 或 Firebase Cloud Messaging，適合做天氣提醒。
+- SEO：Google Search Console，目前已有 verification env 可接。
