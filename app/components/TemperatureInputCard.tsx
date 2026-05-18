@@ -252,7 +252,7 @@ function TemperatureSliderControl({
         step={sliderStep}
         value={sliderValue}
         onChange={onSliderChange}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-[#FF5E5B]"
+        className="h-2 w-full cursor-grab appearance-none rounded-full bg-slate-800 accent-[#FF5E5B] active:cursor-grabbing"
       />
     </label>
   );
