@@ -485,7 +485,6 @@ export function useWeatherDashboard(defaultQuery: string) {
       return;
     }
 
-    console.log("Starting geolocation...");
     setGeolocating(true);
     setWeatherError(null);
 
@@ -493,10 +492,7 @@ export function useWeatherDashboard(defaultQuery: string) {
       const position = await new Promise<GeolocationPosition>(
         (resolve, reject) => {
           navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              console.log("Got position", pos);
-              resolve(pos);
-            },
+            (pos) => resolve(pos),
             (err) => {
               console.error("Position error", err);
               reject(err);

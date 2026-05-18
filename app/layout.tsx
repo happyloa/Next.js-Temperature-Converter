@@ -4,9 +4,11 @@ import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { ThemeToggleButton } from "./components/ThemeToggleButton";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://temperature-studio.vercel.app";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://next-js-temperature-convert.vercel.app";
 
 export const metadata: Metadata = {
+  manifest: "/manifest.webmanifest",
   title: {
     default: "溫度工作室 | 多尺度智慧轉換",
     template: "%s | 溫度工作室",
